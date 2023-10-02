@@ -22,46 +22,63 @@
  */
   
   
-  class action_azulsummerpavilion extends APP_GameAction
-  { 
+  class action_azulsummerpavilion extends APP_GameAction { 
     // Constructor: please do not modify
-   	public function __default()
-  	{
-  	    if( self::isArg( 'notifwindow') )
-  	    {
-            $this->view = "common_notifwindow";
-  	        $this->viewArgs['table'] = self::getArg( "table", AT_posint, true );
-  	    }
-  	    else
-  	    {
-            $this->view = "azulsummerpavilion_azulsummerpavilion";
-            self::trace( "Complete reinitialization of board game" );
+   	public function __default() {
+      if (self::isArg( 'notifwindow')) {
+        $this->view = "common_notifwindow";
+        $this->viewArgs['table'] = self::getArg( "table", AT_posint, true );
+      } else {
+        $this->view = "azulsummerpavilion_azulsummerpavilion";
+        self::trace( "Complete reinitialization of board game" );
       }
   	} 
   	
-  	// TODO: defines your action entry points there
+    public function takeTiles() {
+      self::setAjaxMode();
 
+      // Retrieve arguments
+      $id = self::getArg("id", AT_posint, true);
 
-    /*
-    
-    Example:
-  	
-    public function myAction()
-    {
-        self::setAjaxMode();     
+      $this->game->takeTiles($id);
 
-        // Retrieve arguments
-        // Note: these arguments correspond to what has been sent through the javascript "ajaxcall" method
-        $arg1 = self::getArg( "myArgument1", AT_posint, true );
-        $arg2 = self::getArg( "myArgument2", AT_posint, true );
-
-        // Then, call the appropriate method in your game logic, like "playCard" or "myAction"
-        $this->game->myAction( $arg1, $arg2 );
-
-        self::ajaxResponse( );
+      self::ajaxResponse();
     }
-    
-    */
+
+    public function undoTakeTiles() {
+      self::setAjaxMode();
+
+      $this->game->undoTakeTiles();
+
+      self::ajaxResponse();
+    }
+
+    public function selectLine() {
+      self::setAjaxMode();
+
+      // Retrieve arguments
+      $line = self::getArg("line", AT_posint, true);
+
+      $this->game->selectLine($line);
+
+      self::ajaxResponse();
+    }
+
+    public function confirmLine() {
+      self::setAjaxMode();
+
+      $this->game->confirmLine();
+
+      self::ajaxResponse();
+    }
+
+    public function undoSelectLine() {
+      self::setAjaxMode();
+
+      $this->game->undoSelectLine();
+
+      self::ajaxResponse();
+    }
 
   }
   

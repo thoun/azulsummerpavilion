@@ -1,72 +1,531 @@
-/**
- *------
- * BGA framework: © Gregory Isabelli <gisabelli@boardgamearena.com> & Emmanuel Colin <ecolin@boardgamearena.com>
- * AzulSummerPavilion implementation : © <Your name here> <Your email address here>
- *
- * This code has been produced on the BGA studio platform for use on http://boardgamearena.com.
- * See http://en.boardgamearena.com/#!doc/Studio for more information.
- * -----
- *
- * azulsummerpavilion.css
- *
- * AzulSummerPavilion stylesheet
- *
- */
+#bga-zoom-wrapper {
+  position: relative;
+}
 
-/*
-    This is the CSS stylesheet of your game User Interface.
-    
-    Styles defined on this file will be applied to the HTML elements you define in your
-    HTML template (azulsummerpavilion_azulsummerpavilion.tpl), and to HTML elements you create dynamically
-    (in azulsummerpavilion.js).
-    
-    Usually, you are using CSS to:
-    
-    1°) define the overall layout of your game
-        (ex: place the board on the top left, place player's hand beside, place the deck on the right, ...).
+#bga-zoom-wrapper .bga-zoom-inner {
+  transform-origin: left top;
+}
 
-    2°) create your CSS-sprites:
-        All images of your games should be gathered into a small number of image files. Then, using
-        background-image and background-position CSS properties, you create HTML blocks that can 
-        display these images correctly (see example below).
-    
-    3°) ... anything else:
-        It is really easy to add and remove CSS classes dynamically from your Javascript with
-        dojo.addClass and dojo.removeClass. It is also easy to check if an element has a class
-        (dojo.hasClass) or to get all elements with a specific class (dojo.query). This is why,
-        very often, using CSS classes for the logic of your user interface allow you to do complex
-        thing easily.
-        
-        
-     Note: on the production platform, this file will be compressed and comments will be removed.
-           Consequently, don't hesitate to put as many comments as necessary.
-*/
+#bga-zoom-wrapper .bga-zoom-inner[data-smooth=true] {
+  transition: transform 0.5s;
+}
 
+#bga-zoom-wrapper #bga-zoom-controls {
+  position: absolute;
+  top: 0;
+}
 
-/* Note: you must not use any @import directive */
+#bga-zoom-wrapper #bga-zoom-controls[data-position=top-left] {
+  left: 0;
+}
 
+#bga-zoom-wrapper #bga-zoom-controls[data-position=top-right] {
+  right: 0;
+}
 
-/********* You can start writing your CSS below this line: **********/
+#bga-zoom-wrapper #bga-zoom-controls button {
+  border: 0;
+}
 
+#bga-zoom-wrapper #bga-zoom-controls button:not(.disabled) {
+  cursor: pointer;
+}
 
-/*
-    Example of CSS sprites (a black token and a white token, 20x20px each, embedded in the same "tokens.png" 40x20px image):
+#bga-zoom-wrapper #bga-zoom-controls button.disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
 
-    .white_token {
-        background-image: url('img/tokens.png');
-        background-position: 0px 0px;
-    }
-    .black_token {
-        background-image: url('img/tokens.png');
-        background-position: -20px 0px;
-    }
-    .token {
-        width: 20px;
-        height: 20px;
-        background-repeat: none;
-    }
-*/
+#bga-zoom-wrapper #bga-zoom-controls .bga-zoom-out-icon {
+  width: 40px;
+  height: 40px;
+  background: url('data:image/svg+xml;utf8,<svg width="100%" height="100%" viewBox="65 0 70 70" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xml:space="preserve" xmlns:serif="http://www.serif.com/" style="fill-rule:evenodd;clip-rule:evenodd;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:10;"><g><g transform="matrix(1,0,0,1,-4.97116,-76.2244)"><path d="M118,118C122.1,113.8 124.3,108.7 124.3,102.8C124.3,96.8 122.1,91.8 118,87.6C113.8,83.4 108.7,81.3 102.8,81.3C96.8,81.3 91.8,83.4 87.6,87.6C83.3,91.8 81.3,96.8 81.3,102.8C81.3,108.7 83.3,113.8 87.6,118C91.8,122.2 96.8,124.3 102.8,124.3C108.7,124.3 113.8,122.2 118,118" style="fill:none;fill-rule:nonzero;stroke:black;stroke-width:7px;"/></g><g transform="matrix(1,0,0,1,-4.97116,-76.2244)"><path d="M118,118L132.3,132.3" style="fill:none;fill-rule:nonzero;stroke:black;stroke-width:7px;"/></g><g transform="matrix(1,0,0,1,-4.97116,-76.2244)"><path d="M114.5,102.1L90.8,102.1" style="fill:none;fill-rule:nonzero;stroke:black;stroke-width:7px;"/></g></g></svg>');
+}
 
+#bga-zoom-wrapper #bga-zoom-controls .bga-zoom-in-icon {
+  width: 40px;
+  height: 40px;
+  background: url('data:image/svg+xml;utf8,<svg width="100%" height="100%" viewBox="0 0 70 70" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xml:space="preserve" xmlns:serif="http://www.serif.com/" style="fill-rule:evenodd;clip-rule:evenodd;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:10;"><g><g transform="matrix(1,0,0,1,-7.91703,-76.2244)"><path d="M23.8,102.1L35.7,102.1" style="fill:none;fill-rule:nonzero;stroke:black;stroke-width:7px;"/></g><g transform="matrix(1,0,0,1,-7.91703,-76.2244)"><path d="M35.7,102.1L47.5,102.1" style="fill:none;fill-rule:nonzero;stroke:black;stroke-width:7px;"/></g><g transform="matrix(1,0,0,1,-7.91703,-76.2244)"><path d="M35.7,102.1L35.7,90.3" style="fill:none;fill-rule:nonzero;stroke:black;stroke-width:7px;"/></g><g transform="matrix(1,0,0,1,-7.91703,-76.2244)"><path d="M51,118C55.2,113.8 57.3,108.7 57.3,102.8C57.3,96.8 55.2,91.8 51,87.6C46.8,83.4 41.7,81.3 35.8,81.3C29.9,81.3 24.8,83.4 20.6,87.6C16.4,91.8 14.3,96.8 14.3,102.8C14.3,108.7 16.4,113.8 20.6,118C24.8,122.2 29.9,124.3 35.8,124.3C41.7,124.3 46.8,122.2 51,118" style="fill:none;fill-rule:nonzero;stroke:black;stroke-width:7px;"/></g><g transform="matrix(1,0,0,1,-7.91703,-76.2244)"><path d="M35.7,113.9L35.7,102.1" style="fill:none;fill-rule:nonzero;stroke:black;stroke-width:7px;"/></g><g transform="matrix(1,0,0,1,-7.91703,-76.2244)"><path d="M65.3,132.3L51,118" style="fill:none;fill-rule:nonzero;stroke:black;stroke-width:7px;"/></g></g></svg>');
+}
 
+#bga-zoom-wrapper #bga-zoom-controls[data-color=white] .bga-zoom-out-icon {
+  width: 40px;
+  height: 40px;
+  background: url('data:image/svg+xml;utf8,<svg width="100%" height="100%" viewBox="65 0 70 70" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xml:space="preserve" xmlns:serif="http://www.serif.com/" style="fill-rule:evenodd;clip-rule:evenodd;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:10;"><g><g transform="matrix(1,0,0,1,-4.97116,-76.2244)"><path d="M118,118C122.1,113.8 124.3,108.7 124.3,102.8C124.3,96.8 122.1,91.8 118,87.6C113.8,83.4 108.7,81.3 102.8,81.3C96.8,81.3 91.8,83.4 87.6,87.6C83.3,91.8 81.3,96.8 81.3,102.8C81.3,108.7 83.3,113.8 87.6,118C91.8,122.2 96.8,124.3 102.8,124.3C108.7,124.3 113.8,122.2 118,118" style="fill:none;fill-rule:nonzero;stroke:white;stroke-width:7px;"/></g><g transform="matrix(1,0,0,1,-4.97116,-76.2244)"><path d="M118,118L132.3,132.3" style="fill:none;fill-rule:nonzero;stroke:white;stroke-width:7px;"/></g><g transform="matrix(1,0,0,1,-4.97116,-76.2244)"><path d="M114.5,102.1L90.8,102.1" style="fill:none;fill-rule:nonzero;stroke:white;stroke-width:7px;"/></g></g></svg>');
+}
 
+#bga-zoom-wrapper #bga-zoom-controls[data-color=white] .bga-zoom-in-icon {
+  width: 40px;
+  height: 40px;
+  background: url('data:image/svg+xml;utf8,<svg width="100%" height="100%" viewBox="0 0 70 70" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xml:space="preserve" xmlns:serif="http://www.serif.com/" style="fill-rule:evenodd;clip-rule:evenodd;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:10;"><g><g transform="matrix(1,0,0,1,-7.91703,-76.2244)"><path d="M23.8,102.1L35.7,102.1" style="fill:none;fill-rule:nonzero;stroke:white;stroke-width:7px;"/></g><g transform="matrix(1,0,0,1,-7.91703,-76.2244)"><path d="M35.7,102.1L47.5,102.1" style="fill:none;fill-rule:nonzero;stroke:white;stroke-width:7px;"/></g><g transform="matrix(1,0,0,1,-7.91703,-76.2244)"><path d="M35.7,102.1L35.7,90.3" style="fill:none;fill-rule:nonzero;stroke:white;stroke-width:7px;"/></g><g transform="matrix(1,0,0,1,-7.91703,-76.2244)"><path d="M51,118C55.2,113.8 57.3,108.7 57.3,102.8C57.3,96.8 55.2,91.8 51,87.6C46.8,83.4 41.7,81.3 35.8,81.3C29.9,81.3 24.8,83.4 20.6,87.6C16.4,91.8 14.3,96.8 14.3,102.8C14.3,108.7 16.4,113.8 20.6,118C24.8,122.2 29.9,124.3 35.8,124.3C41.7,124.3 46.8,122.2 51,118" style="fill:none;fill-rule:nonzero;stroke:white;stroke-width:7px;"/></g><g transform="matrix(1,0,0,1,-7.91703,-76.2244)"><path d="M35.7,113.9L35.7,102.1" style="fill:none;fill-rule:nonzero;stroke:white;stroke-width:7px;"/></g><g transform="matrix(1,0,0,1,-7.91703,-76.2244)"><path d="M65.3,132.3L51,118" style="fill:none;fill-rule:nonzero;stroke:white;stroke-width:7px;"/></g></g></svg>');
+}
 
+.factory {
+  background: url("img/factory.png");
+  width: 250px;
+  height: 250px;
+  display: inline-block;
+  pointer-events: none;
+}
+
+#factories {
+  position: relative;
+  --top: 0;
+  float: left;
+}
+#factories .factory {
+  position: absolute;
+}
+#factories .factory .tile {
+  transition: left 0.5s, top 0.5s;
+}
+#factories .factory-center {
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  display: inline-block;
+}
+#factories.selectable .tile:not(.tile0) {
+  cursor: pointer;
+  pointer-events: all;
+}
+#factories .tile.hover {
+  box-shadow: 0 0 5px 5px white;
+}
+#factories #bag {
+  position: absolute;
+  top: var(--top);
+  left: 24px;
+  width: 128px;
+  height: 128px;
+  background-image: url("img/bag.png");
+  background-size: contain;
+  background-repeat: none;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 8;
+}
+#factories #bag #bag-counter {
+  font-size: 2em;
+  font-weight: 700;
+  position: absolute;
+  text-shadow: 0 0 1px #fff, 0 0 2px #fff, 0 0 3px #fff, 0 0 5px #fff, 0 0 8px #fff;
+  pointer-events: none;
+  display: none;
+  user-select: none;
+}
+#factories #bag #bag-counter.visible {
+  display: unset;
+}
+
+.tile-count {
+  position: absolute;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 32px;
+  height: 32px;
+  background: white;
+  border-radius: 50%;
+  font-size: 24px;
+  cursor: pointer;
+}
+.tile-count.tile1 {
+  color: #231f20;
+}
+.tile-count.tile1.hover {
+  box-shadow: 0 0 5px 5px #231f20;
+}
+.tile-count.tile2 {
+  color: #1dcad3;
+}
+.tile-count.tile2.hover {
+  box-shadow: 0 0 5px 5px #1dcad3;
+}
+.tile-count.tile3 {
+  color: #0083ad;
+}
+.tile-count.tile3.hover {
+  box-shadow: 0 0 5px 5px #0083ad;
+}
+.tile-count.tile4 {
+  color: #ffbf3c;
+}
+.tile-count.tile4.hover {
+  box-shadow: 0 0 5px 5px #ffbf3c;
+}
+.tile-count.tile5 {
+  color: #f5333f;
+}
+.tile-count.tile5.hover {
+  box-shadow: 0 0 5px 5px #f5333f;
+}
+
+.hide-tile-count .tile-count {
+  display: none;
+}
+
+.touch-device .tile-count {
+  width: 48px;
+  height: 48px;
+  font-size: 32px;
+  margin-left: -8px;
+  margin-top: -8px;
+}
+
+#table {
+  display: flex;
+  justify-content: center;
+  overflow-x: auto;
+  position: relative;
+  transform-origin: center top;
+}
+
+.player-table-wrapper {
+  position: relative;
+  display: inline-block;
+  margin-left: 20px;
+}
+.player-table-wrapper .player-hand {
+  height: 75px;
+  background: rgba(255, 255, 255, 0.8666666667);
+  margin-bottom: -5px;
+  margin-left: 15px;
+  margin-right: 15px;
+  box-shadow: 0 0 5px 5px rgba(255, 255, 255, 0.8666666667);
+  opacity: 1;
+  transition: opacity 0.5s;
+}
+.player-table-wrapper .player-hand.empty {
+  opacity: 0;
+}
+.player-table-wrapper .player-name-wrapper {
+  position: absolute;
+  font-size: 20px;
+  top: 63px;
+  left: 46px;
+  width: 120px;
+  height: 38px;
+  text-align: center;
+  vertical-align: middle;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.player-table-wrapper .player-name-wrapper.shift {
+  top: 64px;
+  left: 47px;
+}
+.player-table-wrapper .player-name-wrapper .player-name {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.player-table-wrapper .player-name-wrapper .player-name.azul {
+  text-transform: uppercase;
+  font-family: "Algeria";
+}
+.player-table-wrapper .player-name-wrapper .player-name.with-space {
+  line-break: normal;
+}
+.player-table-wrapper .player-name-wrapper .player-name.without-space {
+  line-break: anywhere;
+}
+.player-table-wrapper .player-name-wrapper .player-name.dark {
+  color: #012c3c;
+}
+.player-table-wrapper .player-name-wrapper .player-name.dark.standard {
+  display: none;
+}
+.player-table-wrapper .player-name-wrapper .player-name.color {
+  color: var(--player-color);
+}
+.player-table-wrapper .player-table {
+  background: url("img/playerboard.jpg");
+  width: 740px;
+  height: 484px;
+  position: relative;
+  border: 2px solid black;
+  border-radius: 8px;
+  margin: 5px;
+  z-index: 1;
+  border-color: var(--player-color);
+  box-shadow: 0 0 5px 2px var(--player-color);
+}
+.player-table-wrapper .player-table.variant {
+  background: url("img/playerboard-variant.jpg");
+}
+.player-table-wrapper .player-table.variant .wall-tile-cb {
+  display: none;
+}
+.player-table-wrapper .player-table:not(.variant) .wall {
+  background: rgba(255, 255, 255, 0.6901960784);
+  box-shadow: 0 0 10px 5px rgba(255, 255, 255, 0.6901960784);
+}
+.player-table-wrapper .player-table .line {
+  display: inline-block;
+  position: absolute;
+  right: 389px;
+  border: 3px dashed transparent;
+  height: 63px;
+  pointer-events: none;
+}
+.player-table-wrapper .player-table .line.floor {
+  right: 209px;
+  top: 407px;
+  left: 1px;
+  height: 71px;
+  overflow: hidden;
+}
+.player-table-wrapper .player-table .line.selectable {
+  border-color: red;
+  pointer-events: all;
+  cursor: pointer;
+}
+.player-table-wrapper .player-table .wall-spot {
+  display: inline-block;
+  position: absolute;
+  border: 3px dashed transparent;
+  height: 63px;
+  width: 63px;
+  pointer-events: none;
+}
+.player-table-wrapper .player-table .wall-spot.floor {
+  right: 209px;
+  top: 407px;
+  left: 1px;
+  height: 71px;
+  width: unset;
+}
+.player-table-wrapper .player-table .wall-spot.selectable {
+  animation: selectable-wall 1s alternate-reverse infinite ease-in-out;
+  pointer-events: all;
+  cursor: pointer;
+}
+.player-table-wrapper .player-table .wall-spot .ghost {
+  box-shadow: none;
+  opacity: 0.5;
+}
+.player-table-wrapper .player-table .wall {
+  position: absolute;
+  top: 12px;
+  left: 385px;
+  width: 339px;
+  height: 341px;
+}
+.player-table-wrapper .player-table .wall .tile.highlight {
+  animation: highlight-animation 0.7s alternate 2;
+}
+@keyframes highlight-animation {
+  100% {
+    box-shadow: 0 0 30px 15px white;
+  }
+}
+.player-table-wrapper .player-table .wall .wall-tile-cb {
+  position: absolute;
+  width: 58px;
+  height: 58px;
+  background: url("img/red-cb.svg");
+  border-radius: 5px;
+}
+.player-table-wrapper .player-table .score-magnified {
+  position: absolute;
+  color: black;
+  font-size: 2em;
+  font-weight: 700;
+  position: absolute;
+  text-shadow: 0 0 1px #fff, 0 0 2px #fff, 0 0 3px #fff, 0 0 5px #fff, 0 0 8px #fff;
+}
+.player-table-wrapper .player-table .score-magnified.row {
+  left: 647px;
+  top: 370px;
+}
+.player-table-wrapper .player-table .score-magnified.column {
+  left: 702px;
+  top: 447px;
+}
+.player-table-wrapper .player-table .score-magnified.color {
+  left: 593px;
+  top: 425px;
+}
+
+.wall-tile-cb {
+  opacity: 0;
+}
+
+.cb .wall-tile-cb {
+  opacity: 0.3;
+}
+
+@keyframes selectable-wall {
+  from {
+    border-color: rgb(255, 65, 65);
+    background: rgba(255, 255, 255, 0.4);
+  }
+  to {
+    border-color: rgb(90, 0, 0);
+    background: rgba(255, 255, 255, 0.2);
+  }
+}
+.player_board_content .tile {
+  position: relative;
+  margin: 5px;
+  pointer-events: all;
+}
+
+.tile {
+  width: 58px;
+  height: 58px;
+  display: inline-block;
+  position: absolute;
+  border: 2px outset;
+  border-radius: 5px;
+  box-shadow: 1px 1px 2px 2px black;
+  pointer-events: none;
+  overflow: hidden;
+}
+.tile.tile0 {
+  background: url("img/first-player.svg") white;
+  border-color: white;
+  z-index: 8;
+}
+.tile.tile1 {
+  background: url("img/black.svg") #231f20;
+  border-color: #231f20;
+}
+.tile.tile2 {
+  background: url("img/cyan.svg") #1dcad3;
+  border-color: #1dcad3;
+}
+.tile.tile3 {
+  background: url("img/blue.svg") #0083ad;
+  border-color: #0083ad;
+}
+.tile.tile4 {
+  background: url("img/yellow.svg") #ffbf3c;
+  border-color: #ffbf3c;
+}
+.tile.tile5 {
+  background: url("img/red.svg") #f5333f;
+  border-color: #f5333f;
+}
+.tile::after {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  opacity: 0.15;
+  background: linear-gradient(110deg, transparent 15%, #FFFFFF 50%, transparent 85%);
+  animation: shimmer 3s ease-in-out infinite;
+  content: "";
+}
+@keyframes shimmer {
+  0% {
+    transform: translateX(-200%);
+  }
+  100% {
+    transform: translateX(200%);
+  }
+}
+
+.disabled-shimmer .tile::after {
+  opacity: 0;
+  animation: none;
+}
+
+#firstPlayerToken {
+  width: 32px;
+  height: 32px;
+  position: relative;
+  box-shadow: 1px 1px 1px 1px rgba(0, 0, 0, 0.6);
+}
+
+.cb .tile.tile5 {
+  background: url("img/red-cb.svg");
+}
+
+.scoring-tile {
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: inline-block;
+  position: absolute;
+  pointer-events: none;
+  z-index: 100;
+}
+
+.hide-scoring-tile .scoring-tile {
+  display: none;
+}
+
+html {
+  background: url("img/background.jpg") #fff8f0;
+  background-repeat: repeat;
+}
+html.background2 {
+  background: url("img/background2.jpg") #00587a;
+}
+
+.mode_3d #game_play_area_background {
+  background: url("img/background.jpg") #fff8f0;
+  background-repeat: repeat;
+}
+
+@font-face {
+  font-family: "Algeria";
+  src: url("img/algeria.woff2") format("woff2"), url("img/algeria.woff") format("woff");
+  font-weight: normal;
+  font-style: normal;
+}
+#page-title .tile {
+  margin: -2px 3px -5px 3px;
+  width: 24px;
+  height: 24px;
+  position: relative;
+  box-shadow: 1px 1px 1px 1px rgba(0, 0, 0, 0.6);
+}
+
+.log .tile {
+  margin: 2px;
+  position: relative;
+  width: 16px;
+  height: 16px;
+  box-shadow: none;
+  vertical-align: middle;
+}
+
+#last-round {
+  margin: 5px -5px -5px;
+  text-align: center;
+  background: #26b3e1;
+  color: white;
+}
+
+#zoom-notice {
+  position: absolute;
+  background: white;
+  min-width: 350px;
+  right: 80px;
+  top: 0;
+  padding: 10px;
+  border-radius: 8px;
+  box-shadow: 2px 2px 5px 0px rgba(0, 0, 0, 0.8);
+}
+#zoom-notice #hide-zoom-notice {
+  font-weight: bold;
+  cursor: pointer;
+}
+#zoom-notice .arrow-right {
+  width: 0;
+  height: 0;
+  border-top: 12px solid transparent;
+  border-bottom: 12px solid transparent;
+  border-left: 12px solid white;
+  position: absolute;
+  right: -12px;
+  top: 8px;
+}

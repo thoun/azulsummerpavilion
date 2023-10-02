@@ -19,17 +19,19 @@
 --       you have to restart a game to see your changes in database.
 
 -- Example 1: create a standard "card" table to be used with the "Deck" tools (see example game "hearts"):
+CREATE TABLE IF NOT EXISTS `tile` (
+   `card_id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+   `card_type` int(1) NOT NULL,
+   `card_type_arg` int(1),
+   `card_location` varchar(20) NOT NULL,
+   `card_location_arg` int(11),
+   PRIMARY KEY (`card_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
--- CREATE TABLE IF NOT EXISTS `card` (
---   `card_id` int(10) unsigned NOT NULL AUTO_INCREMENT,
---   `card_type` varchar(16) NOT NULL,
---   `card_type_arg` int(11) NOT NULL,
---   `card_location` varchar(16) NOT NULL,
---   `card_location_arg` int(11) NOT NULL,
---   PRIMARY KEY (`card_id`)
--- ) ENGINE=InnoDB DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
+ALTER TABLE `player` ADD `selected_columns` json;
 
-
--- Example 2: add a custom field to the standard "player" table
--- ALTER TABLE `player` ADD `player_my_custom_field` INT UNSIGNED NOT NULL DEFAULT '0';
-
+CREATE TABLE IF NOT EXISTS `global_variables` (
+  `name` varchar(50) NOT NULL,
+  `value` json,
+  PRIMARY KEY (`name`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;

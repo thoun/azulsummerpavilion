@@ -1,0 +1,83 @@
+@import '../node_modules/bga-zoom/bga-zoom';
+@import 'factories/factories';
+@import 'players-tables/players-tables';
+@import 'playerboards';
+@import 'tile';
+
+html {
+    background: url('img/background.jpg') #fff8f0;
+    background-repeat: repeat;
+
+
+    &.background2 {  
+      background: url('img/background2.jpg') #00587a;
+    }
+}
+
+.mode_3d #game_play_area_background {
+  background: url('img/background.jpg') #fff8f0;
+  background-repeat: repeat;
+}
+
+@font-face {
+    font-family: 'Algeria';
+    src: url('img/algeria.woff2') format('woff2'),
+        url('img/algeria.woff') format('woff');
+    font-weight: normal;
+    font-style: normal;
+}
+
+#page-title {
+  .tile {        
+      margin: -2px 3px -5px 3px;
+      width: 24px;
+      height: 24px;
+      position: relative;
+      box-shadow: 1px 1px 1px 1px #00000099;
+  }
+}
+
+.log {
+  .tile {
+    margin: 2px;
+    position: relative;
+    width: 16px;
+    height: 16px;
+    box-shadow: none;
+    vertical-align: middle;
+  }
+}
+
+#last-round {
+  margin: 5px -5px -5px;
+  text-align: center;
+  background: #26b3e1;
+  color: white;
+}
+
+#zoom-notice {
+  position: absolute;
+    background: white;
+    min-width: 350px;
+    right: 80px;
+    top: 0;
+    padding: 10px;
+    border-radius: 8px;
+    box-shadow: 2px 2px 5px 0px #000000cc;
+
+    #hide-zoom-notice {
+        font-weight: bold;
+        cursor: pointer;
+    }
+
+    .arrow-right {
+      width: 0; 
+      height: 0; 
+      border-top: 12px solid transparent; 
+      border-bottom: 12px solid transparent;
+      border-left: 12px solid white;
+      position:absolute;
+      right:-12px;
+      top: 8px;
+    }
+}

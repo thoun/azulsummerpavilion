@@ -48,64 +48,214 @@
 */
 
 //    !! It is not a good idea to modify this file when a game is running !!
+require_once("modules/constants.inc.php");
 
- 
-$machinestates = array(
+$basicGameStates = [
 
     // The initial state. Please do not modify.
-    1 => array(
+    ST_BGA_GAME_SETUP => [
         "name" => "gameSetup",
-        "description" => "",
+        "description" => clienttranslate("Game setup"),
         "type" => "manager",
         "action" => "stGameSetup",
-        "transitions" => array( "" => 2 )
-    ),
-    
-    // Note: ID=2 => your first state
+        "transitions" => [ "" => ST_FILL_FACTORIES ]
+    ],
 
-    2 => array(
-    		"name" => "playerTurn",
-    		"description" => clienttranslate('${actplayer} must play a card or pass'),
-    		"descriptionmyturn" => clienttranslate('${you} must play a card or pass'),
-    		"type" => "activeplayer",
-    		"possibleactions" => array( "playCard", "pass" ),
-    		"transitions" => array( "playCard" => 2, "pass" => 2 )
-    ),
-    
-/*
-    Examples:
-    
-    2 => array(
+    ST_NEXT_PLAYER => [
         "name" => "nextPlayer",
-        "description" => '',
+        "description" => "",
         "type" => "game",
         "action" => "stNextPlayer",
-        "updateGameProgression" => true,   
-        "transitions" => array( "endGame" => 99, "nextPlayer" => 10 )
-    ),
-    
-    10 => array(
-        "name" => "playerTurn",
-        "description" => clienttranslate('${actplayer} must play a card or pass'),
-        "descriptionmyturn" => clienttranslate('${you} must play a card or pass'),
-        "type" => "activeplayer",
-        "possibleactions" => array( "playCard", "pass" ),
-        "transitions" => array( "playCard" => 2, "pass" => 2 )
-    ), 
-
-*/    
+        "transitions" => [
+            "nextPlayer" => ST_PLAYER_CHOOSE_TILE, 
+            "endRound" => ST_END_ROUND,
+        ],
+    ],
    
     // Final state.
-    // Please do not modify (and do not overload action/args methods).
-    99 => array(
+    // Please do not modify.
+    ST_END_GAME => [
         "name" => "gameEnd",
         "description" => clienttranslate("End of game"),
         "type" => "manager",
         "action" => "stGameEnd",
-        "args" => "argGameEnd"
-    )
+        "args" => "argGameEnd",
+    ],
+];
 
-);
+$playerActionsGameStates = [
 
+    ST_FILL_FACTORIES => [
+        "name" => "fillFactories",
+        "description" => "",
+        "type" => "game",
+        "updateGameProgression" => true,
+        "action" => "stFillFactories",
+        "transitions" => [ 
+            "next" => ST_PLAYER_CHOOSE_TILE,
+        ],
+    ],
 
+    ST_PLAYER_CHOOSE_TILE => [
+        "name" => "chooseTile",
+        "description" => clienttranslate('${actplayer} must choose tiles'),
+        "descriptionmyturn" => clienttranslate('${you} must choose tiles'),
+        "type" => "activeplayer",
+        "possibleactions" => [ 
+            "takeTiles" 
+        ],
+        "transitions" => [
+            "placeTiles" => ST_PLAYER_CHOOSE_LINE,
+            "chooseFactory" => ST_PLAYER_CHOOSE_FACTORY,
+            "nextPlayer" => ST_NEXT_PLAYER,
+        ]
+    ],
 
+    ST_PLAYER_CHOOSE_FACTORY => [
+        "name" => "chooseFactory",
+        "description" => clienttranslate('${actplayer} must choose a neighbor factory to place remaining ${number} ${color}'),
+        "descriptionmyturn" => clienttranslate('${you} must choose a neighbor factory to place remaining ${number} ${color}'),
+        "type" => "activeplayer",
+        "args" => "argChooseFactory",
+        "possibleactions" => [ 
+            "selectFactory",
+            "undoTakeTiles",
+         ],
+        "transitions" => [
+            "nextFactory" => ST_PLAYER_CHOOSE_FACTORY,
+            "chooseLine" => ST_PLAYER_CHOOSE_LINE,
+            "nextPlayer" => ST_NEXT_PLAYER,
+            "undo" => ST_PLAYER_CHOOSE_TILE,
+        ],
+    ],
+
+    ST_PLAYER_CHOOSE_LINE => [
+        "name" => "chooseLine",
+        "description" => clienttranslate('${actplayer} must choose a line to place ${number} ${color}'),
+        "descriptionmyturn" => clienttranslate('${you} must choose a line to place ${number} ${color}'),
+        "type" => "activeplayer",
+        "args" => "argChooseLine",
+        "possibleactions" => [ 
+            "selectLine",
+            "undoTakeTiles",
+         ],
+        "transitions" => [
+            "confirm" => ST_PLAYER_CONFIRM_LINE,
+            "nextPlayer" => ST_NEXT_PLAYER,
+            "undo" => ST_PLAYER_CHOOSE_TILE,
+        ],
+    ],
+
+    ST_PLAYER_CONFIRM_LINE => [
+        "name" => "confirmLine",
+        "description" => clienttranslate('${actplayer} must confirm line choice'),
+        "descriptionmyturn" => clienttranslate('${you} must confirm line choice'),
+        "type" => "activeplayer",
+        "possibleactions" => [ 
+            "confirmLine",
+            "undoSelectLine",
+         ],
+        "transitions" => [
+            "nextPlayer" => ST_NEXT_PLAYER,
+            "undo" => ST_PLAYER_CHOOSE_LINE,
+        ],
+    ],
+
+    ST_END_ROUND => [
+        "name" => "endRound",
+        "description" => "",
+        "type" => "game",
+        "action" => "stEndRound",
+        "transitions" => [
+            //"chooseColumns" => ST_MULTIPLAYER_CHOOSE_COLUMNS,
+            "chooseColumns" => ST_MULTIPLAYER_PRIVATE_CHOOSE_COLUMNS,
+            "placeTiles" => ST_PLACE_TILES,
+        ],
+    ],
+
+    ST_MULTIPLAYER_CHOOSE_COLUMNS => [
+        "name" => "chooseColumns",
+        "description" => clienttranslate('Players with complete lines must choose columns to place tiles'),
+        "descriptionmyturn" => clienttranslate('${you} must must choose columns to place tiles'),
+        "type" => "multipleactiveplayer",
+        "action" => "stChooseColumns",
+        "args" => "argChooseColumns",
+        "possibleactions" => [ 
+            "selectColumn",
+            "confirmColumns",
+            "undoColumns"
+        ],
+        "transitions" => [
+            "confirmColumns" => ST_PLACE_TILES,
+        ],
+    ],
+
+    ST_MULTIPLAYER_PRIVATE_CHOOSE_COLUMNS => [
+        "name" => "multiChooseColumns",
+        "description" => clienttranslate('Players with complete lines must choose columns to place tiles'),
+        "descriptionmyturn" => clienttranslate('${you} must must choose columns to place tiles'),
+        "type" => "multipleactiveplayer",
+        "initialprivate" => ST_PRIVATE_CHOOSE_COLUMNS,
+        "action" => "stMultiChooseColumns",
+        "possibleactions" => [ 
+        ],
+        "transitions" => [
+            "confirmColumns" => ST_PLACE_TILES,
+        ],
+    ],
+
+    ST_PRIVATE_CHOOSE_COLUMNS => [
+        "name" => "privateChooseColumns",
+        "descriptionmyturn" => clienttranslate('${you} must must choose columns to place tiles'),
+        "type" => "private",
+        "action" => "stPrivateChooseColumns",
+        "args" => "argChooseColumnForPlayer",
+        "possibleactions" => [
+            "selectColumn",
+            "confirmColumns",
+            "undoColumns"
+        ],
+        "transitions" => [
+            "next" => ST_PRIVATE_CHOOSE_COLUMNS,
+            "undo" => ST_PRIVATE_CHOOSE_COLUMNS,
+            "confirm" => ST_PRIVATE_CONFIRM_COLUMNS,
+        ],
+    ],
+
+    ST_PRIVATE_CONFIRM_COLUMNS => [
+        "name" => "privateConfirmColumns",
+        "descriptionmyturn" => clienttranslate('${you} must must choose columns to place tiles'),
+        "type" => "private",
+        "possibleactions" => [
+            "confirmColumns",
+            "undoColumns"
+        ],
+        "transitions" => [
+            "undo" => ST_PRIVATE_CHOOSE_COLUMNS,
+            "confirmColumns" => ST_PLACE_TILES,
+        ],
+    ],
+
+    ST_PLACE_TILES => [
+        "name" => "placeTiles",
+        "description" => "",
+        "type" => "game",
+        "action" => "stPlaceTiles",
+        "transitions" => [ 
+            "newRound" => ST_FILL_FACTORIES,
+            "endScore" => ST_END_SCORE,
+        ],
+    ],
+
+    ST_END_SCORE => [
+        "name" => "endScore",
+        "description" => "",
+        "type" => "game",
+        "action" => "stEndScore",
+        "transitions" => [
+            "endGame" => ST_END_GAME,
+        ],
+    ],
+];
+ 
+$machinestates = $basicGameStates + $playerActionsGameStates;

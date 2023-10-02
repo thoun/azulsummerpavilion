@@ -1,0 +1,26 @@
+{
+    "rootDir": ".", 
+    "compilerOptions": {
+      "target": "es5",
+      "module": "none",
+      "lib": ["dom", "esnext"],  
+      "sourceMap": false,
+      "outFile": "azulsummerpavilion.js",
+    },
+    "files": [
+        "src/framework.d.ts",
+        "src/counter.d.ts",
+        "src/stock.d.ts",
+        "node_modules/bga-animations/src/animations.ts",
+        "node_modules/bga-animations/src/animations/slide-animation.ts",
+        "node_modules/bga-animations/src/animations-utils.ts",
+        "node_modules/bga-animations/src/animation-manager.ts",
+        "node_modules/bga-zoom/src/zoom-manager.ts",
+        "src/azulsummerpavilion.d.ts",
+        "src/slide-utils.ts",
+        "src/factories/factories.ts",
+        "src/players-tables/player-table.ts",
+        "src/azulsummerpavilion.ts",
+        "src/define.ts"
+    ]
+}

@@ -1,0 +1,22 @@
+{
+  "name": "azul",
+  "version": "1.0.0",
+  "description": "",
+  "main": "azulsummerpavilion.js",
+  "scripts": {
+    "build:ts": "tsc",
+    "build:scss": "sass --no-source-map src/azulsummerpavilion.scss azulsummerpavilion.css"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "bga-animations": "thoun/bga-animations#1.0.2",
+    "bga-cards": "thoun/bga-cards#3.0.0",
+    "bga-jump-to": "thoun/bga-jump-to#1.0.0",
+    "bga-zoom": "thoun/bga-zoom#1.0.1"
+  },
+  "devDependencies": {
+    "sass": "^1.62.1",
+    "typescript": "^5.0.4"
+  }
+}

@@ -1,0 +1,133 @@
+.factory {
+    background: url('img/factory.png');
+    width: 250px;
+    height: 250px;
+    display: inline-block;
+    pointer-events: none;
+}
+
+#factories {
+    position: relative;
+    --top: 0;
+    
+    float: left;
+
+    .factory {
+        position: absolute;
+    
+        .tile {
+            transition: left 0.5s, top 0.5s;
+        }
+    }
+
+    .factory-center {
+        width: 100%;
+        height: 100%;
+        position: absolute;
+        display: inline-block;
+    }
+
+    &.selectable {
+        .tile:not(.tile0) {
+            cursor: pointer;
+            pointer-events: all;
+        }
+    }
+
+    .tile.hover {
+        box-shadow: 0 0 5px 5px white;
+    }
+    
+    #bag {
+        position: absolute;
+        top: var(--top);
+        left: 24px;
+        width: 128px;
+        height: 128px;
+        background-image: url('img/bag.png');
+        background-size: contain;
+        background-repeat: none;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 8;
+
+        #bag-counter {
+            font-size: 2em;
+            font-weight: 700;
+            position: absolute;
+            text-shadow: 0 0 1px #fff, 0 0 2px #fff, 0 0 3px #fff, 0 0 5px #fff, 0 0 8px #fff;
+            pointer-events: none;
+            display: none;
+            user-select: none;
+
+            &.visible {
+                display: unset;
+            }
+        }
+    }
+}
+
+.tile-count {
+    position: absolute;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 32px;
+    height: 32px;
+    background: white;
+    border-radius: 50%;
+    font-size: 24px;
+    cursor: pointer;
+    
+    &.tile1 {
+        color: #231f20;
+
+        &.hover {
+            box-shadow: 0 0 5px 5px #231f20;
+        }
+    }
+    &.tile2 {
+        color: #1dcad3;
+        
+        &.hover {
+            box-shadow: 0 0 5px 5px #1dcad3;
+        }
+    }
+    &.tile3 {
+        color: #0083ad;
+        
+        &.hover {
+            box-shadow: 0 0 5px 5px #0083ad;
+        }
+    }
+    &.tile4 {
+        color: #ffbf3c;
+        
+        &.hover {
+            box-shadow: 0 0 5px 5px #ffbf3c;
+        }
+    }
+    &.tile5 {
+        color: #f5333f;
+        
+        &.hover {
+            box-shadow: 0 0 5px 5px #f5333f;
+        }
+    }
+}
+
+
+.hide-tile-count .tile-count {
+    display: none;
+}
+
+.touch-device {
+    .tile-count {
+        width: 48px;
+        height: 48px;
+        font-size: 32px;
+        margin-left: -8px;
+        margin-top: -8px;
+    }
+}

@@ -19,19 +19,17 @@
  *
  */
 
-
-/*
-
-Example:
-
-$this->card_types = array(
-    1 => array( "card_name" => ...,
-                ...
-              )
-);
-
-*/
+ $this->factoriesByPlayers = [
+  2 => 5,
+  3 => 7,
+  4 => 9,
+];
 
 
-
-
+$this->indexForDefaultWall = [
+  1 => 3,
+  2 => 4,
+  3 => 0,
+  4 => 1,
+  5 => 2,
+];

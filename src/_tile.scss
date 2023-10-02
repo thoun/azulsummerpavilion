@@ -1,0 +1,94 @@
+.tile {
+    width: 58px;
+    height: 58px;
+    display: inline-block;
+    position: absolute;
+    border: 2px outset;
+    border-radius: 5px;
+    box-shadow: 1px 1px 2px 2px black;
+    pointer-events: none;
+
+    &.tile0 {
+        background: url('img/first-player.svg') white;
+        border-color: white;
+        z-index: 8;
+    }
+    &.tile1 {
+        background: url('img/black.svg') #231f20;
+        border-color: #231f20;
+    }
+    &.tile2 {
+        background: url('img/cyan.svg') #1dcad3;
+        border-color: #1dcad3;
+    }
+    &.tile3 {
+        background: url('img/blue.svg') #0083ad;
+        border-color: #0083ad;
+    }
+    &.tile4 {
+        background: url('img/yellow.svg') #ffbf3c;
+        border-color: #ffbf3c;
+    }
+    &.tile5 {
+        background: url('img/red.svg') #f5333f;
+        border-color: #f5333f;
+    }
+
+    overflow: hidden;
+    // shimmer animation
+    &::after {
+        position: absolute;
+        top: 0;
+        right: 0;
+        bottom: 0;
+        left: 0;
+        opacity: 0.15;
+        background: linear-gradient(110deg, transparent 15%, #FFFFFF 50%, transparent 85%);
+        animation: shimmer 3s ease-in-out infinite;
+        content: '';
+    }
+
+    @keyframes shimmer {
+        0% {
+            transform: translateX(-200%);
+        }
+        100% {
+            transform: translateX(200%);
+        }
+    }
+}
+
+.disabled-shimmer {
+    .tile::after {
+        opacity: 0;
+        animation: none;
+    }
+}
+
+#firstPlayerToken {
+    width: 32px;
+    height: 32px;
+    position: relative;
+    box-shadow: 1px 1px 1px 1px #00000099;
+}
+
+.cb .tile.tile5 {
+    background: url('img/red-cb.svg');
+}
+
+.scoring-tile {
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    display: inline-block;
+    position: absolute;
+    pointer-events: none;
+    z-index: 100;
+}
+
+.hide-scoring-tile {
+    .scoring-tile {
+        display: none;
+    }
+}
