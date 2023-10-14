@@ -136,16 +136,36 @@ trait ActionTrait {
         $this->gamestate->nextState('undo');
     }
 
-    function selectLine(int $line, $skipActionCheck = false) {
+    function selectPlace(int $line, int $column, $skipActionCheck = false) {
         if (!$skipActionCheck) {
-            $this->checkAction('selectLine');
+            $this->checkAction('selectPlace');
         }
         
         $playerId = self::getActivePlayerId();
 
-        if (array_search($line, $this->availableLines($playerId)) === false) {
+        /*if (array_search($line, $this->availableLines($playerId)) === false) {
             throw new BgaUserException('Line not available');
+        }*/
+
+        /*$tiles = $this->getTilesFromDb($this->tiles->getCardsInLocation('hand', $playerId));
+        $this->placeTilesOnLine($playerId, $tiles, $line, true);
+
+        $this->setGlobalVariable(UNDO_PLACE, new Undo($tiles, null, null, false)); */
+        $this->setGlobalVariable(SELECTED_PLACE, [$line, $column]);
+
+        $this->gamestate->nextState('next');
+    }
+
+    function playTile(int $line, $skipActionCheck = false) {
+        if (!$skipActionCheck) {
+            $this->checkAction('playTile');
         }
+        
+        $playerId = self::getActivePlayerId();
+
+        /*if (array_search($line, $this->availableLines($playerId)) === false) {
+            throw new BgaUserException('Line not available');
+        }*/
 
         $tiles = $this->getTilesFromDb($this->tiles->getCardsInLocation('hand', $playerId));
         $this->placeTilesOnLine($playerId, $tiles, $line, true);
@@ -167,8 +187,8 @@ trait ActionTrait {
         $this->gamestate->nextState('nextPlayer');
     }
     
-    function undoSelectLine() {
-        self::checkAction('undoSelectLine'); 
+    function undoPlayTile() {
+        self::checkAction('undoPlayTile'); 
 
         if (!$this->allowUndo()) {
             throw new BgaUserException('Undo is disabled');
@@ -180,54 +200,13 @@ trait ActionTrait {
 
         $this->tiles->moveCards(array_map('getIdPredicate', $undo->tiles), 'hand', $playerId);
 
-        self::notifyAllPlayers('undoSelectLine', clienttranslate('${player_name} cancels tile placement'), [
+        self::notifyAllPlayers('undoPlayTile', clienttranslate('${player_name} cancels tile placement'), [
             'playerId' => $playerId,
             'player_name' => self::getActivePlayerName(),
             'undo' => $undo,
         ]);
         
         $this->gamestate->nextState('undo');
-    }
-
-    function selectColumn(int $line, int $column) {
-        $playerId = intval(self::getCurrentPlayerId());
-
-        $this->setSelectedColumn($playerId, $line, $column);
-
-        $arg = $this->argChooseColumnForPlayer($playerId);
-
-        self::notifyPlayer($playerId, 'updateSelectColumn', '', [
-            'playerId' => $playerId,
-            'arg' => $arg,
-        ]);
-
-        if (intval($this->gamestate->state_id()) == ST_MULTIPLAYER_PRIVATE_CHOOSE_COLUMNS) {
-            $confirm = $arg->nextColumnToSelect === null;
-            $this->gamestate->nextPrivateState($playerId, $confirm ? 'confirm' : 'next');
-        }
-    }
-
-    function confirmColumns() {
-        $playerId = intval(self::getCurrentPlayerId());
-
-        // Make this player unactive now (and tell the machine state to use transtion "placeTiles" if all players are now unactive
-        $this->gamestate->setPlayerNonMultiactive($playerId, 'confirmColumns');
-    }
-
-    function undoColumns() {
-        $playerId = intval(self::getCurrentPlayerId());
-
-        self::DbQuery("UPDATE player SET selected_columns = '[]' WHERE player_id = $playerId");
-        
-        self::notifyPlayer($playerId, 'updateSelectColumn', '', [
-            'playerId' => $playerId,
-            'arg' => $this->argChooseColumnForPlayer($playerId),
-            'undo' => true,
-        ]);
-
-        if (intval($this->gamestate->state_id()) == ST_MULTIPLAYER_PRIVATE_CHOOSE_COLUMNS) {
-            $this->gamestate->nextPrivateState($playerId, 'undo');
-        }
     }
 
 }

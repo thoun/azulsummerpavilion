@@ -108,11 +108,11 @@ class AzulSummerPavilion implements AzulSummerPavilionGame {
             case 'chooseTile':
                 this.onEnteringChooseTile();
                 break;
-            case 'chooseLine':
-                this.onEnteringChooseLine(args.args);
+            case 'choosePlace':
+                this.onEnteringChoosePlace(args.args);
                 break;
-            case 'privateChooseColumns':
-                this.onEnteringChooseColumnsForPlayer(this.getPlayerId(), args.args, true);
+            case 'playTile':
+                this.onEnteringPlayTile(args.args);
                 break;
             case 'gameEnd':
                 const lastTurnBar = document.getElementById('last-round');
@@ -129,43 +129,31 @@ class AzulSummerPavilion implements AzulSummerPavilionGame {
         }
     }
 
-    onEnteringChooseLine(args: EnteringChooseLineArgs) {
+    onEnteringChoosePlace(args: EnteringChoosePlaceArgs) {
         if ((this as any).isCurrentPlayerActive()) {
-            args.lines.forEach(i => dojo.addClass(`player-table-${this.getPlayerId()}-line${i}`, 'selectable'));
-        }
-    }
-
-    onEnteringChooseColumnsForPlayer(playerId: number, infos: ChooseColumnsForPlayer, privateMulti: boolean) {
-        const table = this.getPlayerTable(playerId);
-
-        infos.selectedColumns.forEach(selectedColumn => table.setGhostTile(selectedColumn.line, selectedColumn.column, selectedColumn.color));
-
-        if ((this as any).isCurrentPlayerActive()) {
-            const nextColumnToSelect = infos.nextColumnToSelect;
-            if (nextColumnToSelect) {
-                nextColumnToSelect.availableColumns.forEach(column =>
-                    dojo.addClass(
-                        /*column == 0 ? `player-table-${playerId}-column0` :*/ `player-table-${playerId}-wall-spot-${nextColumnToSelect.line}-${column}`, 
-                        'selectable'
-                    )
-                );
-            }
-            
-            if (!privateMulti) {
-                if (!document.getElementById('confirmColumns_button')) {
-                    (this as any).addActionButton('confirmColumns_button', _("Confirm chosen column(s)"), () => this.confirmColumns());
-                    (this as any).addActionButton('undoColumns_button', _("Undo column selection"), () => this.undoColumns(), null, null, 'gray');
+            const playerId = this.getPlayerId();
+            for (let x = 1; x <= 5; x++) {
+                for (let y = 1; y <= 5; y++) {
+                    document.getElementById(`player-table-${playerId}-wall-spot-${x}-${y}`).classList.toggle('selectable',
+                        !args.placedTiles.some(tile => tile.line == x && tile.column == y)
+                    );
                 }
-                dojo.toggleClass('confirmColumns_button', 'disabled', !!nextColumnToSelect);
             }
         }
     }
 
-    onEnteringChooseColumns(args: EnteringChooseColumnsArgs) {
-        const playerId = this.getPlayerId();
-        const infos = args.players[playerId];
-        if (infos) {
-            this.onEnteringChooseColumnsForPlayer(playerId, infos, false);
+    onEnteringPlayTile(args: EnteringPlayTileArgs) {
+        if ((this as any).isCurrentPlayerActive()) {
+            const playerId = this.getPlayerId();
+            for (let x = 1; x <= 5; x++) {
+                for (let y = 1; y <= 5; y++) {
+                    document.getElementById(`player-table-${playerId}-wall-spot-${x}-${y}`).classList.toggle('selectable',
+                        args.selectedPlace[0] == x && args.selectedPlace[1] == y
+                    );
+                }
+            }
+
+            args.lines.forEach(i => dojo.addClass(`player-table-${this.getPlayerId()}-line${i}`, 'selectable'));
         }
     }
 
@@ -179,11 +167,11 @@ class AzulSummerPavilion implements AzulSummerPavilionGame {
             case 'chooseTile':
                 this.onLeavingChooseTile();
                 break;
-            case 'chooseLine':
-                this.onLeavingChooseLine();
+            case 'choosePlace':
+                this.onLeavingChoosePlace();
                 break;
-            case 'chooseColumns':
-                this.onLeavingChooseColumns();
+            case 'playTile':
+                this.onLeavingPlayTile();
                 break;
         }
     }
@@ -192,7 +180,18 @@ class AzulSummerPavilion implements AzulSummerPavilionGame {
         dojo.removeClass('factories', 'selectable');
     }
 
-    onLeavingChooseLine() {
+    onLeavingChoosePlace() {
+        const playerId = this.getPlayerId();
+        for (let x = 1; x <= 5; x++) {
+            for (let y = 1; y <= 5; y++) {
+                document.getElementById(`player-table-${playerId}-wall-spot-${x}-${y}`)?.classList.remove('selectable');
+            }
+        }
+    }
+
+    onLeavingPlayTile() {
+        this.onLeavingChoosePlace();
+
         if (!this.gamedatas.players[this.getPlayerId()]) {
             return;
         }
@@ -200,10 +199,6 @@ class AzulSummerPavilion implements AzulSummerPavilionGame {
         for (let i=0; i<=5; i++) {
             dojo.removeClass(`player-table-${this.getPlayerId()}-line${i}`, 'selectable');
         }
-    }
-
-    onLeavingChooseColumns() {        
-        Array.from(document.getElementsByClassName('ghost')).forEach(elem => elem.parentElement.removeChild(elem));
     }
 
     // onUpdateActionButtons: in this method you can manage "action buttons" that are displayed in the
@@ -221,23 +216,10 @@ class AzulSummerPavilion implements AzulSummerPavilionGame {
                     break;
                 case 'confirmPlay':
                     (this as any).addActionButton('confirmLine_button', _("Confirm"), () => this.confirmPlay());
-                    (this as any).addActionButton('undoSelectLine_button', _("Undo line selection"), () => this.undoSelectLine(), null, null, 'gray');
+                    (this as any).addActionButton('undoPlayTile_button', _("Undo line selection"), () => this.undoPlayTile(), null, null, 'gray');
                     this.startActionTimer('confirmLine_button', 5);
                     break;
-                case 'privateChooseColumns':
-                case 'privateConfirmColumns':
-                    const privateChooseColumnArgs = args as ChooseColumnsForPlayer;
-                    (this as any).addActionButton('confirmColumns_button', _("Confirm chosen column(s)"), () => this.confirmColumns());
-                    (this as any).addActionButton('undoColumns_button', _("Undo column selection"), () => this.undoColumns(), null, null, 'gray');
-                    dojo.toggleClass('confirmColumns_button', 'disabled', !!privateChooseColumnArgs.nextColumnToSelect && stateName != 'privateConfirmColumns');
-                    break;
             }
-        }
-        
-        switch (stateName) {
-            case 'chooseColumns': // for multiplayer states we have to do it here
-                this.onEnteringChooseColumns(args);
-                break;
         }
     } 
     
@@ -516,12 +498,12 @@ class AzulSummerPavilion implements AzulSummerPavilionGame {
         });
     }
 
-    public selectLine(line: number) {
-        if(!(this as any).checkAction('selectLine')) {
+    public playTile(line: number) {
+        if(!(this as any).checkAction('playTile')) {
             return;
         }
 
-        this.takeAction('selectLine', {
+        this.takeAction('playTile', {
             line
         });
     }
@@ -534,20 +516,20 @@ class AzulSummerPavilion implements AzulSummerPavilionGame {
         this.takeAction('confirmPlay');
     }
 
-    public undoSelectLine() {
-        if(!(this as any).checkAction('undoSelectLine')) {
+    public undoPlayTile() {
+        if(!(this as any).checkAction('undoPlayTile')) {
             return;
         }
 
-        this.takeAction('undoSelectLine');
+        this.takeAction('undoPlayTile');
     }
 
-    public selectColumn(line: number, column: number) {
-        if(!(this as any).checkAction('selectColumn')) {
+    public selectPlace(line: number, column: number) {
+        if(!(this as any).checkAction('selectPlace')) {
             return;
         }
 
-        this.takeAction('selectColumn', {
+        this.takeAction('selectPlace', {
             line,
             column
         });
@@ -621,14 +603,12 @@ class AzulSummerPavilion implements AzulSummerPavilionGame {
             ['tilesSelected', ANIMATION_MS],
             ['undoTakeTiles', ANIMATION_MS],
             ['tilesPlacedOnLine', ANIMATION_MS],
-            ['undoSelectLine', ANIMATION_MS],
+            ['undoPlayTile', ANIMATION_MS],
             ['placeTileOnWall', this.gamedatas.fastScoring ? SCORE_MS : SLOW_SCORE_MS],
             ['emptyFloorLine', this.gamedatas.fastScoring ? SCORE_MS : SLOW_SCORE_MS],
             ['endScore', this.gamedatas.fastScoring ? SCORE_MS : SLOW_SCORE_MS],
             ['firstPlayerToken', 1],
             ['lastRound', 1],
-            ['removeLastRound', 1],
-            ['updateSelectColumn', 1],
         ];
 
         notifs.forEach((notif) => {
@@ -671,7 +651,7 @@ class AzulSummerPavilion implements AzulSummerPavilionGame {
         this.getPlayerTable(notif.args.playerId).placeTilesOnLine(notif.args.placedTiles, notif.args.line);
     }
 
-    notif_undoSelectLine(notif: Notif<NotifUndoArgs>) {
+    notif_undoPlayTile(notif: Notif<NotifUndoArgs>) {
         const table = this.getPlayerTable(notif.args.playerId);
         table.placeTilesOnHand(notif.args.undo.tiles);
 
@@ -721,37 +701,12 @@ class AzulSummerPavilion implements AzulSummerPavilionGame {
         this.placeFirstPlayerToken(notif.args.playerId);
     }
 
-    notif_updateSelectColumn(notif: Notif<NotifUpdateSelectColumnArgs>) {
-        if (notif.args.undo) {
-            this.removeColumnSelection();
-            this.onLeavingChooseColumns();
-        }
-
-        if (this.gamedatas.gamestate.name === 'chooseColumns') {
-            // when a player is deactivated, updateActionButton calling onEnteringChooseColumns is called with old args.
-            // so we set args up-to-date to avoid conflict between current situation and old args
-            this.gamedatas.gamestate.args.players[notif.args.playerId] = notif.args.arg;
-        }
-
-        this.onEnteringChooseColumnsForPlayer(notif.args.playerId, notif.args.arg, this.gamedatas.gamestate.name !== 'chooseColumns');
-    }
-
     notif_lastRound() {
         if (document.getElementById('last-round')) {
             return;
         }
         
-        let message = _("This is the last round of the game!");
-        if (this.isVariant()) {
-            message += ' <i>(' + _("if the complete line can be placed on the wall") + ')</i>';
-        }
-        dojo.place(`<div id="last-round">${message}</div>`, 'page-title');
-    }
-
-    notif_removeLastRound() {
-        if (document.getElementById('last-round')) {
-            dojo.destroy('last-round');
-        }
+        dojo.place(`<div id="last-round">${_("This is the last round of the game!")}</div>`, 'page-title');
     }
 
     /* This enable to inject translatable styled things to logs or action bar */

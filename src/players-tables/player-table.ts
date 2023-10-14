@@ -34,10 +34,8 @@ class PlayerTable {
                 html += `<div id="player-table-${this.playerId}-wall-spot-${line}-${column}" class="wall-spot" style="left: ${69*(column-1) - 1}px; top: ${70*(line-1) - 1}px;"></div>`;
             }
         }
-        html += `</div>`;
-        if (this.game.isVariant()) {
-            html += `<div id="player-table-${this.playerId}-column0" class="floor wall-spot"></div>`;
-        }
+        html += `</div>
+        <div id="player-table-${this.playerId}-column0" class="floor wall-spot"></div>`;
         
         html += `
             <div class="score-magnified row">2</div>
@@ -54,18 +52,17 @@ class PlayerTable {
         this.placeTilesOnHand(player.hand);
 
         for (let i=0; i<=5; i++) {
-            document.getElementById(`player-table-${this.playerId}-line${i}`).addEventListener('click', () => this.game.selectLine(i));
+            document.getElementById(`player-table-${this.playerId}-line${i}`).addEventListener('click', () => this.game.playTile(i));
         }
-        if (this.game.isVariant()) {
-            for (let line=1; line<=5; line++) {
-                for (let column=1; column<=5; column++) {
-                    document.getElementById(`player-table-${this.playerId}-wall-spot-${line}-${column}`).addEventListener('click', () => {
-                        this.game.selectColumn(line, column);
-                    });
-                }
+
+        for (let line=1; line<=5; line++) {
+            for (let column=1; column<=5; column++) {
+                document.getElementById(`player-table-${this.playerId}-wall-spot-${line}-${column}`).addEventListener('click', () => {
+                    this.game.selectPlace(line, column);
+                });
             }
-            document.getElementById(`player-table-${this.playerId}-column0`).addEventListener('click', () => this.game.selectColumn(0, 0));
         }
+        document.getElementById(`player-table-${this.playerId}-column0`).addEventListener('click', () => this.game.selectPlace(0, 0));
 
         for (let i=-1; i<=5; i++) {
             const tiles = player.lines.filter(tile => tile.line === i);
@@ -73,14 +70,6 @@ class PlayerTable {
         }
 
         this.placeTilesOnWall(player.wall);
-
-        
-        if (this.game.isVariant()) {
-            // if player hit refresh when column is selected but not yet applied, we reset ghost tile
-            if (this.playerId === this.game.getPlayerId()) {
-                player.selectedColumns.forEach(selectedColumn => this.setGhostTile(selectedColumn.line, selectedColumn.column, selectedColumn.color));
-            }
-        }
     }
 
     public placeTilesOnHand(tiles: Tile[]) {
@@ -98,16 +87,6 @@ class PlayerTable {
 
     public placeTilesOnWall(tiles: Tile[]) {
         tiles.forEach(tile => this.game.placeTile(tile, `player-table-${this.playerId}-wall-spot-${tile.line}-${tile.column}`));
-    }
-
-    public setGhostTile(line: number, column: number, color: number) {
-        const spotId = `player-table-${this.playerId}-wall-spot-${line}-${column}`;
-        const ghostTileId = `${spotId}-ghost-tile`;
-        const existingGhostTile = document.getElementById(ghostTileId);
-        existingGhostTile?.parentElement.removeChild(existingGhostTile);
-        if (column > 0) {
-            dojo.place(`<div id="${ghostTileId}" class="tile tile${color} ghost"></div>`, spotId);
-        }
     }
     
     public setFont(prefValue: number): void {

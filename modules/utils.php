@@ -93,20 +93,6 @@ trait UtilTrait {
         self::DbQuery("UPDATE player SET player_score_aux = player_score_aux + $incScoreAux WHERE player_id = $playerId");
     }
 
-    function getSelectedColumns(int $playerId) {
-        $json_obj = self::getUniqueValueFromDB("SELECT `selected_columns` FROM `player` where `player_id` = $playerId");
-        $object = json_decode($json_obj, true);
-        return $object ?? [];
-    }
-
-    function setSelectedColumn(int $playerId, int $line, int $column) {
-        $object = $this->getSelectedColumns($playerId);
-        $object[$line] = $column;
-        
-        $jsonObj = json_encode($object);        
-        self::DbQuery("UPDATE player SET selected_columns = '$jsonObj' WHERE player_id = $playerId");
-    }
-
     function getTileFromDb($dbTile) {
         if (!$dbTile || !array_key_exists('id', $dbTile)) {
             throw new Error('tile doesn\'t exists '.json_encode($dbTile));
@@ -331,18 +317,7 @@ trait UtilTrait {
             if (count($playerTiles) == $line) {
                 
                 $wallTile = $playerTiles[0];
-                $column = null;
-                if ($this->isVariant()) {
-                    $selectedColumns = $this->getSelectedColumns($playerId);
-                    if (!array_key_exists($line, $selectedColumns)) {
-                        // happens when a player left the game with a complete row
-                        $column = 0;
-                    } else {
-                        $column = $selectedColumns[$line];
-                    }
-                } else {
-                    $column = $this->getColumnForTile($line, $wallTile->type);
-                }
+                $column = $this->getColumnForTile($line, $wallTile->type);
 
                 if ($column == 0) {
                     // variant : we place tiles on floor line, count will be done after
@@ -555,41 +530,5 @@ trait UtilTrait {
                 ]);
             }
         }
-    }
-
-    function getAvailableColumnForColor(int $playerId, int $color, int $line) {
-        $wall = $this->getTilesFromDb($this->tiles->getCardsInLocation('wall'.$playerId));
-
-        $ghostTiles = $this->getSelectedColumnsArray($playerId);
-        $wallAndGhost = array_merge($wall, $ghostTiles);
-
-        $availableColumns = [];
-        for ($column = 1; $column <= 5; $column++) {
-
-            $tilesSameColorSameColumnOrSamePosition = array_values(array_filter(
-                $wallAndGhost, fn($tile) => $tile->column == $column && ($tile->type == $color || $tile->line == $line))
-            );
-
-            if (count($tilesSameColorSameColumnOrSamePosition) == 0) {
-                $availableColumns[] = $column;
-            }
-        }
-
-        return count($availableColumns) > 0 ? $availableColumns : [0];
-    }
-
-    function lineWillBeComplete(int $playerId, int $line) {
-        if (count($this->getTilesFromLine($playerId, $line)) == $line) {
-            // construction line is complete
-            
-            $playerWallTiles = $this->getTilesFromDb($this->tiles->getCardsInLocation('wall'.$playerId));
-            $playerWallTileLineCount = count(array_values(array_filter($playerWallTiles, fn($tile) => $tile->line == $line)));
-            
-            // wall has only on spot left
-            if ($playerWallTileLineCount >= 4) {
-                return true;
-            }
-        }
-        return false;
     }
 }

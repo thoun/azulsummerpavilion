@@ -93,12 +93,6 @@
         &.variant {            
             background: url('img/playerboard-variant.jpg');
         }
-        &:not(.variant) {
-            .wall {
-                background: #ffffffb0;
-                box-shadow: 0 0 10px 5px #ffffffb0;
-            }
-        }
 
         .line {
             display: inline-block;

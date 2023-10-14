@@ -61,13 +61,25 @@
       self::ajaxResponse();
     }
 
-    public function selectLine() {
+    public function selectPlace() {
+      self::setAjaxMode();
+
+      // Retrieve arguments
+      $line = self::getArg("line", AT_posint, true);
+      $column = self::getArg("column", AT_posint, true);
+
+      $this->game->selectPlace($line, $column);
+
+      self::ajaxResponse();
+    }
+
+    public function playTile() {
       self::setAjaxMode();
 
       // Retrieve arguments
       $line = self::getArg("line", AT_posint, true);
 
-      $this->game->selectLine($line);
+      $this->game->playTile($line);
 
       self::ajaxResponse();
     }
@@ -80,10 +92,10 @@
       self::ajaxResponse();
     }
 
-    public function undoSelectLine() {
+    public function undoPlayTile() {
       self::setAjaxMode();
 
-      $this->game->undoSelectLine();
+      $this->game->undoPlayTile();
 
       self::ajaxResponse();
     }

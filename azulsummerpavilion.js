@@ -24,6 +24,32 @@ var __extends = (this && this.__extends) || (function () {
     };
 })();
 /**
+ * Just use playSequence from animationManager
+ *
+ * @param animationManager the animation manager
+ * @param animation a `BgaAnimation` object
+ * @returns a promise when animation ends
+ */
+function attachWithAnimation(animationManager, animation) {
+    var _a;
+    var settings = animation.settings;
+    var element = settings.animation.settings.element;
+    var fromRect = element.getBoundingClientRect();
+    settings.animation.settings.fromRect = fromRect;
+    settings.attachElement.appendChild(element);
+    (_a = settings.afterAttach) === null || _a === void 0 ? void 0 : _a.call(settings, element, settings.attachElement);
+    return animationManager.play(settings.animation);
+}
+var BgaAttachWithAnimation = /** @class */ (function (_super) {
+    __extends(BgaAttachWithAnimation, _super);
+    function BgaAttachWithAnimation(settings) {
+        var _this = _super.call(this, attachWithAnimation, settings) || this;
+        _this.playWhenNoAnimation = true;
+        return _this;
+    }
+    return BgaAttachWithAnimation;
+}(BgaAnimation));
+/**
  * Linear slide of the element from origin to destination.
  *
  * @param animationManager the animation manager
@@ -1011,38 +1037,33 @@ var PlayerTable = /** @class */ (function () {
                 html += "<div id=\"player-table-".concat(this.playerId, "-wall-spot-").concat(line, "-").concat(column, "\" class=\"wall-spot\" style=\"left: ").concat(69 * (column - 1) - 1, "px; top: ").concat(70 * (line - 1) - 1, "px;\"></div>");
             }
         }
-        html += "</div>";
-        if (this.game.isVariant()) {
-            html += "<div id=\"player-table-".concat(this.playerId, "-column0\" class=\"floor wall-spot\"></div>");
-        }
+        html += "</div>\n        <div id=\"player-table-".concat(this.playerId, "-column0\" class=\"floor wall-spot\"></div>");
         html += "\n            <div class=\"score-magnified row\">2</div>\n            <div class=\"score-magnified column\">7</div>\n            <div class=\"score-magnified color\">10</div>\n        ";
         html += "   \n            </div>\n        </div>";
         dojo.place(html, 'centered-table');
         this.placeTilesOnHand(player.hand);
         var _loop_5 = function (i) {
-            document.getElementById("player-table-".concat(this_3.playerId, "-line").concat(i)).addEventListener('click', function () { return _this.game.selectLine(i); });
+            document.getElementById("player-table-".concat(this_3.playerId, "-line").concat(i)).addEventListener('click', function () { return _this.game.playTile(i); });
         };
         var this_3 = this;
         for (var i = 0; i <= 5; i++) {
             _loop_5(i);
         }
-        if (this.game.isVariant()) {
-            var _loop_6 = function (line) {
-                var _loop_8 = function (column) {
-                    document.getElementById("player-table-".concat(this_4.playerId, "-wall-spot-").concat(line, "-").concat(column)).addEventListener('click', function () {
-                        _this.game.selectColumn(line, column);
-                    });
-                };
-                for (var column = 1; column <= 5; column++) {
-                    _loop_8(column);
-                }
+        var _loop_6 = function (line) {
+            var _loop_8 = function (column) {
+                document.getElementById("player-table-".concat(this_4.playerId, "-wall-spot-").concat(line, "-").concat(column)).addEventListener('click', function () {
+                    _this.game.selectPlace(line, column);
+                });
             };
-            var this_4 = this;
-            for (var line = 1; line <= 5; line++) {
-                _loop_6(line);
+            for (var column = 1; column <= 5; column++) {
+                _loop_8(column);
             }
-            document.getElementById("player-table-".concat(this.playerId, "-column0")).addEventListener('click', function () { return _this.game.selectColumn(0, 0); });
+        };
+        var this_4 = this;
+        for (var line = 1; line <= 5; line++) {
+            _loop_6(line);
         }
+        document.getElementById("player-table-".concat(this.playerId, "-column0")).addEventListener('click', function () { return _this.game.selectPlace(0, 0); });
         var _loop_7 = function (i) {
             var tiles = player.lines.filter(function (tile) { return tile.line === i; });
             this_5.placeTilesOnLine(tiles, i);
@@ -1052,12 +1073,6 @@ var PlayerTable = /** @class */ (function () {
             _loop_7(i);
         }
         this.placeTilesOnWall(player.wall);
-        if (this.game.isVariant()) {
-            // if player hit refresh when column is selected but not yet applied, we reset ghost tile
-            if (this.playerId === this.game.getPlayerId()) {
-                player.selectedColumns.forEach(function (selectedColumn) { return _this.setGhostTile(selectedColumn.line, selectedColumn.column, selectedColumn.color); });
-            }
-        }
     }
     PlayerTable.prototype.placeTilesOnHand = function (tiles) {
         var _this = this;
@@ -1075,15 +1090,6 @@ var PlayerTable = /** @class */ (function () {
     PlayerTable.prototype.placeTilesOnWall = function (tiles) {
         var _this = this;
         tiles.forEach(function (tile) { return _this.game.placeTile(tile, "player-table-".concat(_this.playerId, "-wall-spot-").concat(tile.line, "-").concat(tile.column)); });
-    };
-    PlayerTable.prototype.setGhostTile = function (line, column, color) {
-        var spotId = "player-table-".concat(this.playerId, "-wall-spot-").concat(line, "-").concat(column);
-        var ghostTileId = "".concat(spotId, "-ghost-tile");
-        var existingGhostTile = document.getElementById(ghostTileId);
-        existingGhostTile === null || existingGhostTile === void 0 ? void 0 : existingGhostTile.parentElement.removeChild(existingGhostTile);
-        if (column > 0) {
-            dojo.place("<div id=\"".concat(ghostTileId, "\" class=\"tile tile").concat(color, " ghost\"></div>"), spotId);
-        }
     };
     PlayerTable.prototype.setFont = function (prefValue) {
         var defaultFont = prefValue === 1;
@@ -1172,11 +1178,11 @@ var AzulSummerPavilion = /** @class */ (function () {
             case 'chooseTile':
                 this.onEnteringChooseTile();
                 break;
-            case 'chooseLine':
-                this.onEnteringChooseLine(args.args);
+            case 'choosePlace':
+                this.onEnteringChoosePlace(args.args);
                 break;
-            case 'privateChooseColumns':
-                this.onEnteringChooseColumnsForPlayer(this.getPlayerId(), args.args, true);
+            case 'playTile':
+                this.onEnteringPlayTile(args.args);
                 break;
             case 'gameEnd':
                 var lastTurnBar = document.getElementById('last-round');
@@ -1191,38 +1197,32 @@ var AzulSummerPavilion = /** @class */ (function () {
             dojo.addClass('factories', 'selectable');
         }
     };
-    AzulSummerPavilion.prototype.onEnteringChooseLine = function (args) {
-        var _this = this;
+    AzulSummerPavilion.prototype.onEnteringChoosePlace = function (args) {
         if (this.isCurrentPlayerActive()) {
-            args.lines.forEach(function (i) { return dojo.addClass("player-table-".concat(_this.getPlayerId(), "-line").concat(i), 'selectable'); });
-        }
-    };
-    AzulSummerPavilion.prototype.onEnteringChooseColumnsForPlayer = function (playerId, infos, privateMulti) {
-        var _this = this;
-        var table = this.getPlayerTable(playerId);
-        infos.selectedColumns.forEach(function (selectedColumn) { return table.setGhostTile(selectedColumn.line, selectedColumn.column, selectedColumn.color); });
-        if (this.isCurrentPlayerActive()) {
-            var nextColumnToSelect_1 = infos.nextColumnToSelect;
-            if (nextColumnToSelect_1) {
-                nextColumnToSelect_1.availableColumns.forEach(function (column) {
-                    return dojo.addClass(
-                    /*column == 0 ? `player-table-${playerId}-column0` :*/ "player-table-".concat(playerId, "-wall-spot-").concat(nextColumnToSelect_1.line, "-").concat(column), 'selectable');
-                });
-            }
-            if (!privateMulti) {
-                if (!document.getElementById('confirmColumns_button')) {
-                    this.addActionButton('confirmColumns_button', _("Confirm chosen column(s)"), function () { return _this.confirmColumns(); });
-                    this.addActionButton('undoColumns_button', _("Undo column selection"), function () { return _this.undoColumns(); }, null, null, 'gray');
+            var playerId = this.getPlayerId();
+            var _loop_9 = function (x) {
+                var _loop_10 = function (y) {
+                    document.getElementById("player-table-".concat(playerId, "-wall-spot-").concat(x, "-").concat(y)).classList.toggle('selectable', !args.placedTiles.some(function (tile) { return tile.line == x && tile.column == y; }));
+                };
+                for (var y = 1; y <= 5; y++) {
+                    _loop_10(y);
                 }
-                dojo.toggleClass('confirmColumns_button', 'disabled', !!nextColumnToSelect_1);
+            };
+            for (var x = 1; x <= 5; x++) {
+                _loop_9(x);
             }
         }
     };
-    AzulSummerPavilion.prototype.onEnteringChooseColumns = function (args) {
-        var playerId = this.getPlayerId();
-        var infos = args.players[playerId];
-        if (infos) {
-            this.onEnteringChooseColumnsForPlayer(playerId, infos, false);
+    AzulSummerPavilion.prototype.onEnteringPlayTile = function (args) {
+        var _this = this;
+        if (this.isCurrentPlayerActive()) {
+            var playerId = this.getPlayerId();
+            for (var x = 1; x <= 5; x++) {
+                for (var y = 1; y <= 5; y++) {
+                    document.getElementById("player-table-".concat(playerId, "-wall-spot-").concat(x, "-").concat(y)).classList.toggle('selectable', args.selectedPlace[0] == x && args.selectedPlace[1] == y);
+                }
+            }
+            args.lines.forEach(function (i) { return dojo.addClass("player-table-".concat(_this.getPlayerId(), "-line").concat(i), 'selectable'); });
         }
     };
     // onLeavingState: this method is called each time we are leaving a game state.
@@ -1234,27 +1234,34 @@ var AzulSummerPavilion = /** @class */ (function () {
             case 'chooseTile':
                 this.onLeavingChooseTile();
                 break;
-            case 'chooseLine':
-                this.onLeavingChooseLine();
+            case 'choosePlace':
+                this.onLeavingChoosePlace();
                 break;
-            case 'chooseColumns':
-                this.onLeavingChooseColumns();
+            case 'playTile':
+                this.onLeavingPlayTile();
                 break;
         }
     };
     AzulSummerPavilion.prototype.onLeavingChooseTile = function () {
         dojo.removeClass('factories', 'selectable');
     };
-    AzulSummerPavilion.prototype.onLeavingChooseLine = function () {
+    AzulSummerPavilion.prototype.onLeavingChoosePlace = function () {
+        var _a;
+        var playerId = this.getPlayerId();
+        for (var x = 1; x <= 5; x++) {
+            for (var y = 1; y <= 5; y++) {
+                (_a = document.getElementById("player-table-".concat(playerId, "-wall-spot-").concat(x, "-").concat(y))) === null || _a === void 0 ? void 0 : _a.classList.remove('selectable');
+            }
+        }
+    };
+    AzulSummerPavilion.prototype.onLeavingPlayTile = function () {
+        this.onLeavingChoosePlace();
         if (!this.gamedatas.players[this.getPlayerId()]) {
             return;
         }
         for (var i = 0; i <= 5; i++) {
             dojo.removeClass("player-table-".concat(this.getPlayerId(), "-line").concat(i), 'selectable');
         }
-    };
-    AzulSummerPavilion.prototype.onLeavingChooseColumns = function () {
-        Array.from(document.getElementsByClassName('ghost')).forEach(function (elem) { return elem.parentElement.removeChild(elem); });
     };
     // onUpdateActionButtons: in this method you can manage "action buttons" that are displayed in the
     //                        action status bar (ie: the HTML links in the status bar).
@@ -1271,22 +1278,10 @@ var AzulSummerPavilion = /** @class */ (function () {
                     break;
                 case 'confirmPlay':
                     this.addActionButton('confirmLine_button', _("Confirm"), function () { return _this.confirmPlay(); });
-                    this.addActionButton('undoSelectLine_button', _("Undo line selection"), function () { return _this.undoSelectLine(); }, null, null, 'gray');
+                    this.addActionButton('undoPlayTile_button', _("Undo line selection"), function () { return _this.undoPlayTile(); }, null, null, 'gray');
                     this.startActionTimer('confirmLine_button', 5);
                     break;
-                case 'privateChooseColumns':
-                case 'privateConfirmColumns':
-                    var privateChooseColumnArgs = args;
-                    this.addActionButton('confirmColumns_button', _("Confirm chosen column(s)"), function () { return _this.confirmColumns(); });
-                    this.addActionButton('undoColumns_button', _("Undo column selection"), function () { return _this.undoColumns(); }, null, null, 'gray');
-                    dojo.toggleClass('confirmColumns_button', 'disabled', !!privateChooseColumnArgs.nextColumnToSelect && stateName != 'privateConfirmColumns');
-                    break;
             }
-        }
-        switch (stateName) {
-            case 'chooseColumns': // for multiplayer states we have to do it here
-                this.onEnteringChooseColumns(args);
-                break;
         }
     };
     ///////////////////////////////////////////////////
@@ -1523,11 +1518,11 @@ var AzulSummerPavilion = /** @class */ (function () {
             factory: factory
         });
     };
-    AzulSummerPavilion.prototype.selectLine = function (line) {
-        if (!this.checkAction('selectLine')) {
+    AzulSummerPavilion.prototype.playTile = function (line) {
+        if (!this.checkAction('playTile')) {
             return;
         }
-        this.takeAction('selectLine', {
+        this.takeAction('playTile', {
             line: line
         });
     };
@@ -1537,17 +1532,17 @@ var AzulSummerPavilion = /** @class */ (function () {
         }
         this.takeAction('confirmPlay');
     };
-    AzulSummerPavilion.prototype.undoSelectLine = function () {
-        if (!this.checkAction('undoSelectLine')) {
+    AzulSummerPavilion.prototype.undoPlayTile = function () {
+        if (!this.checkAction('undoPlayTile')) {
             return;
         }
-        this.takeAction('undoSelectLine');
+        this.takeAction('undoPlayTile');
     };
-    AzulSummerPavilion.prototype.selectColumn = function (line, column) {
-        if (!this.checkAction('selectColumn')) {
+    AzulSummerPavilion.prototype.selectPlace = function (line, column) {
+        if (!this.checkAction('selectPlace')) {
             return;
         }
-        this.takeAction('selectColumn', {
+        this.takeAction('selectPlace', {
             line: line,
             column: column
         });
@@ -1608,14 +1603,12 @@ var AzulSummerPavilion = /** @class */ (function () {
             ['tilesSelected', ANIMATION_MS],
             ['undoTakeTiles', ANIMATION_MS],
             ['tilesPlacedOnLine', ANIMATION_MS],
-            ['undoSelectLine', ANIMATION_MS],
+            ['undoPlayTile', ANIMATION_MS],
             ['placeTileOnWall', this.gamedatas.fastScoring ? SCORE_MS : SLOW_SCORE_MS],
             ['emptyFloorLine', this.gamedatas.fastScoring ? SCORE_MS : SLOW_SCORE_MS],
             ['endScore', this.gamedatas.fastScoring ? SCORE_MS : SLOW_SCORE_MS],
             ['firstPlayerToken', 1],
             ['lastRound', 1],
-            ['removeLastRound', 1],
-            ['updateSelectColumn', 1],
         ];
         notifs.forEach(function (notif) {
             dojo.subscribe(notif[0], _this, "notif_".concat(notif[0]));
@@ -1650,7 +1643,7 @@ var AzulSummerPavilion = /** @class */ (function () {
         this.getPlayerTable(notif.args.playerId).placeTilesOnLine(notif.args.discardedTiles, 0);
         this.getPlayerTable(notif.args.playerId).placeTilesOnLine(notif.args.placedTiles, notif.args.line);
     };
-    AzulSummerPavilion.prototype.notif_undoSelectLine = function (notif) {
+    AzulSummerPavilion.prototype.notif_undoPlayTile = function (notif) {
         var table = this.getPlayerTable(notif.args.playerId);
         table.placeTilesOnHand(notif.args.undo.tiles);
         if (document.getElementById('last-round') && !notif.args.undo.lastRoundBefore) {
@@ -1691,32 +1684,11 @@ var AzulSummerPavilion = /** @class */ (function () {
     AzulSummerPavilion.prototype.notif_firstPlayerToken = function (notif) {
         this.placeFirstPlayerToken(notif.args.playerId);
     };
-    AzulSummerPavilion.prototype.notif_updateSelectColumn = function (notif) {
-        if (notif.args.undo) {
-            this.removeColumnSelection();
-            this.onLeavingChooseColumns();
-        }
-        if (this.gamedatas.gamestate.name === 'chooseColumns') {
-            // when a player is deactivated, updateActionButton calling onEnteringChooseColumns is called with old args.
-            // so we set args up-to-date to avoid conflict between current situation and old args
-            this.gamedatas.gamestate.args.players[notif.args.playerId] = notif.args.arg;
-        }
-        this.onEnteringChooseColumnsForPlayer(notif.args.playerId, notif.args.arg, this.gamedatas.gamestate.name !== 'chooseColumns');
-    };
     AzulSummerPavilion.prototype.notif_lastRound = function () {
         if (document.getElementById('last-round')) {
             return;
         }
-        var message = _("This is the last round of the game!");
-        if (this.isVariant()) {
-            message += ' <i>(' + _("if the complete line can be placed on the wall") + ')</i>';
-        }
-        dojo.place("<div id=\"last-round\">".concat(message, "</div>"), 'page-title');
-    };
-    AzulSummerPavilion.prototype.notif_removeLastRound = function () {
-        if (document.getElementById('last-round')) {
-            dojo.destroy('last-round');
-        }
+        dojo.place("<div id=\"last-round\">".concat(_("This is the last round of the game!"), "</div>"), 'page-title');
     };
     /* This enable to inject translatable styled things to logs or action bar */
     /* @Override */

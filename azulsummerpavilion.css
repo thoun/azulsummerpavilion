@@ -254,10 +254,6 @@
 .player-table-wrapper .player-table.variant {
   background: url("img/playerboard-variant.jpg");
 }
-.player-table-wrapper .player-table:not(.variant) .wall {
-  background: rgba(255, 255, 255, 0.6901960784);
-  box-shadow: 0 0 10px 5px rgba(255, 255, 255, 0.6901960784);
-}
 .player-table-wrapper .player-table .line {
   display: inline-block;
   position: absolute;

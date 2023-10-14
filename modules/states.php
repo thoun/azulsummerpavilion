@@ -25,9 +25,7 @@ trait StateTrait {
             $factories[$factory] = $this->getTilesFromDb($this->tiles->pickCardsForLocation(4, 'deck', 'factory', $factory));
         }
 
-        if ($this->isVariant()) {
-            self::DbQuery("UPDATE player SET selected_columns = '{}'");
-        }
+        self::DbQuery("UPDATE player SET passed = false");
 
         self::notifyAllPlayers("factoriesFilled", clienttranslate("A new round begins !"), [
             'factories' => $factories,
@@ -36,6 +34,8 @@ trait StateTrait {
 
         self::incStat(1, 'roundsNumber');
         self::incStat(1, 'firstPlayer', intval(self::getGameStateValue(FIRST_PLAYER_FOR_NEXT_TURN)));
+
+        // TODO place stored tiles in hand
 
         $this->gamestate->nextState('next');
     }
@@ -86,83 +86,7 @@ trait StateTrait {
 
 
     function stEndRound() {
-        if ($this->isVariant()) {
-            $this->gamestate->nextState('chooseColumns');
-        } else {
-            $this->gamestate->nextState('placeTiles');
-        }
-    }
-
-    function stChooseColumns() {
-        $playersIds = $this->getPlayersIds();
-
-        $playersIdsWithCompleteLines = [];
-
-        foreach ($playersIds as $playerId) {
-            $selectedColumns = $this->getSelectedColumns($playerId);
-
-            $canAutoSelect = true;
-
-            for ($line = 1; $line <= 5; $line++) {
-                if (!array_key_exists($line, $selectedColumns)) {
-                    $playerTiles = $this->getTilesFromLine($playerId, $line);
-                    if (count($playerTiles) == $line) {
-                        $availableColumns = $this->getAvailableColumnForColor($playerId, $playerTiles[0]->type, $line);
-
-                        if (count($availableColumns) > 1) {                        
-                            if (!array_key_exists($playerId, $playersIdsWithCompleteLines)) {                   
-                                $playersIdsWithCompleteLines[] = $playerId;
-                                $canAutoSelect = false;
-                            }
-                        } else if ($canAutoSelect) {
-                            // if only one possibility, it's automaticaly selected
-                            $this->setSelectedColumn($playerId, $line, $availableColumns[0]);
-                        }
-                    }
-                }
-            }
-        }
-
-        if (count($playersIdsWithCompleteLines) > 0) {
-            $this->gamestate->setPlayersMultiactive($playersIdsWithCompleteLines, 'confirmColumns');
-        } else {
-            $this->gamestate->nextState('confirmColumns');
-        }
-    }
-
-    function stMultiChooseColumns() {
-        $this->gamestate->setAllPlayersMultiactive();
-        $this->gamestate->initializePrivateStateForAllActivePlayers(); 
-    }
-
-    function stPrivateChooseColumns(int $playerId) {
-        $selectedColumns = $this->getSelectedColumns($playerId);
-        $disablePlayer = true;
-        
-        for ($line = 1; $line <= 5; $line++) {
-            if (!array_key_exists($line, $selectedColumns)) {
-                $playerTiles = $this->getTilesFromLine($playerId, $line);
-                if (count($playerTiles) == $line) {
-                    $availableColumns = $this->getAvailableColumnForColor($playerId, $playerTiles[0]->type, $line);
-
-                    if (count($availableColumns) > 1) {
-                        $disablePlayer = false;
-                    } else {
-                        // if only one possibility, it's automaticaly selected
-                        $this->setSelectedColumn($playerId, $line, $availableColumns[0]);
-
-                        if ($line < 5) {
-                            $this->gamestate->nextPrivateState($playerId, 'next');
-                            return;
-                        }
-                    }
-                }
-            }
-        }
-
-        if ($disablePlayer) {
-            $this->gamestate->setPlayerNonMultiactive($playerId, 'confirmColumns');
-        }
+        $this->gamestate->nextState('placeTiles');
     }
 
     function stPlaceTiles() {

@@ -163,16 +163,6 @@ class AzulSummerPavilion extends Table {
             $player['wall'] = $this->getTilesFromDb($this->tiles->getCardsInLocation('wall'.$playerId));
             $player['playerNo'] = intval($player['playerNo']);
             $player['hand'] = $this->getTilesFromDb($this->tiles->getCardsInLocation('hand', $playerId));
-
-            for ($line=1; $line<=5; $line++) {
-                if ($this->lineWillBeComplete($playerId, $line)) {
-                    $endRound = true;
-                }
-            }
-
-            if ($isVariant) {
-                $player['selectedColumns'] = $this->getSelectedColumnsArray($playerId);
-            }
         }
 
         $result['endRound'] = $endRound;
@@ -240,8 +230,11 @@ class AzulSummerPavilion extends Table {
                     case 'confirmAcquire':
                         $this->confirmAcquire(true);
                         break;
-                    case 'chooseLine':
-                        $this->selectLine(0, true);
+                    case 'choosePlace':
+                        $this->selectPlace(0, 0);
+                        break;
+                    case 'playTile':
+                        $this->playTile(0, true);
                         break;
                     case 'confirmPlay':
                         $this->confirmPlay(true);
@@ -284,16 +277,10 @@ class AzulSummerPavilion extends Table {
             // For example, if the game was running with a release of your game named "140430-1345",
             // $from_version is equal to 1404301345
             
-            if ($from_version <= 2109161337) {
-                // ! important ! Use DBPREFIX_<table_name> for all tables    
-                $sql = "CREATE TABLE IF NOT EXISTS DBPREFIX_global_variables(`name` varchar(50) NOT NULL, `value` json, PRIMARY KEY (`name`)) ENGINE=InnoDB DEFAULT CHARSET=utf8";
-                self::applyDbUpgradeToAllDB($sql);
-            }
-
-            if ($from_version <= 2109241936) {
+            /*if ($from_version <= 2109241936) {
                 // ! important ! Use <table_name> for all tables    
                 $sql = "ALTER TABLE DBPREFIX_player ADD `selected_columns` json";
                 self::applyDbUpgradeToAllDB($sql);
-            }
+            }*/
         }    
 }

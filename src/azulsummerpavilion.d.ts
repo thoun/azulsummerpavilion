@@ -50,15 +50,20 @@ interface AzulSummerPavilionGame extends Game {
     isVariant(): boolean;
     takeTiles(id: number): void;
     selectFactory(factoryIndex: number): any;
-    selectLine(line: number): void;
-    selectColumn(line: number, column: number): void;
+    playTile(line: number): void;
+    selectPlace(line: number, column: number): void;
     removeTile(tile: Tile): void;
     removeTiles(tiles: Tile[]): void;
     placeTile(tile: Tile, destinationId: string, left?: number, top?: number, rotation?: number): Promise<boolean>;
 }
 
-interface EnteringChooseLineArgs {
+interface EnteringChoosePlaceArgs {
+    placedTiles: Tile[];
+}
+
+interface EnteringPlayTileArgs {
     lines: number[];
+    selectedPlace: number[];
 }
 
 interface NextColumnToSelect {
@@ -72,22 +77,6 @@ interface SelectedColumn {
     color: number;
     line: number;
 
-}
-
-interface ChooseColumnsForPlayer {
-    nextColumnToSelect?: NextColumnToSelect;
-    selectedColumns: SelectedColumn[];
-}
-
-
-interface EnteringChooseColumnsArgs {
-    players: { [playerId: number]: ChooseColumnsForPlayer };
-}
-
-interface NotifUpdateSelectColumnArgs {
-    playerId: number;
-    arg: ChooseColumnsForPlayer;
-    undo: boolean;
 }
 
 interface NotifFirstPlayerTokenArgs {

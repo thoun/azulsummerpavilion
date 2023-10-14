@@ -68,7 +68,7 @@ $basicGameStates = [
         "action" => "stNextPlayerAcquire",
         "transitions" => [
             "nextPlayer" => ST_PLAYER_CHOOSE_TILE, 
-            "endAcquire" => ST_PLAYER_PLAY_TILE,
+            "endAcquire" => ST_PLAYER_CHOOSE_PLACE,
         ],
     ],
 
@@ -136,14 +136,29 @@ $playerActionsGameStates = [
         ],
     ],
 
+    ST_PLAYER_CHOOSE_PLACE => [
+        "name" => "choosePlace",
+        "description" => clienttranslate('${actplayer} must choose a space to place a tile'),
+        "descriptionmyturn" => clienttranslate('${you} must choose a space to place a tile'),
+        "type" => "activeplayer",
+        "args" => "argChoosePlace",
+        "possibleactions" => [ 
+            "selectPlace",
+            "pass",
+         ],
+        "transitions" => [
+            "next" => ST_PLAYER_PLAY_TILE,
+        ],
+    ],
+
     ST_PLAYER_PLAY_TILE => [
-        "name" => "chooseLine",
+        "name" => "playTile",
         "description" => clienttranslate('${actplayer} must choose a line to place ${number} ${color}'),
         "descriptionmyturn" => clienttranslate('${you} must choose a line to place ${number} ${color}'),
         "type" => "activeplayer",
-        "args" => "argChooseLine",
+        "args" => "argPlayTile",
         "possibleactions" => [ 
-            "selectLine",
+            "playTile",
             "undoTakeTiles",
          ],
         "transitions" => [
@@ -155,12 +170,12 @@ $playerActionsGameStates = [
 
     ST_PLAYER_CONFIRM_PLAY => [
         "name" => "confirmPlay",
-        "description" => clienttranslate('${actplayer} must confirm line choice'),
-        "descriptionmyturn" => clienttranslate('${you} must confirm line choice'),
+        "description" => clienttranslate('${actplayer} must confirm played tile'),
+        "descriptionmyturn" => clienttranslate('${you} must confirm played tile'),
         "type" => "activeplayer",
         "possibleactions" => [ 
             "confirmPlay",
-            "undoSelectLine",
+            "undoPlayTile",
          ],
         "transitions" => [
             "nextPlayer" => ST_NEXT_PLAYER_PLAY,
