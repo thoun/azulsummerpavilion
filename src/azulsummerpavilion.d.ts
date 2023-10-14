@@ -66,8 +66,11 @@ interface EnteringChoosePlaceArgs {
 }
 
 interface EnteringPlayTileArgs {
-    lines: number[];
     selectedPlace: number[];
+    number: number;
+    color: number;
+    wildColor: number;
+    maxWildTiles: number;
 }
 
 interface NextColumnToSelect {

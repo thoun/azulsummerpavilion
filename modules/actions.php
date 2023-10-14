@@ -164,9 +164,15 @@ trait ActionTrait {
         $this->setGlobalVariable(SELECTED_PLACE, [$line, $column]);
 
         $this->gamestate->nextState('next');
+
+        // if only one option (no use of wilds), auto-play it
+        $args = $this->argPlayTile();
+        if ($args['maxWildTiles'] === 0) {
+            $this->playTile(0, true);
+        }
     }
 
-    function playTile(int $line, $skipActionCheck = false) {
+    function playTile(int $wilds, $skipActionCheck = false) {
         if (!$skipActionCheck) {
             $this->checkAction('playTile');
         }
@@ -177,8 +183,24 @@ trait ActionTrait {
             throw new BgaUserException('Line not available');
         }*/
 
-        $tiles = $this->getTilesFromDb($this->tiles->getCardsInLocation('hand', $playerId));
-        $this->placeTilesOnLine($playerId, $tiles, $line, true);
+        $hand = $this->getTilesFromDb($this->tiles->getCardsInLocation('hand', $playerId));
+
+        $selectedPlace = $this->getGlobalVariable(SELECTED_PLACE);
+        $row = $selectedPlace[0];
+        $column = $selectedPlace[1];
+        $selectedColor = ($row + $this->indexForDefaultWall[$column] - 1) % 5 + 1; // TODO
+        $wildColor = $this->getWildColor();
+        $number = $row;
+
+        $colorTiles = array_values(array_filter($hand, fn($tile) => $tile->type == $selectedColor));
+        $wildTiles = array_values(array_filter($hand, fn($tile) => $tile->type == $wildColor));
+
+        $tiles = array_merge(
+            array_slice($colorTiles, 0, $number - $wilds),
+            array_slice($wildTiles, 0, $wilds),
+        );
+
+        $this->placeTilesOnLine($playerId, $tiles, $wilds, true);
 
         $this->setGlobalVariable(UNDO_PLACE, new Undo($tiles, null, null, false));
 

@@ -23,9 +23,6 @@ class PlayerTable {
             </div>
             `;
             
-        for (let i=1; i<=5; i++) {
-            html += `<div id="player-table-${this.playerId}-line${i}" class="line" style="top: ${10 + 70*(i-1)}px; width: ${69*i - 5}px;"></div>`;
-        }
         html += `<div id="player-table-${this.playerId}-line0" class="floor line"></div>`;
         html += `<div id="player-table-${this.playerId}-wall" class="wall">`;
 
@@ -50,10 +47,6 @@ class PlayerTable {
         dojo.place(html, 'centered-table');
 
         this.placeTilesOnHand(player.hand);
-
-        for (let i=0; i<=5; i++) {
-            document.getElementById(`player-table-${this.playerId}-line${i}`).addEventListener('click', () => this.game.playTile(i));
-        }
 
         for (let line=1; line<=5; line++) {
             for (let column=1; column<=5; column++) {
@@ -81,7 +74,7 @@ class PlayerTable {
         return Promise.all(tiles.map(tile => {
             const left = line == -1 ? 9 : (line > 0 ? (line - tile.column) * 69 : 5 + (tile.column-1) * 74);
             const top = line == -1 ? 9 : 0;
-            return this.game.placeTile(tile, `player-table-${this.playerId}-line${line}`, left, top);
+            return Promise.resolve(true); // this.game.placeTile(tile, `player-table-${this.playerId}-line${line}`, left, top); // TODO no lines anymore
         }));
     }
 

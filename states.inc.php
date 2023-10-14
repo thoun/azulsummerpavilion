@@ -78,7 +78,7 @@ $basicGameStates = [
         "type" => "game",
         "action" => "stNextPlayerPlay",
         "transitions" => [
-            "nextPlayer" => ST_PLAYER_CHOOSE_TILE, 
+            "nextPlayer" => ST_PLAYER_CHOOSE_PLACE, 
             "endRound" => ST_END_ROUND,
         ],
     ],
@@ -133,7 +133,7 @@ $playerActionsGameStates = [
          ],
         "transitions" => [
             "nextPlayer" => ST_NEXT_PLAYER_ACQUIRE,
-            "undo" => ST_PLAYER_PLAY_TILE,
+            "undo" => ST_PLAYER_CHOOSE_TILE,
         ],
     ],
 
@@ -154,8 +154,8 @@ $playerActionsGameStates = [
 
     ST_PLAYER_PLAY_TILE => [
         "name" => "playTile",
-        "description" => clienttranslate('${actplayer} must choose a line to place ${number} ${color}'),
-        "descriptionmyturn" => clienttranslate('${you} must choose a line to place ${number} ${color}'),
+        "description" => clienttranslate('${actplayer} must choose the number of wild tiles to use'),
+        "descriptionmyturn" => clienttranslate('${you} must choose the number of wild tiles to use'),
         "type" => "activeplayer",
         "args" => "argPlayTile",
         "possibleactions" => [ 

@@ -66,18 +66,24 @@ trait StateTrait {
     }
 
     function stNextPlayerPlay() {
-        $factoriesAllEmpty = $this->tiles->countCardInLocation('factory') == 0;
+        $allPassed = intval(self::getUniqueValueFromDB("SELECT count(*) FROM player WHERE passed = FALSE")) == 0;
         $playerId = self::getActivePlayerId();
 
         self::incStat(1, 'turnsNumber');
         self::incStat(1, 'turnsNumber', $playerId);
 
-        if ($factoriesAllEmpty) {
+        if ($allPassed) {
             $this->gamestate->nextState('endRound');
         } else {
             $this->activeNextPlayer();
         
             $playerId = self::getActivePlayerId();
+            while (boolval(self::getUniqueValueFromDB("SELECT passed FROM player WHERE player_id = $playerId"))) {
+                $this->activeNextPlayer();
+            
+                $playerId = self::getActivePlayerId();
+
+            }
             self::giveExtraTime($playerId);
 
             $this->gamestate->nextState('nextPlayer');

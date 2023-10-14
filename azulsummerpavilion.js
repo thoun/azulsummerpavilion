@@ -1040,9 +1040,6 @@ var PlayerTable = /** @class */ (function () {
         this.playerId = Number(player.id);
         var nameClass = player.name.indexOf(' ') !== -1 ? 'with-space' : 'without-space';
         var html = "<div id=\"player-table-wrapper-".concat(this.playerId, "\" class=\"player-table-wrapper\">\n        <div id=\"player-hand-").concat(this.playerId, "\" class=\"player-hand\">\n        </div>\n        <div id=\"player-table-").concat(this.playerId, "\" class=\"player-table ").concat(this.game.isVariant() ? 'variant' : '', "\" style=\"--player-color: #").concat(player.color, ";\">\n            <div class=\"player-name-wrapper shift\">\n                <div id=\"player-name-shift-").concat(this.playerId, "\" class=\"player-name color ").concat(game.isDefaultFont() ? 'standard' : 'azul', " ").concat(nameClass, "\">").concat(player.name, "</div>\n            </div>\n            <div class=\"player-name-wrapper\">\n                <div id=\"player-name-").concat(this.playerId, "\" class=\"player-name dark ").concat(game.isDefaultFont() ? 'standard' : 'azul', " ").concat(nameClass, "\">").concat(player.name, "</div>\n            </div>\n            ");
-        for (var i = 1; i <= 5; i++) {
-            html += "<div id=\"player-table-".concat(this.playerId, "-line").concat(i, "\" class=\"line\" style=\"top: ").concat(10 + 70 * (i - 1), "px; width: ").concat(69 * i - 5, "px;\"></div>");
-        }
         html += "<div id=\"player-table-".concat(this.playerId, "-line0\" class=\"floor line\"></div>");
         html += "<div id=\"player-table-".concat(this.playerId, "-wall\" class=\"wall\">");
         for (var line = 1; line <= 5; line++) {
@@ -1055,35 +1052,28 @@ var PlayerTable = /** @class */ (function () {
         html += "   \n            </div>\n        </div>";
         dojo.place(html, 'centered-table');
         this.placeTilesOnHand(player.hand);
-        var _loop_5 = function (i) {
-            document.getElementById("player-table-".concat(this_3.playerId, "-line").concat(i)).addEventListener('click', function () { return _this.game.playTile(i); });
-        };
-        var this_3 = this;
-        for (var i = 0; i <= 5; i++) {
-            _loop_5(i);
-        }
-        var _loop_6 = function (line) {
-            var _loop_8 = function (column) {
-                document.getElementById("player-table-".concat(this_4.playerId, "-wall-spot-").concat(line, "-").concat(column)).addEventListener('click', function () {
+        var _loop_5 = function (line) {
+            var _loop_7 = function (column) {
+                document.getElementById("player-table-".concat(this_3.playerId, "-wall-spot-").concat(line, "-").concat(column)).addEventListener('click', function () {
                     _this.game.selectPlace(line, column);
                 });
             };
             for (var column = 1; column <= 5; column++) {
-                _loop_8(column);
+                _loop_7(column);
             }
         };
-        var this_4 = this;
+        var this_3 = this;
         for (var line = 1; line <= 5; line++) {
-            _loop_6(line);
+            _loop_5(line);
         }
         document.getElementById("player-table-".concat(this.playerId, "-column0")).addEventListener('click', function () { return _this.game.selectPlace(0, 0); });
-        var _loop_7 = function (i) {
+        var _loop_6 = function (i) {
             var tiles = player.lines.filter(function (tile) { return tile.line === i; });
-            this_5.placeTilesOnLine(tiles, i);
+            this_4.placeTilesOnLine(tiles, i);
         };
-        var this_5 = this;
+        var this_4 = this;
         for (var i = -1; i <= 5; i++) {
-            _loop_7(i);
+            _loop_6(i);
         }
         this.placeTilesOnWall(player.wall);
     }
@@ -1093,11 +1083,10 @@ var PlayerTable = /** @class */ (function () {
         tiles.forEach(function (tile, index) { return _this.game.placeTile(tile, "player-hand-".concat(_this.playerId), startX + (tiles.length - index) * (HALF_TILE_SIZE + 5) * 2, 5); });
     };
     PlayerTable.prototype.placeTilesOnLine = function (tiles, line) {
-        var _this = this;
         return Promise.all(tiles.map(function (tile) {
             var left = line == -1 ? 9 : (line > 0 ? (line - tile.column) * 69 : 5 + (tile.column - 1) * 74);
             var top = line == -1 ? 9 : 0;
-            return _this.game.placeTile(tile, "player-table-".concat(_this.playerId, "-line").concat(line), left, top);
+            return Promise.resolve(true); // this.game.placeTile(tile, `player-table-${this.playerId}-line${line}`, left, top); // TODO no lines anymore
         }));
     };
     PlayerTable.prototype.placeTilesOnWall = function (tiles) {
@@ -1214,21 +1203,20 @@ var AzulSummerPavilion = /** @class */ (function () {
     AzulSummerPavilion.prototype.onEnteringChoosePlace = function (args) {
         if (this.isCurrentPlayerActive()) {
             var playerId = this.getPlayerId();
-            var _loop_9 = function (x) {
-                var _loop_10 = function (y) {
+            var _loop_8 = function (x) {
+                var _loop_9 = function (y) {
                     document.getElementById("player-table-".concat(playerId, "-wall-spot-").concat(x, "-").concat(y)).classList.toggle('selectable', !args.placedTiles.some(function (tile) { return tile.line == x && tile.column == y; }));
                 };
                 for (var y = 1; y <= 5; y++) {
-                    _loop_10(y);
+                    _loop_9(y);
                 }
             };
             for (var x = 1; x <= 5; x++) {
-                _loop_9(x);
+                _loop_8(x);
             }
         }
     };
     AzulSummerPavilion.prototype.onEnteringPlayTile = function (args) {
-        var _this = this;
         if (this.isCurrentPlayerActive()) {
             var playerId = this.getPlayerId();
             for (var x = 1; x <= 5; x++) {
@@ -1236,7 +1224,6 @@ var AzulSummerPavilion = /** @class */ (function () {
                     document.getElementById("player-table-".concat(playerId, "-wall-spot-").concat(x, "-").concat(y)).classList.toggle('selectable', args.selectedPlace[0] == x && args.selectedPlace[1] == y);
                 }
             }
-            args.lines.forEach(function (i) { return dojo.addClass("player-table-".concat(_this.getPlayerId(), "-line").concat(i), 'selectable'); });
         }
     };
     // onLeavingState: this method is called each time we are leaving a game state.
@@ -1270,12 +1257,6 @@ var AzulSummerPavilion = /** @class */ (function () {
     };
     AzulSummerPavilion.prototype.onLeavingPlayTile = function () {
         this.onLeavingChoosePlace();
-        if (!this.gamedatas.players[this.getPlayerId()]) {
-            return;
-        }
-        for (var i = 0; i <= 5; i++) {
-            dojo.removeClass("player-table-".concat(this.getPlayerId(), "-line").concat(i), 'selectable');
-        }
     };
     // onUpdateActionButtons: in this method you can manage "action buttons" that are displayed in the
     //                        action status bar (ie: the HTML links in the status bar).
@@ -1289,6 +1270,19 @@ var AzulSummerPavilion = /** @class */ (function () {
                     this.addActionButton('confirmAcquire_button', _("Confirm"), function () { return _this.confirmAcquire(); });
                     this.addActionButton('undoAcquire_button', _("Undo tile selection"), function () { return _this.undoTakeTiles(); }, null, null, 'gray');
                     this.startActionTimer('confirmAcquire_button', 5);
+                    break;
+                case 'playTile':
+                    var playTileArgs = args;
+                    var _loop_10 = function (i) {
+                        var label = this_5.format_string_recursive('${number} ${color}', { number: playTileArgs.number - i, type: playTileArgs.color });
+                        label += this_5.format_string_recursive('${number} ${color}', { number: i, type: playTileArgs.wildColor });
+                        this_5.addActionButton("playTile".concat(i, "_button"), label, function () { return _this.playTile(i); });
+                    };
+                    var this_5 = this;
+                    for (var i = 0; i <= playTileArgs.maxWildTiles; i++) {
+                        _loop_10(i);
+                    }
+                    this.addActionButton('undoPlayTile_button', _("Undo line selection"), function () { return _this.undoPlayTile(); }, null, null, 'gray');
                     break;
                 case 'confirmPlay':
                     this.addActionButton('confirmLine_button', _("Confirm"), function () { return _this.confirmPlay(); });
@@ -1532,12 +1526,12 @@ var AzulSummerPavilion = /** @class */ (function () {
             factory: factory
         });
     };
-    AzulSummerPavilion.prototype.playTile = function (line) {
+    AzulSummerPavilion.prototype.playTile = function (wilds) {
         if (!this.checkAction('playTile')) {
             return;
         }
         this.takeAction('playTile', {
-            line: line
+            wilds: wilds
         });
     };
     AzulSummerPavilion.prototype.confirmPlay = function () {

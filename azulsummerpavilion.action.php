@@ -77,9 +77,9 @@
       self::setAjaxMode();
 
       // Retrieve arguments
-      $line = self::getArg("line", AT_posint, true);
+      $wilds = self::getArg("wilds", AT_posint, true);
 
-      $this->game->playTile($line);
+      $this->game->playTile($wilds);
 
       self::ajaxResponse();
     }

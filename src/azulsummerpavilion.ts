@@ -153,8 +153,6 @@ class AzulSummerPavilion implements AzulSummerPavilionGame {
                     );
                 }
             }
-
-            args.lines.forEach(i => dojo.addClass(`player-table-${this.getPlayerId()}-line${i}`, 'selectable'));
         }
     }
 
@@ -192,14 +190,6 @@ class AzulSummerPavilion implements AzulSummerPavilionGame {
 
     onLeavingPlayTile() {
         this.onLeavingChoosePlace();
-
-        if (!this.gamedatas.players[this.getPlayerId()]) {
-            return;
-        }
-
-        for (let i=0; i<=5; i++) {
-            dojo.removeClass(`player-table-${this.getPlayerId()}-line${i}`, 'selectable');
-        }
     }
 
     // onUpdateActionButtons: in this method you can manage "action buttons" that are displayed in the
@@ -214,6 +204,15 @@ class AzulSummerPavilion implements AzulSummerPavilionGame {
                     (this as any).addActionButton('confirmAcquire_button', _("Confirm"), () => this.confirmAcquire());
                     (this as any).addActionButton('undoAcquire_button', _("Undo tile selection"), () => this.undoTakeTiles(), null, null, 'gray');
                     this.startActionTimer('confirmAcquire_button', 5);
+                    break;
+                case 'playTile':
+                    const playTileArgs = args as EnteringPlayTileArgs;
+                    for (let i = 0; i <= playTileArgs.maxWildTiles; i++) {
+                        let label = this.format_string_recursive('${number} ${color}', { number: playTileArgs.number - i, type: playTileArgs.color });
+                        label += this.format_string_recursive('${number} ${color}', { number: i, type: playTileArgs.wildColor });
+                        (this as any).addActionButton(`playTile${i}_button`, label, () => this.playTile(i));
+                    }
+                    (this as any).addActionButton('undoPlayTile_button', _("Undo line selection"), () => this.undoPlayTile(), null, null, 'gray');
                     break;
                 case 'confirmPlay':
                     (this as any).addActionButton('confirmLine_button', _("Confirm"), () => this.confirmPlay());
@@ -499,13 +498,13 @@ class AzulSummerPavilion implements AzulSummerPavilionGame {
         });
     }
 
-    public playTile(line: number) {
+    public playTile(wilds: number) {
         if(!(this as any).checkAction('playTile')) {
             return;
         }
 
         this.takeAction('playTile', {
-            line
+            wilds
         });
     }
 
