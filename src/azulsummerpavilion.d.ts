@@ -39,6 +39,7 @@ interface AzulSummerPavilionGamedatas {
     undo: boolean;
     fastScoring: boolean;
     remainingTiles: number;
+    round: number; // 1..6
 }
 
 interface AzulSummerPavilionGame extends Game {
@@ -61,7 +62,7 @@ interface EnteringChooseTileArgs {
 }
 
 interface EnteringChoosePlaceArgs {
-    placedTiles: Tile[];
+    placedTiles: Tile[]; // TODO temp
 }
 
 interface EnteringChooseColorArgs {

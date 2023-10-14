@@ -93,6 +93,10 @@ trait UtilTrait {
         self::DbQuery("UPDATE player SET player_score_aux = player_score_aux + $incScoreAux WHERE player_id = $playerId");
     }
 
+    function getRound() {
+        return intval(self::getStat('roundsNumber'));
+    }
+
     function getWildColor() {
         return intval(self::getStat('roundsNumber'));
     }

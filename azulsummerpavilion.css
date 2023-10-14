@@ -85,6 +85,10 @@
   position: absolute;
   display: inline-block;
 }
+#factories.selectable .tile:not(.tile0) {
+  cursor: pointer;
+  pointer-events: all;
+}
 #factories .tile.hover {
   box-shadow: 0 0 5px 5px white;
 }
@@ -192,6 +196,10 @@
   box-shadow: 0 0 5px 5px rgba(255, 255, 255, 0.8666666667);
   opacity: 1;
   transition: opacity 0.5s;
+}
+.player-table-wrapper .player-hand.selectable .tile {
+  cursor: pointer;
+  pointer-events: all;
 }
 .player-table-wrapper .player-name-wrapper {
   position: absolute;

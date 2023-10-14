@@ -267,4 +267,36 @@ trait ActionTrait {
         $this->gamestate->nextState('undo');
     }
 
+    function pass($skipActionCheck = false) {
+        if (!$skipActionCheck) {
+            $this->checkAction('pass');
+        }
+        
+        $playerId = self::getActivePlayerId();
+
+        self::DbQuery("UPDATE player SET passed = TRUE WHERE player_id = $playerId" );
+        // TODO notif players ?
+
+        $tiles = $this->getTilesFromDb($this->tiles->getCardsInLocation('hand', $playerId));
+        if (count($tiles) > 4) { // TODO always ask ?
+            $this->gamestate->nextState('chooseKeptTiles');
+        } else if ($this->allowUndo()) {
+            $this->gamestate->nextState('confirm');
+        } else {
+            $this->gamestate->nextState('nextPlayer');
+        }
+    }
+
+    function selectKeptTiles(array $ids, $skipActionCheck = false) {
+        if (!$skipActionCheck) {
+            $this->checkAction('selectKeptTiles');
+        }
+        
+        $playerId = self::getActivePlayerId();
+
+        // TODO keep $ids and discard the rest of the hand
+
+        $this->gamestate->nextState('nextPlayer');
+    }
+
 }

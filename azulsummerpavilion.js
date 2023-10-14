@@ -1179,6 +1179,9 @@ var AzulSummerPavilion = /** @class */ (function () {
             case 'playTile':
                 this.onEnteringPlayTile(args.args);
                 break;
+            case 'chooseKeptTiles':
+                this.onEnteringChooseKeptTiles(args.args);
+                break;
             case 'gameEnd':
                 var lastTurnBar = document.getElementById('last-round');
                 if (lastTurnBar) {
@@ -1219,6 +1222,11 @@ var AzulSummerPavilion = /** @class */ (function () {
             }
         }
     };
+    AzulSummerPavilion.prototype.onEnteringChooseKeptTiles = function (args) {
+        if (this.isCurrentPlayerActive()) {
+            document.getElementById("player-hand-".concat(this.getPlayerId())).classList.add('selectable');
+        }
+    };
     // onLeavingState: this method is called each time we are leaving a game state.
     //                 You can use this method to perform some user interface changes at this moment.
     //
@@ -1233,6 +1241,9 @@ var AzulSummerPavilion = /** @class */ (function () {
                 break;
             case 'playTile':
                 this.onLeavingPlayTile();
+                break;
+            case 'chooseKeptTiles':
+                this.onLeavingChooseKeptTiles();
                 break;
         }
     };
@@ -1251,6 +1262,37 @@ var AzulSummerPavilion = /** @class */ (function () {
     AzulSummerPavilion.prototype.onLeavingPlayTile = function () {
         this.onLeavingChoosePlace();
     };
+    AzulSummerPavilion.prototype.onLeavingChooseKeptTiles = function () {
+        var _a;
+        (_a = document.getElementById("player-hand-".concat(this.getPlayerId()))) === null || _a === void 0 ? void 0 : _a.classList.remove('selectable');
+    };
+    AzulSummerPavilion.prototype.updateSelectKeptTilesButton = function () {
+        var _this = this;
+        var button = document.getElementById("selectKeptTiles_button");
+        var handDiv = document.getElementById("player-hand-".concat(this.getPlayerId()));
+        var handTileDivs = Array.from(handDiv.querySelectorAll('.tile'));
+        var selectedTileDivs = Array.from(handDiv.querySelectorAll('.tile.selected'));
+        var selectedTileDivsIds = selectedTileDivs.map(function (div) { return Number(div.dataset.id); });
+        var discardedTileDivs = handTileDivs.filter(function (div) { return !selectedTileDivsIds.includes(Number(div.dataset.id)); });
+        var warning = selectedTileDivs.length < handTileDivs.length && selectedTileDivs.length < 4;
+        var labelKeep = selectedTileDivs.map(function (div) { return _this.format_string_recursive('${number} ${color}', { number: 1, type: Number(div.dataset.type) }); }).join('');
+        var labelDiscard = discardedTileDivs.map(function (div) { return _this.format_string_recursive('${number} ${color}', { number: 1, type: Number(div.dataset.type) }); }).join('');
+        var label = '';
+        if (labelKeep != '' && labelDiscard != '') {
+            label = _("Keep ${keep} and discard ${discard}");
+        }
+        else if (labelKeep != '') {
+            label = _("Keep ${keep}");
+        }
+        else if (labelDiscard != '') {
+            label = _("Discard ${discard}");
+        }
+        label = label.replace('${keep}', labelKeep).replace('${discard}', labelDiscard);
+        button.innerHTML = label;
+        button.classList.toggle('bgabutton_blue', !warning);
+        button.classList.toggle('bgabutton_red', warning);
+        button.classList.toggle('disabled', selectedTileDivs.length > 4);
+    };
     // onUpdateActionButtons: in this method you can manage "action buttons" that are displayed in the
     //                        action status bar (ie: the HTML links in the status bar).
     //
@@ -1263,6 +1305,9 @@ var AzulSummerPavilion = /** @class */ (function () {
                     this.addActionButton('confirmAcquire_button', _("Confirm"), function () { return _this.confirmAcquire(); });
                     this.addActionButton('undoAcquire_button', _("Undo tile selection"), function () { return _this.undoTakeTiles(); }, null, null, 'gray');
                     this.startActionTimer('confirmAcquire_button', 5);
+                    break;
+                case 'choosePlace':
+                    this.addActionButton('pass_button', _("Pass (end round)"), function () { return _this.pass(); }, null, null, 'red');
                     break;
                 case 'chooseColor':
                     var chooseColorArgs = args;
@@ -1289,6 +1334,10 @@ var AzulSummerPavilion = /** @class */ (function () {
                     this.addActionButton('confirmLine_button', _("Confirm"), function () { return _this.confirmPlay(); });
                     this.addActionButton('undoPlayTile_button', _("Undo line selection"), function () { return _this.undoPlayTile(); }, null, null, 'gray');
                     this.startActionTimer('confirmLine_button', 5);
+                    break;
+                case 'chooseKeptTiles':
+                    this.addActionButton('selectKeptTiles_button', '', function () { return _this.selectKeptTiles(); });
+                    this.updateSelectKeptTilesButton();
                     break;
             }
         }
@@ -1430,10 +1479,10 @@ var AzulSummerPavilion = /** @class */ (function () {
             return slideToObjectAndAttach(this, tileDiv, destinationId, left, top, rotation);
         }
         else {
-            dojo.place("<div id=\"tile".concat(tile.id, "\" class=\"tile tile").concat(tile.type, "\" style=\"").concat(left !== undefined ? "left: ".concat(left, "px;") : '').concat(top !== undefined ? "top: ".concat(top, "px;") : '').concat(rotation ? "transform: rotate(".concat(rotation, "deg)") : '', "\" data-rotation=\"").concat(rotation !== null && rotation !== void 0 ? rotation : 0, "\"></div>"), destinationId);
+            dojo.place("<div id=\"tile".concat(tile.id, "\" class=\"tile tile").concat(tile.type, "\" data-id=\"").concat(tile.id, "\" data-type=\"").concat(tile.type, "\" style=\"").concat(left !== undefined ? "left: ".concat(left, "px;") : '').concat(top !== undefined ? "top: ".concat(top, "px;") : '').concat(rotation ? "transform: rotate(".concat(rotation, "deg)") : '', "\" data-rotation=\"").concat(rotation !== null && rotation !== void 0 ? rotation : 0, "\"></div>"), destinationId);
             var newTileDiv = document.getElementById("tile".concat(tile.id));
             newTileDiv.addEventListener('click', function () {
-                _this.takeTiles(tile.id);
+                _this.onTileClick(tile);
                 _this.factories.tileMouseLeave(tile.id);
             });
             newTileDiv.addEventListener('mouseenter', function () { return _this.factories.tileMouseEnter(tile.id); });
@@ -1499,6 +1548,18 @@ var AzulSummerPavilion = /** @class */ (function () {
         var _this = this;
         tiles.forEach(function (tile) { return _this.removeTile(tile, fadeOut); });
     };
+    AzulSummerPavilion.prototype.onTileClick = function (tile) {
+        if (this.gamedatas.gamestate.name == 'chooseTile') {
+            this.takeTiles(tile.id);
+        }
+        else if (this.gamedatas.gamestate.name == 'chooseKeptTiles') {
+            var divElement = document.getElementById("tile".concat(tile.id));
+            if (divElement === null || divElement === void 0 ? void 0 : divElement.closest("#player-hand-".concat(this.getPlayerId()))) {
+                divElement.classList.toggle('selected');
+                this.updateSelectKeptTilesButton();
+            }
+        }
+    };
     AzulSummerPavilion.prototype.takeTiles = function (id) {
         if (!this.checkAction('takeTiles')) {
             return;
@@ -1518,6 +1579,12 @@ var AzulSummerPavilion = /** @class */ (function () {
             return;
         }
         this.takeAction('confirmAcquire');
+    };
+    AzulSummerPavilion.prototype.pass = function () {
+        if (!this.checkAction('pass')) {
+            return;
+        }
+        this.takeAction('pass');
     };
     AzulSummerPavilion.prototype.selectColor = function (color) {
         if (!this.checkAction('selectColor')) {
@@ -1557,17 +1624,26 @@ var AzulSummerPavilion = /** @class */ (function () {
         });
         this.removeColumnSelection();
     };
-    AzulSummerPavilion.prototype.confirmColumns = function () {
-        if (!this.checkAction('confirmColumns')) {
+    AzulSummerPavilion.prototype.selectKeptTiles = function (askConfirmation) {
+        var _this = this;
+        if (askConfirmation === void 0) { askConfirmation = true; }
+        if (!this.checkAction('selectKeptTiles')) {
             return;
         }
-        this.takeAction('confirmColumns');
-    };
-    AzulSummerPavilion.prototype.undoColumns = function () {
-        if (!this.checkAction('undoColumns')) {
-            return;
+        var handDiv = document.getElementById("player-hand-".concat(this.getPlayerId()));
+        var handTileDivs = handDiv.querySelectorAll('.tile');
+        var selectedTileDivs = handDiv.querySelectorAll('.tile.selected');
+        if (askConfirmation && selectedTileDivs.length < handTileDivs.length && selectedTileDivs.length < 4) {
+            this.confirmationDialog(_('You will keep ${keep} tiles and discard ${discard} tiles, when you could keep ${possible} tiles!')
+                .replace('${keep}', "<strong>".concat(selectedTileDivs.length, "</strong>"))
+                .replace('${discard}', "<strong>".concat(handTileDivs.length - selectedTileDivs.length, "</strong>"))
+                .replace('${possible}', "<strong>".concat(Math.min(4, handTileDivs.length), "</strong>")), function () { return _this.selectKeptTiles(false); });
         }
-        this.takeAction('undoColumns');
+        else {
+            this.takeAction('selectKeptTiles', {
+                ids: Array.from(selectedTileDivs).map(function (tile) { return Number(tile.dataset.id); }).sort().join(','),
+            });
+        }
     };
     AzulSummerPavilion.prototype.takeAction = function (action, data) {
         data = data || {};

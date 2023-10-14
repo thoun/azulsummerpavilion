@@ -167,6 +167,7 @@ class AzulSummerPavilion extends Table {
         $result['undo'] = $this->allowUndo();
         $result['fastScoring'] = $this->isFastScoring();
         $result['remainingTiles'] = intval($this->tiles->countCardInLocation('deck'));
+        $result['round'] = $this->getRound();
   
         return $result;
     }
@@ -182,20 +183,8 @@ class AzulSummerPavilion extends Table {
         (see states.inc.php)
     */
     function getGameProgression() {
-        $maxColumns = 0;
-        
-        $playerIds = $this->getPlayersIds();
-        foreach ($playerIds as $playerId) {
-            $playerWallTiles = $this->getTilesFromDb($this->tiles->getCardsInLocation('wall'.$playerId));
-            for ($i=1; $i<=5; $i++) {
-                $playerWallTileLineCount = count(array_values(array_filter($playerWallTiles, fn($tile) => $tile->line == $i)));
-                if ($playerWallTileLineCount > $maxColumns) {
-                    $maxColumns = $playerWallTileLineCount;
-                }
-            }
-        }
-        
-        return $maxColumns * 20;
+        $round = $this->getRound();
+        return ($round - 1) * 20;
     }
 
     //////////////////////////////////////////////////////////////////////////////
@@ -229,7 +218,7 @@ class AzulSummerPavilion extends Table {
                         $this->confirmAcquire(true);
                         break;
                     case 'choosePlace':
-                        $this->selectPlace(0, 0);
+                        $this->pass(true);
                         break;
                     case 'chooseColor':
                         $this->selectColor(0);

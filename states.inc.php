@@ -149,6 +149,21 @@ $playerActionsGameStates = [
          ],
         "transitions" => [
             "next" => ST_PLAYER_CHOOSE_COLOR,
+            "chooseKeptTiles" => ST_PLAYER_CHOOSE_KEPT_TILES,
+        ],
+    ],
+
+    ST_PLAYER_CHOOSE_KEPT_TILES => [
+        "name" => "chooseKeptTiles",
+        "description" => clienttranslate('${actplayer} must choose up to 4 tiles to keep'),
+        "descriptionmyturn" => clienttranslate('${you} must choose up to 4 tiles to keep'),
+        "type" => "activeplayer",
+        "possibleactions" => [ 
+            "selectKeptTiles",
+         ],
+        "transitions" => [
+            "nextPlayer" => ST_NEXT_PLAYER_PLAY,
+            "undo" => ST_PLAYER_CHOOSE_PLACE,
         ],
     ],
 
@@ -164,6 +179,7 @@ $playerActionsGameStates = [
          ],
         "transitions" => [
             "next" => ST_PLAYER_PLAY_TILE,
+            "undo" => ST_PLAYER_CHOOSE_PLACE,
         ],
     ],
 
@@ -180,7 +196,7 @@ $playerActionsGameStates = [
         "transitions" => [
             "confirm" => ST_PLAYER_CONFIRM_PLAY,
             "nextPlayer" => ST_NEXT_PLAYER_PLAY,
-            "undo" => ST_PLAYER_CHOOSE_TILE,
+            "undo" => ST_PLAYER_CHOOSE_PLACE,
         ],
     ],
 

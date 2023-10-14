@@ -22,6 +22,13 @@
         box-shadow: 0 0 5px 5px #FFFFFFDD;
         opacity: 1;
         transition: opacity 0.5s;
+
+        &.selectable {
+            .tile {
+                cursor: pointer;
+                pointer-events: all;
+            }
+        }
     }
 
     .player-name-wrapper {

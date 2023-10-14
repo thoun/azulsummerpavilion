@@ -111,6 +111,26 @@
       self::ajaxResponse();
     }
 
+    public function pass() {
+      self::setAjaxMode();
+
+      $this->game->pass();
+
+      self::ajaxResponse();
+    }
+
+    public function selectKeptTiles() {
+      self::setAjaxMode();
+
+      // Retrieve arguments
+        $idsStr = self::getArg( "ids", AT_numberlist, true );
+        $ids = array_map(fn($str) => intval($str), explode(',', $idsStr));
+
+      $this->game->selectKeptTiles($ids);
+
+      self::ajaxResponse();
+    }
+
   }
   
 

@@ -20,7 +20,6 @@ trait ArgsTrait {
 
     function argChoosePlace() {
         $playerId = self::getActivePlayerId();
-        $tiles = $this->getTilesFromDb($this->tiles->getCardsInLocation('hand', $playerId));
 
         $placedTiles = $this->getTilesFromDb($this->tiles->getCardsInLocation('line'.$playerId));
 
@@ -29,7 +28,6 @@ trait ArgsTrait {
 
         return [
             'placedTiles' => $placedTiles,
-            'passWarning' => count($tiles) > 4,
         ];
     }
 

@@ -114,6 +114,9 @@ class AzulSummerPavilion implements AzulSummerPavilionGame {
             case 'playTile':
                 this.onEnteringPlayTile(args.args);
                 break;
+            case 'chooseKeptTiles':
+                this.onEnteringChooseKeptTiles(args.args);
+                break;
             case 'gameEnd':
                 const lastTurnBar = document.getElementById('last-round');
                 if (lastTurnBar) {
@@ -156,6 +159,12 @@ class AzulSummerPavilion implements AzulSummerPavilionGame {
         }
     }
 
+    onEnteringChooseKeptTiles(args: EnteringChooseTileArgs) {
+        if ((this as any).isCurrentPlayerActive()) {
+            document.getElementById(`player-hand-${this.getPlayerId()}`).classList.add('selectable');
+        }
+    }
+
     // onLeavingState: this method is called each time we are leaving a game state.
     //                 You can use this method to perform some user interface changes at this moment.
     //
@@ -171,6 +180,9 @@ class AzulSummerPavilion implements AzulSummerPavilionGame {
                 break;
             case 'playTile':
                 this.onLeavingPlayTile();
+                break;
+            case 'chooseKeptTiles':
+                this.onLeavingChooseKeptTiles();
                 break;
         }
     }
@@ -192,6 +204,38 @@ class AzulSummerPavilion implements AzulSummerPavilionGame {
         this.onLeavingChoosePlace();
     }
 
+    onLeavingChooseKeptTiles() {
+        document.getElementById(`player-hand-${this.getPlayerId()}`)?.classList.remove('selectable');
+    }
+
+    private updateSelectKeptTilesButton() {
+        const button = document.getElementById(`selectKeptTiles_button`);
+
+        const handDiv = document.getElementById(`player-hand-${this.getPlayerId()}`);
+        const handTileDivs = Array.from(handDiv.querySelectorAll('.tile'));
+        const selectedTileDivs = Array.from(handDiv.querySelectorAll('.tile.selected'));
+        const selectedTileDivsIds = selectedTileDivs.map((div: HTMLElement) => Number(div.dataset.id));
+        const discardedTileDivs = handTileDivs.filter((div: HTMLElement) => !selectedTileDivsIds.includes(Number(div.dataset.id)));
+        const warning = selectedTileDivs.length < handTileDivs.length && selectedTileDivs.length < 4;
+
+        const labelKeep = selectedTileDivs.map((div: HTMLElement) => this.format_string_recursive('${number} ${color}', { number: 1, type: Number(div.dataset.type) })).join('');
+        const labelDiscard = discardedTileDivs.map((div: HTMLElement) => this.format_string_recursive('${number} ${color}', { number: 1, type: Number(div.dataset.type) })).join('');
+        let label = '';
+        if (labelKeep != '' && labelDiscard != '') {
+            label = _("Keep ${keep} and discard ${discard}");
+        } else if (labelKeep != '') {
+            label = _("Keep ${keep}");
+        } else if (labelDiscard != '') {
+            label = _("Discard ${discard}");
+        }  
+        label = label.replace('${keep}', labelKeep).replace('${discard}', labelDiscard);
+
+        button.innerHTML = label;
+        button.classList.toggle('bgabutton_blue', !warning);
+        button.classList.toggle('bgabutton_red', warning);
+        button.classList.toggle('disabled', selectedTileDivs.length > 4);
+    }
+
     // onUpdateActionButtons: in this method you can manage "action buttons" that are displayed in the
     //                        action status bar (ie: the HTML links in the status bar).
     //
@@ -204,6 +248,9 @@ class AzulSummerPavilion implements AzulSummerPavilionGame {
                     (this as any).addActionButton('confirmAcquire_button', _("Confirm"), () => this.confirmAcquire());
                     (this as any).addActionButton('undoAcquire_button', _("Undo tile selection"), () => this.undoTakeTiles(), null, null, 'gray');
                     this.startActionTimer('confirmAcquire_button', 5);
+                    break;
+                case 'choosePlace':
+                    (this as any).addActionButton('pass_button', _("Pass (end round)"), () => this.pass(), null, null, 'red');
                     break;
                 case 'chooseColor':
                     const chooseColorArgs = args as EnteringChooseColorArgs;
@@ -226,6 +273,10 @@ class AzulSummerPavilion implements AzulSummerPavilionGame {
                     (this as any).addActionButton('confirmLine_button', _("Confirm"), () => this.confirmPlay());
                     (this as any).addActionButton('undoPlayTile_button', _("Undo line selection"), () => this.undoPlayTile(), null, null, 'gray');
                     this.startActionTimer('confirmLine_button', 5);
+                    break;
+                case 'chooseKeptTiles':
+                    (this as any).addActionButton('selectKeptTiles_button', '', () => this.selectKeptTiles());
+                    this.updateSelectKeptTilesButton();
                     break;
             }
         }
@@ -392,10 +443,10 @@ class AzulSummerPavilion implements AzulSummerPavilionGame {
         if (tileDiv) {
             return slideToObjectAndAttach(this, tileDiv, destinationId, left, top, rotation);
         } else {
-            dojo.place(`<div id="tile${tile.id}" class="tile tile${tile.type}" style="${left !== undefined ? `left: ${left}px;` : ''}${top !== undefined ? `top: ${top}px;` : ''}${rotation ? `transform: rotate(${rotation}deg)` : ''}" data-rotation="${rotation ?? 0}"></div>`, destinationId);
+            dojo.place(`<div id="tile${tile.id}" class="tile tile${tile.type}" data-id="${tile.id}" data-type="${tile.type}" style="${left !== undefined ? `left: ${left}px;` : ''}${top !== undefined ? `top: ${top}px;` : ''}${rotation ? `transform: rotate(${rotation}deg)` : ''}" data-rotation="${rotation ?? 0}"></div>`, destinationId);
             const newTileDiv = document.getElementById(`tile${tile.id}`);
             newTileDiv.addEventListener('click', () => {
-                this.takeTiles(tile.id);
+                this.onTileClick(tile);
                 this.factories.tileMouseLeave(tile.id);
             });
             newTileDiv.addEventListener('mouseenter', () => this.factories.tileMouseEnter(tile.id));
@@ -470,6 +521,18 @@ class AzulSummerPavilion implements AzulSummerPavilionGame {
         tiles.forEach(tile => this.removeTile(tile, fadeOut));
     }
 
+    public onTileClick(tile: Tile) {
+        if (this.gamedatas.gamestate.name == 'chooseTile') {
+            this.takeTiles(tile.id);
+        } else if (this.gamedatas.gamestate.name == 'chooseKeptTiles') {
+            const divElement = document.getElementById(`tile${tile.id}`);
+            if (divElement?.closest(`#player-hand-${this.getPlayerId()}`)) {
+                divElement.classList.toggle('selected');
+                this.updateSelectKeptTilesButton();
+            }
+        }
+    }
+
     public takeTiles(id: number) {
         if(!(this as any).checkAction('takeTiles')) {
             return;
@@ -494,6 +557,14 @@ class AzulSummerPavilion implements AzulSummerPavilionGame {
         }
 
         this.takeAction('confirmAcquire');
+    }
+
+    public pass() {
+        if(!(this as any).checkAction('pass')) {
+            return;
+        }
+
+        this.takeAction('pass');
     }
 
     public selectColor(color: number) {
@@ -545,20 +616,28 @@ class AzulSummerPavilion implements AzulSummerPavilionGame {
         this.removeColumnSelection();
     }
 
-    public confirmColumns() {
-        if(!(this as any).checkAction('confirmColumns')) {
+    public selectKeptTiles(askConfirmation = true) {
+        if(!(this as any).checkAction('selectKeptTiles')) {
             return;
         }
 
-        this.takeAction('confirmColumns');
-    }
+        const handDiv = document.getElementById(`player-hand-${this.getPlayerId()}`);
+        const handTileDivs = handDiv.querySelectorAll('.tile');
+        const selectedTileDivs = handDiv.querySelectorAll('.tile.selected');
 
-    public undoColumns() {
-        if(!(this as any).checkAction('undoColumns')) {
-            return;
+        if (askConfirmation && selectedTileDivs.length < handTileDivs.length && selectedTileDivs.length < 4) {
+            (this as any).confirmationDialog(
+                _('You will keep ${keep} tiles and discard ${discard} tiles, when you could keep ${possible} tiles!')
+                    .replace('${keep}', `<strong>${selectedTileDivs.length}</strong>`)
+                    .replace('${discard}', `<strong>${handTileDivs.length - selectedTileDivs.length}</strong>`)
+                    .replace('${possible}', `<strong>${Math.min(4, handTileDivs.length)}</strong>`), 
+                () => this.selectKeptTiles(false)
+            );
+        } else {
+            this.takeAction('selectKeptTiles', {
+                ids: Array.from(selectedTileDivs).map((tile: HTMLElement) => Number(tile.dataset.id)).sort().join(','),
+            });
         }
-
-        this.takeAction('undoColumns');
     }
 
     public takeAction(action: string, data?: any) {

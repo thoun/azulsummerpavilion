@@ -26,6 +26,7 @@ trait StateTrait {
         }
 
         self::DbQuery("UPDATE player SET passed = false");
+        // TODO notif players ?
 
         self::notifyAllPlayers("factoriesFilled", clienttranslate("A new round begins !"), [
             'factories' => $factories,
@@ -92,9 +93,11 @@ trait StateTrait {
 
 
     function stEndRound() {
-        $this->gamestate->nextState('placeTiles');
+        $round = $this->getRound();
+        $this->gamestate->nextState($round < 6 ? 'newRound' : 'endScore');
     }
 
+    // TODO delete
     function stPlaceTiles() {
         $playersIds = $this->getPlayersIds();
 
