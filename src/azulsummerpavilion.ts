@@ -108,9 +108,6 @@ class AzulSummerPavilion implements AzulSummerPavilionGame {
             case 'chooseTile':
                 this.onEnteringChooseTile();
                 break;
-            case 'chooseFactory':
-                this.onEnteringChooseFactory(args.args);
-                break;
             case 'chooseLine':
                 this.onEnteringChooseLine(args.args);
                 break;
@@ -129,12 +126,6 @@ class AzulSummerPavilion implements AzulSummerPavilionGame {
     onEnteringChooseTile() {
         if ((this as any).isCurrentPlayerActive()) {
             dojo.addClass('factories', 'selectable');
-        }
-    }
-
-    onEnteringChooseFactory(args: EnteringChooseFactoryArgs) {
-        if ((this as any).isCurrentPlayerActive()) {
-            args.possibleFactories.forEach(i => dojo.addClass(`factory${i}`, 'selectable'));
         }
     }
 
@@ -188,9 +179,6 @@ class AzulSummerPavilion implements AzulSummerPavilionGame {
             case 'chooseTile':
                 this.onLeavingChooseTile();
                 break;
-            case 'chooseFactory':
-                this.onLeavingChooseFactory();
-                break;
             case 'chooseLine':
                 this.onLeavingChooseLine();
                 break;
@@ -202,10 +190,6 @@ class AzulSummerPavilion implements AzulSummerPavilionGame {
 
     onLeavingChooseTile() {
         dojo.removeClass('factories', 'selectable');
-    }
-
-    onLeavingChooseFactory() {
-        dojo.query('#factories .factory.selectable').removeClass('selectable');
     }
 
     onLeavingChooseLine() {
@@ -229,15 +213,14 @@ class AzulSummerPavilion implements AzulSummerPavilionGame {
         log('onUpdateActionButtons', stateName, args);
         
         if((this as any).isCurrentPlayerActive()) {
-            switch (stateName) {  
-                case 'chooseFactory':
-                case 'chooseLine':
-                    if (this.gamedatas.undo) {
-                        (this as any).addActionButton('undoTakeTiles_button', _("Undo tile selection"), () => this.undoTakeTiles());
-                    }
-                    break;     
-                case 'confirmLine':
-                    (this as any).addActionButton('confirmLine_button', _("Confirm"), () => this.confirmLine());
+            switch (stateName) { 
+                case 'confirmAcquire':
+                    (this as any).addActionButton('confirmAcquire_button', _("Confirm"), () => this.confirmAcquire());
+                    (this as any).addActionButton('undoAcquire_button', _("Undo tile selection"), () => this.undoTakeTiles(), null, null, 'gray');
+                    this.startActionTimer('confirmAcquire_button', 5);
+                    break;
+                case 'confirmPlay':
+                    (this as any).addActionButton('confirmLine_button', _("Confirm"), () => this.confirmPlay());
                     (this as any).addActionButton('undoSelectLine_button', _("Undo line selection"), () => this.undoSelectLine(), null, null, 'gray');
                     this.startActionTimer('confirmLine_button', 5);
                     break;
@@ -515,6 +498,14 @@ class AzulSummerPavilion implements AzulSummerPavilionGame {
         this.takeAction('undoTakeTiles');
     }
 
+    public confirmAcquire() {
+        if(!(this as any).checkAction('confirmAcquire')) {
+            return;
+        }
+
+        this.takeAction('confirmAcquire');
+    }
+
     public selectFactory(factory: number) {
         if(!(this as any).checkAction('selectFactory', true)) {
             return;
@@ -535,12 +526,12 @@ class AzulSummerPavilion implements AzulSummerPavilionGame {
         });
     }
 
-    public confirmLine() {
-        if(!(this as any).checkAction('confirmLine')) {
+    public confirmPlay() {
+        if(!(this as any).checkAction('confirmPlay')) {
             return;
         }
 
-        this.takeAction('confirmLine');
+        this.takeAction('confirmPlay');
     }
 
     public undoSelectLine() {
@@ -670,20 +661,12 @@ class AzulSummerPavilion implements AzulSummerPavilionGame {
     notif_undoTakeTiles(notif: Notif<NotifUndoArgs>) {
         this.placeFirstPlayerToken(notif.args.undo.previousFirstPlayer);
 
-        this.factories.undoTakeTiles(notif.args.undo.tiles, notif.args.undo.from, notif.args.factoryTilesBefore).then(
-            () => this.getPlayerTable(notif.args.playerId).setHandVisible(false)
-        );
+        this.factories.undoTakeTiles(notif.args.undo.tiles, notif.args.undo.from, notif.args.factoryTilesBefore);
     }
 
     notif_tilesPlacedOnLine(notif: Notif<NotifTilesPlacedOnLineArgs>) {
         this.getPlayerTable(notif.args.playerId).placeTilesOnLine(notif.args.discardedTiles, 0);
-        this.getPlayerTable(notif.args.playerId).placeTilesOnLine(notif.args.placedTiles, notif.args.line).then(
-            () => { 
-                if (notif.args.fromHand) {
-                    this.getPlayerTable(notif.args.playerId).setHandVisible(false);
-                }
-            }
-        );
+        this.getPlayerTable(notif.args.playerId).placeTilesOnLine(notif.args.placedTiles, notif.args.line);
     }
 
     notif_undoSelectLine(notif: Notif<NotifUndoArgs>) {

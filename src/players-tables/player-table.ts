@@ -12,7 +12,7 @@ class PlayerTable {
         const nameClass = player.name.indexOf(' ') !== -1 ? 'with-space' : 'without-space';
 
         let html = `<div id="player-table-wrapper-${this.playerId}" class="player-table-wrapper">
-        <div id="player-hand-${this.playerId}" class="player-hand ${player.hand.length ? '' : 'empty'}">
+        <div id="player-hand-${this.playerId}" class="player-hand">
         </div>
         <div id="player-table-${this.playerId}" class="player-table ${this.game.isVariant() ? 'variant' : ''}" style="--player-color: #${player.color};">
             <div class="player-name-wrapper shift">
@@ -28,12 +28,6 @@ class PlayerTable {
         }
         html += `<div id="player-table-${this.playerId}-line0" class="floor line"></div>`;
         html += `<div id="player-table-${this.playerId}-wall" class="wall">`;
-
-        // color-blind marks on wall
-        for (let line=1; line<=5; line++) {
-            const column = ((line + 1) % 5) + 1;
-            html += `<div class="wall-tile-cb" style="left: ${69*(column-1) +4}px; top: ${70*(line-1) +4}px;"></div>`;
-        }
 
         for (let line=1; line<=5; line++) {
             for (let column=1; column<=5; column++) {
@@ -92,7 +86,6 @@ class PlayerTable {
     public placeTilesOnHand(tiles: Tile[]) {
         const startX = HAND_CENTER - tiles.length * (HALF_TILE_SIZE + 5);
         tiles.forEach((tile, index) => this.game.placeTile(tile, `player-hand-${this.playerId}`, startX + (tiles.length - index) * (HALF_TILE_SIZE + 5) * 2, 5));
-        this.setHandVisible(tiles.length > 0);
     }
 
     public placeTilesOnLine(tiles: Tile[], line: number): Promise<any> {
@@ -105,10 +98,6 @@ class PlayerTable {
 
     public placeTilesOnWall(tiles: Tile[]) {
         tiles.forEach(tile => this.game.placeTile(tile, `player-table-${this.playerId}-wall-spot-${tile.line}-${tile.column}`));
-    }
-    
-    public setHandVisible(visible: boolean) {
-        dojo.toggleClass(`player-hand-${this.playerId}`, 'empty', !visible);
     }
 
     public setGhostTile(line: number, column: number, color: number) {

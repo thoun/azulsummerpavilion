@@ -3,30 +3,26 @@
 /*
  * State constants
  */
-define('ST_BGA_GAME_SETUP', 1);
+const ST_BGA_GAME_SETUP = 1;
 
-define('ST_FILL_FACTORIES', 10);
+const ST_FILL_FACTORIES = 10;
 
-define('ST_PLAYER_CHOOSE_TILE', 20);
+const ST_PLAYER_CHOOSE_TILE = 20;
+const ST_PLAYER_CONFIRM_ACQUIRE = 25;
 
-define('ST_PLAYER_CHOOSE_FACTORY', 25);
+const ST_NEXT_PLAYER_ACQUIRE = 30;
 
-define('ST_PLAYER_CHOOSE_LINE', 30);
-define('ST_PLAYER_CONFIRM_LINE', 31);
+const ST_PLAYER_PLAY_TILE = 40;
+const ST_PLAYER_CONFIRM_PLAY = 45;
 
-define('ST_END_ROUND', 50);
-define('ST_MULTIPLAYER_CHOOSE_COLUMNS', 51);
-define('ST_PLACE_TILES', 52);    
-define('ST_MULTIPLAYER_PRIVATE_CHOOSE_COLUMNS', 55);
-define('ST_PRIVATE_CHOOSE_COLUMNS', 56);
-define('ST_PRIVATE_CONFIRM_COLUMNS', 57);
+const ST_NEXT_PLAYER_PLAY = 80;
 
-define('ST_NEXT_PLAYER', 80);
+const ST_END_ROUND = 90;
 
-define('ST_END_SCORE', 90);
+const ST_END_SCORE = 95;
 
-define('ST_END_GAME', 99);
-define('END_SCORE', 100);
+const ST_END_GAME = 99;
+const END_SCORE = 100;
 
 /*
  * Options
@@ -47,8 +43,8 @@ const FIRST_PLAYER_FOR_NEXT_TURN = 'FirstPlayerForNextTurn';
  * Global variables
  */
 
-define('UNDO_SELECT', 'UndoSelect');
-define('UNDO_FACTORY', 'UndoFactory');
-define('UNDO_PLACE', 'UndoPlace');
+const UNDO_SELECT = 'UndoSelect';
+const UNDO_PLACE = 'UndoPlace';
+const SELECTED_PLACE = 'SelectedPlace';
 
 ?>

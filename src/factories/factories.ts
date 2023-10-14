@@ -3,7 +3,7 @@ const HALF_TILE_SIZE = 29;
 const CENTER_FACTORY_TILE_SHIFT = 12;
 
 class Factories {
-    private tilesPositionsInCenter: PlacedTile[][] = [[], [], [], [], [], []]; // color, tiles
+    private tilesPositionsInCenter: PlacedTile[][] = [[], [], [], [], [], [], []]; // color, tiles
     private tilesInFactories: Tile[][][] = []; // factory, color, tiles
     bagCounter: Counter;
 

@@ -12,30 +12,6 @@ trait ArgsTrait {
         game state.
     */
 
-    function argChooseFactory() {
-        $undo = $this->getGlobalVariable(UNDO_FACTORY);
-        $factory = $undo->from;
-        $remainingFactoryTiles = $this->getTilesFromDb($this->tiles->getCardsInLocation('factory', $factory));
-        $tiles = array_values(array_filter($remainingFactoryTiles, fn($tile) => $tile->type == $remainingFactoryTiles[0]->type));
-
-        $number = count($tiles);
-
-        $factoryNumber = $this->getFactoryNumber();
-        $previous = $factory == 1 ? $factoryNumber : $factory - 1;
-        $next = $factory == $factoryNumber ? 1 : $factory + 1;
-        $possibleFactories = [$previous, $next];
-
-        return [
-            'factory' => $factory,
-            'number' => $number,
-            'color' => $number > 0 ? $this->getColor($tiles[0]->type) : null,
-            'i18n' => ['color'],
-            'type' => $number > 0 ? $tiles[0]->type : null,
-            'tiles' => $tiles,
-            'possibleFactories' => $possibleFactories,
-        ];
-    }
-
     function argChooseLine() {
         $playerId = self::getActivePlayerId();
         $tiles = $this->getTilesFromDb($this->tiles->getCardsInLocation('hand', $playerId));

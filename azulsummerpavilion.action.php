@@ -45,6 +45,14 @@
       self::ajaxResponse();
     }
 
+    public function confirmAcquire() {
+      self::setAjaxMode();
+
+      $this->game->confirmAcquire();
+
+      self::ajaxResponse();
+    }
+
     public function undoTakeTiles() {
       self::setAjaxMode();
 
@@ -64,10 +72,10 @@
       self::ajaxResponse();
     }
 
-    public function confirmLine() {
+    public function confirmPlay() {
       self::setAjaxMode();
 
-      $this->game->confirmLine();
+      $this->game->confirmPlay();
 
       self::ajaxResponse();
     }

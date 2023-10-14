@@ -22,10 +22,6 @@
         box-shadow: 0 0 5px 5px #FFFFFFDD;
         opacity: 1;
         transition: opacity 0.5s;
-
-        &.empty {
-            opacity: 0;
-        }
     }
 
     .player-name-wrapper {
@@ -96,10 +92,6 @@
 
         &.variant {            
             background: url('img/playerboard-variant.jpg');
-
-            .wall-tile-cb {
-                display: none;
-            }
         }
         &:not(.variant) {
             .wall {
@@ -178,14 +170,6 @@
                 }
                 
             }
-
-            .wall-tile-cb {
-                position: absolute;
-                width: 58px;
-                height: 58px;
-                background: url('img/red-cb.svg');
-                border-radius: 5px;
-            }
         }
 
         .score-magnified {
@@ -211,13 +195,6 @@
             }
         }
     }
-}
-
-.wall-tile-cb {
-    opacity: 0;
-}
-.cb .wall-tile-cb {
-    opacity: 0.3;
 }
 
 @keyframes selectable-wall {

@@ -57,10 +57,6 @@ interface AzulSummerPavilionGame extends Game {
     placeTile(tile: Tile, destinationId: string, left?: number, top?: number, rotation?: number): Promise<boolean>;
 }
 
-interface EnteringChooseFactoryArgs {
-    possibleFactories: number[];
-}
-
 interface EnteringChooseLineArgs {
     lines: number[];
 }
@@ -126,7 +122,6 @@ interface NotifUndoArgs {
     playerId: number;
     undo: UndoSelect;
     factoryTilesBefore: Tile[],
-    repositionTiles: boolean;
 }
 
 interface NotifTilesPlacedOnLineArgs {

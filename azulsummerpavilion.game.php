@@ -237,11 +237,14 @@ class AzulSummerPavilion extends Table {
                         $tiles = array_values(array_filter($factoryTiles, fn($tile) => $tile->type > 0));
                         $this->takeTiles($tiles[bga_rand(1, count($tiles)) - 1]->id, true);
                         break;
+                    case 'confirmAcquire':
+                        $this->confirmAcquire(true);
+                        break;
                     case 'chooseLine':
                         $this->selectLine(0, true);
                         break;
-                    case 'confirmLine':
-                        $this->confirmLine(true);
+                    case 'confirmPlay':
+                        $this->confirmPlay(true);
                         break;
                     default:
                         $this->gamestate->nextState("nextPlayer"); // all player actions got nextPlayer action as a "zombiePass"

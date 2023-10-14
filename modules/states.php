@@ -46,7 +46,26 @@ trait StateTrait {
         }
     }
 
-    function stNextPlayer() {
+    function stNextPlayerAcquire() {
+        $factoriesAllEmpty = $this->tiles->countCardInLocation('factory') == 0;
+        $playerId = self::getActivePlayerId();
+
+        self::incStat(1, 'turnsNumber');
+        self::incStat(1, 'turnsNumber', $playerId);
+
+        if ($factoriesAllEmpty) {
+            $this->gamestate->nextState('endAcquire');
+        } else {
+            $this->activeNextPlayer();
+        
+            $playerId = self::getActivePlayerId();
+            self::giveExtraTime($playerId);
+
+            $this->gamestate->nextState('nextPlayer');
+        }
+    }
+
+    function stNextPlayerPlay() {
         $factoriesAllEmpty = $this->tiles->countCardInLocation('factory') == 0;
         $playerId = self::getActivePlayerId();
 
@@ -64,6 +83,7 @@ trait StateTrait {
             $this->gamestate->nextState('nextPlayer');
         }
     }
+
 
     function stEndRound() {
         if ($this->isVariant()) {

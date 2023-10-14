@@ -61,11 +61,22 @@ $basicGameStates = [
         "transitions" => [ "" => ST_FILL_FACTORIES ]
     ],
 
-    ST_NEXT_PLAYER => [
-        "name" => "nextPlayer",
+    ST_NEXT_PLAYER_ACQUIRE => [
+        "name" => "nextPlayerAcquire",
         "description" => "",
         "type" => "game",
-        "action" => "stNextPlayer",
+        "action" => "stNextPlayerAcquire",
+        "transitions" => [
+            "nextPlayer" => ST_PLAYER_CHOOSE_TILE, 
+            "endAcquire" => ST_PLAYER_PLAY_TILE,
+        ],
+    ],
+
+    ST_NEXT_PLAYER_PLAY => [
+        "name" => "nextPlayerPlay",
+        "description" => "",
+        "type" => "game",
+        "action" => "stNextPlayerPlay",
         "transitions" => [
             "nextPlayer" => ST_PLAYER_CHOOSE_TILE, 
             "endRound" => ST_END_ROUND,
@@ -105,31 +116,27 @@ $playerActionsGameStates = [
             "takeTiles" 
         ],
         "transitions" => [
-            "placeTiles" => ST_PLAYER_CHOOSE_LINE,
-            "chooseFactory" => ST_PLAYER_CHOOSE_FACTORY,
-            "nextPlayer" => ST_NEXT_PLAYER,
+            "confirm" => ST_PLAYER_CONFIRM_ACQUIRE,
+            "nextPlayer" => ST_NEXT_PLAYER_ACQUIRE,
         ]
     ],
 
-    ST_PLAYER_CHOOSE_FACTORY => [
-        "name" => "chooseFactory",
-        "description" => clienttranslate('${actplayer} must choose a neighbor factory to place remaining ${number} ${color}'),
-        "descriptionmyturn" => clienttranslate('${you} must choose a neighbor factory to place remaining ${number} ${color}'),
+    ST_PLAYER_CONFIRM_ACQUIRE => [
+        "name" => "confirmAcquire",
+        "description" => clienttranslate('${actplayer} must confirm acquired tiles'),
+        "descriptionmyturn" => clienttranslate('${you} must confirm acquired tiles'),
         "type" => "activeplayer",
-        "args" => "argChooseFactory",
         "possibleactions" => [ 
-            "selectFactory",
+            "confirmAcquire",
             "undoTakeTiles",
          ],
         "transitions" => [
-            "nextFactory" => ST_PLAYER_CHOOSE_FACTORY,
-            "chooseLine" => ST_PLAYER_CHOOSE_LINE,
-            "nextPlayer" => ST_NEXT_PLAYER,
-            "undo" => ST_PLAYER_CHOOSE_TILE,
+            "nextPlayer" => ST_NEXT_PLAYER_ACQUIRE,
+            "undo" => ST_PLAYER_PLAY_TILE,
         ],
     ],
 
-    ST_PLAYER_CHOOSE_LINE => [
+    ST_PLAYER_PLAY_TILE => [
         "name" => "chooseLine",
         "description" => clienttranslate('${actplayer} must choose a line to place ${number} ${color}'),
         "descriptionmyturn" => clienttranslate('${you} must choose a line to place ${number} ${color}'),
@@ -140,24 +147,24 @@ $playerActionsGameStates = [
             "undoTakeTiles",
          ],
         "transitions" => [
-            "confirm" => ST_PLAYER_CONFIRM_LINE,
-            "nextPlayer" => ST_NEXT_PLAYER,
+            "confirm" => ST_PLAYER_CONFIRM_PLAY,
+            "nextPlayer" => ST_NEXT_PLAYER_PLAY,
             "undo" => ST_PLAYER_CHOOSE_TILE,
         ],
     ],
 
-    ST_PLAYER_CONFIRM_LINE => [
-        "name" => "confirmLine",
+    ST_PLAYER_CONFIRM_PLAY => [
+        "name" => "confirmPlay",
         "description" => clienttranslate('${actplayer} must confirm line choice'),
         "descriptionmyturn" => clienttranslate('${you} must confirm line choice'),
         "type" => "activeplayer",
         "possibleactions" => [ 
-            "confirmLine",
+            "confirmPlay",
             "undoSelectLine",
          ],
         "transitions" => [
-            "nextPlayer" => ST_NEXT_PLAYER,
-            "undo" => ST_PLAYER_CHOOSE_LINE,
+            "nextPlayer" => ST_NEXT_PLAYER_PLAY,
+            "undo" => ST_PLAYER_PLAY_TILE,
         ],
     ],
 
@@ -167,81 +174,6 @@ $playerActionsGameStates = [
         "type" => "game",
         "action" => "stEndRound",
         "transitions" => [
-            //"chooseColumns" => ST_MULTIPLAYER_CHOOSE_COLUMNS,
-            "chooseColumns" => ST_MULTIPLAYER_PRIVATE_CHOOSE_COLUMNS,
-            "placeTiles" => ST_PLACE_TILES,
-        ],
-    ],
-
-    ST_MULTIPLAYER_CHOOSE_COLUMNS => [
-        "name" => "chooseColumns",
-        "description" => clienttranslate('Players with complete lines must choose columns to place tiles'),
-        "descriptionmyturn" => clienttranslate('${you} must must choose columns to place tiles'),
-        "type" => "multipleactiveplayer",
-        "action" => "stChooseColumns",
-        "args" => "argChooseColumns",
-        "possibleactions" => [ 
-            "selectColumn",
-            "confirmColumns",
-            "undoColumns"
-        ],
-        "transitions" => [
-            "confirmColumns" => ST_PLACE_TILES,
-        ],
-    ],
-
-    ST_MULTIPLAYER_PRIVATE_CHOOSE_COLUMNS => [
-        "name" => "multiChooseColumns",
-        "description" => clienttranslate('Players with complete lines must choose columns to place tiles'),
-        "descriptionmyturn" => clienttranslate('${you} must must choose columns to place tiles'),
-        "type" => "multipleactiveplayer",
-        "initialprivate" => ST_PRIVATE_CHOOSE_COLUMNS,
-        "action" => "stMultiChooseColumns",
-        "possibleactions" => [ 
-        ],
-        "transitions" => [
-            "confirmColumns" => ST_PLACE_TILES,
-        ],
-    ],
-
-    ST_PRIVATE_CHOOSE_COLUMNS => [
-        "name" => "privateChooseColumns",
-        "descriptionmyturn" => clienttranslate('${you} must must choose columns to place tiles'),
-        "type" => "private",
-        "action" => "stPrivateChooseColumns",
-        "args" => "argChooseColumnForPlayer",
-        "possibleactions" => [
-            "selectColumn",
-            "confirmColumns",
-            "undoColumns"
-        ],
-        "transitions" => [
-            "next" => ST_PRIVATE_CHOOSE_COLUMNS,
-            "undo" => ST_PRIVATE_CHOOSE_COLUMNS,
-            "confirm" => ST_PRIVATE_CONFIRM_COLUMNS,
-        ],
-    ],
-
-    ST_PRIVATE_CONFIRM_COLUMNS => [
-        "name" => "privateConfirmColumns",
-        "descriptionmyturn" => clienttranslate('${you} must must choose columns to place tiles'),
-        "type" => "private",
-        "possibleactions" => [
-            "confirmColumns",
-            "undoColumns"
-        ],
-        "transitions" => [
-            "undo" => ST_PRIVATE_CHOOSE_COLUMNS,
-            "confirmColumns" => ST_PLACE_TILES,
-        ],
-    ],
-
-    ST_PLACE_TILES => [
-        "name" => "placeTiles",
-        "description" => "",
-        "type" => "game",
-        "action" => "stPlaceTiles",
-        "transitions" => [ 
             "newRound" => ST_FILL_FACTORIES,
             "endScore" => ST_END_SCORE,
         ],

@@ -197,9 +197,6 @@
   opacity: 1;
   transition: opacity 0.5s;
 }
-.player-table-wrapper .player-hand.empty {
-  opacity: 0;
-}
 .player-table-wrapper .player-name-wrapper {
   position: absolute;
   font-size: 20px;
@@ -256,9 +253,6 @@
 }
 .player-table-wrapper .player-table.variant {
   background: url("img/playerboard-variant.jpg");
-}
-.player-table-wrapper .player-table.variant .wall-tile-cb {
-  display: none;
 }
 .player-table-wrapper .player-table:not(.variant) .wall {
   background: rgba(255, 255, 255, 0.6901960784);
@@ -323,13 +317,6 @@
     box-shadow: 0 0 30px 15px white;
   }
 }
-.player-table-wrapper .player-table .wall .wall-tile-cb {
-  position: absolute;
-  width: 58px;
-  height: 58px;
-  background: url("img/red-cb.svg");
-  border-radius: 5px;
-}
 .player-table-wrapper .player-table .score-magnified {
   position: absolute;
   color: black;
@@ -349,14 +336,6 @@
 .player-table-wrapper .player-table .score-magnified.color {
   left: 593px;
   top: 425px;
-}
-
-.wall-tile-cb {
-  opacity: 0;
-}
-
-.cb .wall-tile-cb {
-  opacity: 0.3;
 }
 
 @keyframes selectable-wall {
@@ -445,10 +424,6 @@
   height: 32px;
   position: relative;
   box-shadow: 1px 1px 1px 1px rgba(0, 0, 0, 0.6);
-}
-
-.cb .tile.tile5 {
-  background: url("img/red-cb.svg");
 }
 
 .scoring-tile {
