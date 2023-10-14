@@ -32,41 +32,51 @@ trait ActionTrait {
 
         $factory = $tile->column;
         $factoryTiles = $this->getTilesFromDb($this->tiles->getCardsInLocation('factory', $factory));
+
+        $wildColor = $this->getWildColor();
+        $isWild = $tile->type == $wildColor;
+        if ($isWild) {
+            if ($this->array_some($factoryTiles, fn($factoryTile) => !in_array($factoryTile->type, [0, $wildColor]))) {
+                throw new BgaUserException(self::_("You cannot take a wild tile"));
+            }
+        }
+
+        $wildTiles = array_values(array_filter($factoryTiles, fn($factoryTile) => $factoryTile->type == $wildColor));
         
         $firstPlayerTokens = [];
         $selectedTiles = [];
         $discardedTiles = [];
         $hasFirstPlayer = false;
 
-        if ($factory == 0) {
-            $firstPlayerTokens = array_values(array_filter($factoryTiles, fn($fpTile) => $fpTile->type == 0));
-            $hasFirstPlayer = count($firstPlayerTokens) > 0;
-
+        if (!$isWild) {
             foreach($factoryTiles as $factoryTile) {
                 if ($tile->type == $factoryTile->type) {
                     $selectedTiles[] = $factoryTile;
                 }
             }
+        }
+        if (count($wildTiles) > 0) {
+            $selectedTiles[] = $wildTiles[0];
+        }
 
-            $this->tiles->moveCards(array_map('getIdPredicate', $selectedTiles), 'hand', $playerId);
+        if ($factory == 0) {
+            $firstPlayerTokens = array_values(array_filter($factoryTiles, fn($fpTile) => $fpTile->type == 0));
+            $hasFirstPlayer = count($firstPlayerTokens) > 0;
+
+
 
             if ($hasFirstPlayer) {
                 $this->putFirstPlayerTile($firstPlayerTokens, $playerId);
             }
         } else {
-            $discardOtherTiles = true;
-
             foreach($factoryTiles as $factoryTile) {
-                if ($tile->type == $factoryTile->type) {
-                    $selectedTiles[] = $factoryTile;
-                } else if ($discardOtherTiles) {
+                if (!$this->array_some($selectedTiles, fn($selectedTile) => $selectedTile->id == $factoryTile->id)) {
                     $discardedTiles[] = $factoryTile;
                 }
             }
-
-            $this->tiles->moveCards(array_map('getIdPredicate', $selectedTiles), 'hand', $playerId);
             $this->tiles->moveCards(array_map('getIdPredicate', $discardedTiles), 'factory', 0);
         }
+        $this->tiles->moveCards(array_map('getIdPredicate', $selectedTiles), 'hand', $playerId);
 
         
         if ($hasFirstPlayer) {

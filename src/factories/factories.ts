@@ -3,6 +3,7 @@ const HALF_TILE_SIZE = 29;
 const CENTER_FACTORY_TILE_SHIFT = 12;
 
 class Factories {
+    public wildColor: number;
     private tilesPositionsInCenter: PlacedTile[][] = [[], [], [], [], [], [], []]; // color, tiles
     private tilesInFactories: Tile[][][] = []; // factory, color, tiles
     bagCounter: Counter;
@@ -299,19 +300,30 @@ class Factories {
         }
     }
 
-    private getTilesOfSameColorInSameFactory(id: number): Tile[] {
+    private getTilesOfPossibleSelection(id: number): Tile[] {
+        const selectionTiles = [];
         for (const tilesInFactory of this.tilesInFactories) {
             for (const colorTilesInFactory of tilesInFactory) {
                 if (colorTilesInFactory.some(tile => tile.id === id)) {
-                    return colorTilesInFactory;
+                    const isWild = colorTilesInFactory[0].type == this.wildColor;
+                    if (isWild) {
+                        if (!tilesInFactory.some(aColorTilesInFactory => aColorTilesInFactory.length && ![0, this.wildColor].includes(aColorTilesInFactory[0].type))) {
+                            selectionTiles.push(tilesInFactory[this.wildColor][0]);
+                        }
+                    } else {
+                        selectionTiles.push(...colorTilesInFactory);
+                        if (tilesInFactory[this.wildColor].length) {
+                            selectionTiles.push(tilesInFactory[this.wildColor][0]);
+                        }
+                    }
                 }
             }
         }
-        return null;
+        return selectionTiles;
     }
 
     public tileMouseEnter(id: number) {
-        const tiles = this.getTilesOfSameColorInSameFactory(id);
+        const tiles = this.getTilesOfPossibleSelection(id);
         if (tiles?.length && this.tilesInFactories[0].some(tilesOfColor => tilesOfColor.some(tile => tile.id == id))) {
             document.getElementById(`tileCount${tiles[0].type}`)?.classList.add('hover');
         }
@@ -321,7 +333,7 @@ class Factories {
     }
 
     public tileMouseLeave(id: number) {
-        const tiles = this.getTilesOfSameColorInSameFactory(id);
+        const tiles = this.getTilesOfPossibleSelection(id);
         if (tiles?.length) {
             document.getElementById(`tileCount${tiles[0].type}`)?.classList.remove('hover');
         }

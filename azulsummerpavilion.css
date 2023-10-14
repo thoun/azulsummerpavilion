@@ -367,28 +367,28 @@
   z-index: 8;
 }
 .tile.tile1 {
-  background: url("img/black.svg") #231f20;
-  border-color: #231f20;
-}
-.tile.tile2 {
-  background: url("img/cyan.svg") #1dcad3;
-  border-color: #1dcad3;
-}
-.tile.tile3 {
-  background: url("img/blue.svg") #0083ad;
-  border-color: #0083ad;
-}
-.tile.tile4 {
-  background: url("img/yellow.svg") #ffbf3c;
-  border-color: #ffbf3c;
-}
-.tile.tile5 {
-  background: url("img/red.svg") #f5333f;
-  border-color: #f5333f;
-}
-.tile.tile6 {
   background: url("img/fuchsia.svg") fuchsia;
   border-color: fuchsia;
+}
+.tile.tile2 {
+  background: url("img/green.svg") lime;
+  border-color: lime;
+}
+.tile.tile3 {
+  background: url("img/orange.svg") orange;
+  border-color: orange;
+}
+.tile.tile4 {
+  background: url("img/yellow.svg") yellow;
+  border-color: yellow;
+}
+.tile.tile5 {
+  background: url("img/blue.svg") blue;
+  border-color: blue;
+}
+.tile.tile6 {
+  background: url("img/red.svg") red;
+  border-color: red;
 }
 .tile::after {
   position: absolute;

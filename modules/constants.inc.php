@@ -37,7 +37,6 @@ define('FAST_SCORING', 'FastScoring');
  * Variables
  */
 
-const ROUND = 'ROUND';
 const FIRST_PLAYER_FOR_NEXT_TURN = 'FirstPlayerForNextTurn';
 
 /*

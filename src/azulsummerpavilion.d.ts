@@ -57,6 +57,10 @@ interface AzulSummerPavilionGame extends Game {
     placeTile(tile: Tile, destinationId: string, left?: number, top?: number, rotation?: number): Promise<boolean>;
 }
 
+interface EnteringChooseTileArgs {
+    wildColor: number;
+}
+
 interface EnteringChoosePlaceArgs {
     placedTiles: Tile[];
 }

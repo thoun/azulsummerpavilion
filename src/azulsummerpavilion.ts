@@ -106,7 +106,7 @@ class AzulSummerPavilion implements AzulSummerPavilionGame {
 
         switch (stateName) {
             case 'chooseTile':
-                this.onEnteringChooseTile();
+                this.onEnteringChooseTile(args.args);
                 break;
             case 'choosePlace':
                 this.onEnteringChoosePlace(args.args);
@@ -123,8 +123,9 @@ class AzulSummerPavilion implements AzulSummerPavilionGame {
         }
     }
 
-    onEnteringChooseTile() {
+    onEnteringChooseTile(args: EnteringChooseTileArgs) {
         if ((this as any).isCurrentPlayerActive()) {
+            this.factories.wildColor = args.wildColor;
             dojo.addClass('factories', 'selectable');
         }
     }

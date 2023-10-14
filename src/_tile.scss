@@ -14,28 +14,28 @@
         z-index: 8;
     }
     &.tile1 {
-        background: url('img/black.svg') #231f20;
-        border-color: #231f20;
-    }
-    &.tile2 {
-        background: url('img/cyan.svg') #1dcad3;
-        border-color: #1dcad3;
-    }
-    &.tile3 {
-        background: url('img/blue.svg') #0083ad;
-        border-color: #0083ad;
-    }
-    &.tile4 {
-        background: url('img/yellow.svg') #ffbf3c;
-        border-color: #ffbf3c;
-    }
-    &.tile5 {
-        background: url('img/red.svg') #f5333f;
-        border-color: #f5333f;
-    }
-    &.tile6 {
         background: url('img/fuchsia.svg') fuchsia;
         border-color: fuchsia;
+    }
+    &.tile2 {
+        background: url('img/green.svg') lime;
+        border-color: lime;
+    }
+    &.tile3 {
+        background: url('img/orange.svg') orange;
+        border-color: orange;
+    }
+    &.tile4 {
+        background: url('img/yellow.svg') yellow;
+        border-color: yellow;
+    }
+    &.tile5 {
+        background: url('img/blue.svg') blue;
+        border-color: blue;
+    }
+    &.tile6 {
+        background: url('img/red.svg') red;
+        border-color: red;
     }
 
     overflow: hidden;

@@ -93,6 +93,10 @@ trait UtilTrait {
         self::DbQuery("UPDATE player SET player_score_aux = player_score_aux + $incScoreAux WHERE player_id = $playerId");
     }
 
+    function getWildColor() {
+        return intval(self::getStat('roundsNumber'));
+    }
+
     function getTileFromDb($dbTile) {
         if (!$dbTile || !array_key_exists('id', $dbTile)) {
             throw new Error('tile doesn\'t exists '.json_encode($dbTile));

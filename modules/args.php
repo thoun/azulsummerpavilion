@@ -12,6 +12,12 @@ trait ArgsTrait {
         game state.
     */
 
+    function argChooseTile() {
+        return [
+            'wildColor' => $this->getWildColor(),
+        ];
+    }
+
     function argChoosePlace() {
         $playerId = self::getActivePlayerId();
         $tiles = $this->getTilesFromDb($this->tiles->getCardsInLocation('hand', $playerId));

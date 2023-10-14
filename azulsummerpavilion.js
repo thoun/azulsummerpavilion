@@ -939,21 +939,34 @@ var Factories = /** @class */ (function () {
             _loop_4(type);
         }
     };
-    Factories.prototype.getTilesOfSameColorInSameFactory = function (id) {
+    Factories.prototype.getTilesOfPossibleSelection = function (id) {
+        var _this = this;
+        var selectionTiles = [];
         for (var _i = 0, _a = this.tilesInFactories; _i < _a.length; _i++) {
             var tilesInFactory = _a[_i];
             for (var _b = 0, tilesInFactory_1 = tilesInFactory; _b < tilesInFactory_1.length; _b++) {
                 var colorTilesInFactory = tilesInFactory_1[_b];
                 if (colorTilesInFactory.some(function (tile) { return tile.id === id; })) {
-                    return colorTilesInFactory;
+                    var isWild = colorTilesInFactory[0].type == this.wildColor;
+                    if (isWild) {
+                        if (!tilesInFactory.some(function (aColorTilesInFactory) { return aColorTilesInFactory.length && ![0, _this.wildColor].includes(aColorTilesInFactory[0].type); })) {
+                            selectionTiles.push(tilesInFactory[this.wildColor][0]);
+                        }
+                    }
+                    else {
+                        selectionTiles.push.apply(selectionTiles, colorTilesInFactory);
+                        if (tilesInFactory[this.wildColor].length) {
+                            selectionTiles.push(tilesInFactory[this.wildColor][0]);
+                        }
+                    }
                 }
             }
         }
-        return null;
+        return selectionTiles;
     };
     Factories.prototype.tileMouseEnter = function (id) {
         var _a;
-        var tiles = this.getTilesOfSameColorInSameFactory(id);
+        var tiles = this.getTilesOfPossibleSelection(id);
         if ((tiles === null || tiles === void 0 ? void 0 : tiles.length) && this.tilesInFactories[0].some(function (tilesOfColor) { return tilesOfColor.some(function (tile) { return tile.id == id; }); })) {
             (_a = document.getElementById("tileCount".concat(tiles[0].type))) === null || _a === void 0 ? void 0 : _a.classList.add('hover');
         }
@@ -963,7 +976,7 @@ var Factories = /** @class */ (function () {
     };
     Factories.prototype.tileMouseLeave = function (id) {
         var _a;
-        var tiles = this.getTilesOfSameColorInSameFactory(id);
+        var tiles = this.getTilesOfPossibleSelection(id);
         if (tiles === null || tiles === void 0 ? void 0 : tiles.length) {
             (_a = document.getElementById("tileCount".concat(tiles[0].type))) === null || _a === void 0 ? void 0 : _a.classList.remove('hover');
         }
@@ -1176,7 +1189,7 @@ var AzulSummerPavilion = /** @class */ (function () {
         log('Entering state: ' + stateName, args.args);
         switch (stateName) {
             case 'chooseTile':
-                this.onEnteringChooseTile();
+                this.onEnteringChooseTile(args.args);
                 break;
             case 'choosePlace':
                 this.onEnteringChoosePlace(args.args);
@@ -1192,8 +1205,9 @@ var AzulSummerPavilion = /** @class */ (function () {
                 break;
         }
     };
-    AzulSummerPavilion.prototype.onEnteringChooseTile = function () {
+    AzulSummerPavilion.prototype.onEnteringChooseTile = function (args) {
         if (this.isCurrentPlayerActive()) {
+            this.factories.wildColor = args.wildColor;
             dojo.addClass('factories', 'selectable');
         }
     };

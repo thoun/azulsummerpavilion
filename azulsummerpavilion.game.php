@@ -47,8 +47,7 @@ class AzulSummerPavilion extends Table {
         parent::__construct();
         
         self::initGameStateLabels([
-            ROUND => 10,
-            FIRST_PLAYER_FOR_NEXT_TURN => 11,
+            FIRST_PLAYER_FOR_NEXT_TURN => 10,
 
             VARIANT_OPTION => 100,
             UNDO => 101,
@@ -95,7 +94,6 @@ class AzulSummerPavilion extends Table {
         /************ Start the game initialization *****/
 
         // Init global values with their initial values
-        self::setGameStateInitialValue(ROUND, 1);
         self::setGameStateInitialValue(FIRST_PLAYER_FOR_NEXT_TURN, intval(array_keys($players)[0]));
         
         // Init game statistics

@@ -112,6 +112,7 @@ $playerActionsGameStates = [
         "description" => clienttranslate('${actplayer} must choose tiles'),
         "descriptionmyturn" => clienttranslate('${you} must choose tiles'),
         "type" => "activeplayer",
+        "args" => "argChooseTile",
         "possibleactions" => [ 
             "takeTiles" 
         ],
