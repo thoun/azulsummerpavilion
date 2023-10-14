@@ -42,10 +42,6 @@ class Factories {
 
         dojo.place(html, 'factories');
 
-        for (let factoryIndex=1; factoryIndex<=this.factoryNumber; factoryIndex++) {
-            document.getElementById(`factory${factoryIndex}`).addEventListener('click', () => this.game.selectFactory(factoryIndex));
-        }
-
         this.fillFactories(factories, remainingTiles, false);
     }
 

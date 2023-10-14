@@ -49,7 +49,6 @@ interface AzulSummerPavilionGame extends Game {
     getZoom(): number;
     isVariant(): boolean;
     takeTiles(id: number): void;
-    selectFactory(factoryIndex: number): any;
     playTile(line: number): void;
     selectPlace(line: number, column: number): void;
     removeTile(tile: Tile): void;
@@ -64,6 +63,11 @@ interface EnteringChooseTileArgs {
 interface EnteringChoosePlaceArgs {
     placedTiles: Tile[];
 }
+
+interface EnteringChooseColorArgs {
+    possibleColors: number[];
+}
+
 
 interface EnteringPlayTileArgs {
     selectedPlace: number[];

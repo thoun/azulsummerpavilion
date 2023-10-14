@@ -33,11 +33,39 @@ trait ArgsTrait {
         ];
     }
 
+    function argChooseColor() {
+        $selectedPlace = $this->getGlobalVariable(SELECTED_PLACE);
+        $row = $selectedPlace[0];
+        $column = $selectedPlace[1];
+        $selectedColor = ($row + $this->indexForDefaultWall[$column] - 1) % 5 + 1; // TODO
+
+        $possibleColors = [];
+        if ($selectedColor == 0) {
+            $playerId = self::getActivePlayerId();
+            $hand = $this->getTilesFromDb($this->tiles->getCardsInLocation('hand', $playerId));
+            $wildColor = $this->getWildColor();
+            $number = $row;
+            for ($i = 1; $i <=6; $i++) {
+                if ($this->getMaxWildTiles($hand, $number, $i, $wildColor) !== null) {
+                    $possibleColors[] = $i;
+                }
+            }
+
+        } else {
+            $possibleColors = [$selectedColor];
+        }
+        return [
+            'possibleColors' => $possibleColors,
+        ];
+    }
+
     function getMaxWildTiles(array $hand, int $cost, int $color, int $wildColor) { // null if cannot pay, else number max of wild tiles that can be used (0 is still valid choice!)
         $colorTiles = array_values(array_filter($hand, fn($tile) => $tile->type == $color));
         $wildTiles = array_values(array_filter($hand, fn($tile) => $tile->type == $wildColor));
 
-        if (count($colorTiles) + count($wildTiles) < $cost) {
+        if ($color == $wildColor) {
+            return count($colorTiles) < $cost ? null : 0;
+        } else if (count($colorTiles) + count($wildTiles) < $cost) {
             return null;
         } else {
             return min($cost - 1, count($wildTiles));

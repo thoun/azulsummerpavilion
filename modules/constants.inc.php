@@ -13,6 +13,7 @@ const ST_PLAYER_CONFIRM_ACQUIRE = 25;
 const ST_NEXT_PLAYER_ACQUIRE = 30;
 
 const ST_PLAYER_CHOOSE_PLACE = 40;
+const ST_PLAYER_CHOOSE_COLOR = 41;
 const ST_PLAYER_PLAY_TILE = 42;
 const ST_PLAYER_CONFIRM_PLAY = 70;
 
@@ -46,5 +47,6 @@ const FIRST_PLAYER_FOR_NEXT_TURN = 'FirstPlayerForNextTurn';
 const UNDO_SELECT = 'UndoSelect';
 const UNDO_PLACE = 'UndoPlace';
 const SELECTED_PLACE = 'SelectedPlace';
+const SELECTED_COLOR = 'SelectedColor';
 
 ?>

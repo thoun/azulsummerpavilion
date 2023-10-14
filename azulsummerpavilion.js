@@ -668,7 +668,6 @@ var HALF_TILE_SIZE = 29;
 var CENTER_FACTORY_TILE_SHIFT = 12;
 var Factories = /** @class */ (function () {
     function Factories(game, factoryNumber, factories, remainingTiles) {
-        var _this = this;
         this.game = game;
         this.factoryNumber = factoryNumber;
         this.tilesPositionsInCenter = [[], [], [], [], [], [], []]; // color, tiles
@@ -695,12 +694,6 @@ var Factories = /** @class */ (function () {
         }
         html += "</div>";
         dojo.place(html, 'factories');
-        var _loop_2 = function (factoryIndex) {
-            document.getElementById("factory".concat(factoryIndex)).addEventListener('click', function () { return _this.game.selectFactory(factoryIndex); });
-        };
-        for (var factoryIndex = 1; factoryIndex <= this.factoryNumber; factoryIndex++) {
-            _loop_2(factoryIndex);
-        }
         this.fillFactories(factories, remainingTiles, false);
     }
     Factories.prototype.getWidth = function () {
@@ -738,7 +731,7 @@ var Factories = /** @class */ (function () {
         var _this = this;
         if (animation === void 0) { animation = true; }
         var tileIndex = 0;
-        var _loop_3 = function (factoryIndex) {
+        var _loop_2 = function (factoryIndex) {
             this_1.tilesInFactories[factoryIndex] = [[], [], [], [], [], [], []]; // color, tiles
             var factoryTiles = factories[factoryIndex];
             factoryTiles.forEach(function (tile, index) {
@@ -778,7 +771,7 @@ var Factories = /** @class */ (function () {
         };
         var this_1 = this;
         for (var factoryIndex = 0; factoryIndex <= this.factoryNumber; factoryIndex++) {
-            _loop_3(factoryIndex);
+            _loop_2(factoryIndex);
         }
         this.updateDiscardedTilesNumbers();
         this.setRemainingTiles(remainingTiles);
@@ -911,7 +904,7 @@ var Factories = /** @class */ (function () {
     };
     Factories.prototype.updateDiscardedTilesNumbers = function () {
         var _this = this;
-        var _loop_4 = function (type) {
+        var _loop_3 = function (type) {
             var number = this_2.tilesPositionsInCenter[type].length;
             var numberDiv = document.getElementById("tileCount".concat(type));
             if (!number) {
@@ -936,7 +929,7 @@ var Factories = /** @class */ (function () {
         };
         var this_2 = this;
         for (var type = 1; type <= 5; type++) {
-            _loop_4(type);
+            _loop_3(type);
         }
     };
     Factories.prototype.getTilesOfPossibleSelection = function (id) {
@@ -1052,28 +1045,28 @@ var PlayerTable = /** @class */ (function () {
         html += "   \n            </div>\n        </div>";
         dojo.place(html, 'centered-table');
         this.placeTilesOnHand(player.hand);
-        var _loop_5 = function (line) {
-            var _loop_7 = function (column) {
+        var _loop_4 = function (line) {
+            var _loop_6 = function (column) {
                 document.getElementById("player-table-".concat(this_3.playerId, "-wall-spot-").concat(line, "-").concat(column)).addEventListener('click', function () {
                     _this.game.selectPlace(line, column);
                 });
             };
             for (var column = 1; column <= 5; column++) {
-                _loop_7(column);
+                _loop_6(column);
             }
         };
         var this_3 = this;
         for (var line = 1; line <= 5; line++) {
-            _loop_5(line);
+            _loop_4(line);
         }
         document.getElementById("player-table-".concat(this.playerId, "-column0")).addEventListener('click', function () { return _this.game.selectPlace(0, 0); });
-        var _loop_6 = function (i) {
+        var _loop_5 = function (i) {
             var tiles = player.lines.filter(function (tile) { return tile.line === i; });
             this_4.placeTilesOnLine(tiles, i);
         };
         var this_4 = this;
         for (var i = -1; i <= 5; i++) {
-            _loop_6(i);
+            _loop_5(i);
         }
         this.placeTilesOnWall(player.wall);
     }
@@ -1203,16 +1196,16 @@ var AzulSummerPavilion = /** @class */ (function () {
     AzulSummerPavilion.prototype.onEnteringChoosePlace = function (args) {
         if (this.isCurrentPlayerActive()) {
             var playerId = this.getPlayerId();
-            var _loop_8 = function (x) {
-                var _loop_9 = function (y) {
+            var _loop_7 = function (x) {
+                var _loop_8 = function (y) {
                     document.getElementById("player-table-".concat(playerId, "-wall-spot-").concat(x, "-").concat(y)).classList.toggle('selectable', !args.placedTiles.some(function (tile) { return tile.line == x && tile.column == y; }));
                 };
                 for (var y = 1; y <= 5; y++) {
-                    _loop_9(y);
+                    _loop_8(y);
                 }
             };
             for (var x = 1; x <= 5; x++) {
-                _loop_8(x);
+                _loop_7(x);
             }
         }
     };
@@ -1271,16 +1264,24 @@ var AzulSummerPavilion = /** @class */ (function () {
                     this.addActionButton('undoAcquire_button', _("Undo tile selection"), function () { return _this.undoTakeTiles(); }, null, null, 'gray');
                     this.startActionTimer('confirmAcquire_button', 5);
                     break;
+                case 'chooseColor':
+                    var chooseColorArgs = args;
+                    chooseColorArgs.possibleColors.forEach(function (color) {
+                        var label = _this.format_string_recursive('${number} ${color}', { number: 1, type: color });
+                        _this.addActionButton("chooseColor".concat(color, "_button"), label, function () { return _this.selectColor(color); });
+                    });
+                    this.addActionButton('undoPlayTile_button', _("Undo line selection"), function () { return _this.undoPlayTile(); }, null, null, 'gray');
+                    break;
                 case 'playTile':
                     var playTileArgs = args;
-                    var _loop_10 = function (i) {
+                    var _loop_9 = function (i) {
                         var label = this_5.format_string_recursive('${number} ${color}', { number: playTileArgs.number - i, type: playTileArgs.color });
                         label += this_5.format_string_recursive('${number} ${color}', { number: i, type: playTileArgs.wildColor });
                         this_5.addActionButton("playTile".concat(i, "_button"), label, function () { return _this.playTile(i); });
                     };
                     var this_5 = this;
                     for (var i = 0; i <= playTileArgs.maxWildTiles; i++) {
-                        _loop_10(i);
+                        _loop_9(i);
                     }
                     this.addActionButton('undoPlayTile_button', _("Undo line selection"), function () { return _this.undoPlayTile(); }, null, null, 'gray');
                     break;
@@ -1518,12 +1519,12 @@ var AzulSummerPavilion = /** @class */ (function () {
         }
         this.takeAction('confirmAcquire');
     };
-    AzulSummerPavilion.prototype.selectFactory = function (factory) {
-        if (!this.checkAction('selectFactory', true)) {
+    AzulSummerPavilion.prototype.selectColor = function (color) {
+        if (!this.checkAction('selectColor')) {
             return;
         }
-        this.takeAction('selectFactory', {
-            factory: factory
+        this.takeAction('selectColor', {
+            color: color
         });
     };
     AzulSummerPavilion.prototype.playTile = function (wilds) {

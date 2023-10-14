@@ -205,6 +205,14 @@ class AzulSummerPavilion implements AzulSummerPavilionGame {
                     (this as any).addActionButton('undoAcquire_button', _("Undo tile selection"), () => this.undoTakeTiles(), null, null, 'gray');
                     this.startActionTimer('confirmAcquire_button', 5);
                     break;
+                case 'chooseColor':
+                    const chooseColorArgs = args as EnteringChooseColorArgs;
+                    chooseColorArgs.possibleColors.forEach(color => {
+                        const label = this.format_string_recursive('${number} ${color}', { number: 1, type: color });
+                        (this as any).addActionButton(`chooseColor${color}_button`, label, () => this.selectColor(color));
+                    });
+                    (this as any).addActionButton('undoPlayTile_button', _("Undo line selection"), () => this.undoPlayTile(), null, null, 'gray');
+                    break;
                 case 'playTile':
                     const playTileArgs = args as EnteringPlayTileArgs;
                     for (let i = 0; i <= playTileArgs.maxWildTiles; i++) {
@@ -488,13 +496,13 @@ class AzulSummerPavilion implements AzulSummerPavilionGame {
         this.takeAction('confirmAcquire');
     }
 
-    public selectFactory(factory: number) {
-        if(!(this as any).checkAction('selectFactory', true)) {
+    public selectColor(color: number) {
+        if(!(this as any).checkAction('selectColor')) {
             return;
         }
 
-        this.takeAction('selectFactory', {
-            factory
+        this.takeAction('selectColor', {
+            color
         });
     }
 

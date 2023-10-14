@@ -231,6 +231,9 @@ class AzulSummerPavilion extends Table {
                     case 'choosePlace':
                         $this->selectPlace(0, 0);
                         break;
+                    case 'chooseColor':
+                        $this->selectColor(0);
+                        break;
                     case 'playTile':
                         $this->playTile(0, true);
                         break;

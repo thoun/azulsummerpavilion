@@ -27,13 +27,6 @@
         display: inline-block;
     }
 
-    &.selectable {
-        .tile:not(.tile0) {
-            cursor: pointer;
-            pointer-events: all;
-        }
-    }
-
     .tile.hover {
         box-shadow: 0 0 5px 5px white;
     }

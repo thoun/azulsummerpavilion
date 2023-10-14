@@ -148,6 +148,21 @@ $playerActionsGameStates = [
             "pass",
          ],
         "transitions" => [
+            "next" => ST_PLAYER_CHOOSE_COLOR,
+        ],
+    ],
+
+    ST_PLAYER_CHOOSE_COLOR => [
+        "name" => "chooseColor",
+        "description" => clienttranslate('${actplayer} must choose a color to place'),
+        "descriptionmyturn" => clienttranslate('${you} must choose a color to place'),
+        "type" => "activeplayer",
+        "args" => "argChooseColor",
+        "possibleactions" => [ 
+            "selectColor",
+            "pass",
+         ],
+        "transitions" => [
             "next" => ST_PLAYER_PLAY_TILE,
         ],
     ],

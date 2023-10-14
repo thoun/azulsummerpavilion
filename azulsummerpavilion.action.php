@@ -73,6 +73,17 @@
       self::ajaxResponse();
     }
 
+    public function selectColor() {
+      self::setAjaxMode();
+
+      // Retrieve arguments
+      $color = self::getArg("color", AT_posint, true);
+
+      $this->game->selectColor($color);
+
+      self::ajaxResponse();
+    }
+
     public function playTile() {
       self::setAjaxMode();
 

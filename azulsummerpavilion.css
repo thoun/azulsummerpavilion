@@ -85,10 +85,6 @@
   position: absolute;
   display: inline-block;
 }
-#factories.selectable .tile:not(.tile0) {
-  cursor: pointer;
-  pointer-events: all;
-}
 #factories .tile.hover {
   box-shadow: 0 0 5px 5px white;
 }
