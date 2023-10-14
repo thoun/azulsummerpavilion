@@ -411,6 +411,10 @@
   background: url("img/red.svg") #f5333f;
   border-color: #f5333f;
 }
+.tile.tile6 {
+  background: url("img/fuchsia.svg") fuchsia;
+  border-color: fuchsia;
+}
 .tile::after {
   position: absolute;
   top: 0;

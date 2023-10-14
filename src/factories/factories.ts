@@ -62,7 +62,7 @@ class Factories {
     }
 
     public factoryTilesRemoved(factory: number) {
-        this.tilesInFactories[factory] = [[], [], [], [], [], []];
+        this.tilesInFactories[factory] = [[], [], [], [], [], [], []];
     }
 
     private getCoordinatesInFactory(tileIndex: number, tileNumber: number) {
@@ -89,7 +89,7 @@ class Factories {
     public fillFactories(factories: { [factoryId: number]: Tile[]; }, remainingTiles: number, animation: boolean = true) {
         let tileIndex = 0;
         for (let factoryIndex=0; factoryIndex<=this.factoryNumber; factoryIndex++) {
-            this.tilesInFactories[factoryIndex] = [[], [], [], [], [], []]; // color, tiles
+            this.tilesInFactories[factoryIndex] = [[], [], [], [], [], [], []]; // color, tiles
             const factoryTiles = factories[factoryIndex];
             factoryTiles.forEach((tile, index) => {
                 let left = null;

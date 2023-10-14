@@ -196,16 +196,7 @@ trait ActionTrait {
         $tiles = $this->getTilesFromDb($this->tiles->getCardsInLocation('hand', $playerId));
         $this->placeTilesOnLine($playerId, $tiles, $line, true);
 
-        $lastRoundLogged = intval(self::getGameStateValue(END_TURN_LOGGED)) > 0;
-        if ($this->lineWillBeComplete($playerId, $line) && !$lastRoundLogged) {
-            self::notifyAllPlayers('lastRound', clienttranslate('${player_name} will complete a line, it\'s last turn !'), [
-                'playerId' => $playerId,
-                'player_name' => self::getActivePlayerName(),
-            ]);
-            self::setGameStateValue(END_TURN_LOGGED, 1);
-        }
-
-        $this->setGlobalVariable(UNDO_PLACE, new Undo($tiles, null, null, $lastRoundLogged));
+        $this->setGlobalVariable(UNDO_PLACE, new Undo($tiles, null, null, false));
 
         if ($this->allowUndo()) {
             $this->gamestate->nextState('confirm');
@@ -234,11 +225,6 @@ trait ActionTrait {
         $undo = $this->getGlobalVariable(UNDO_PLACE);
 
         $this->tiles->moveCards(array_map('getIdPredicate', $undo->tiles), 'hand', $playerId);
-
-        $lastRoundLogged = intval(self::getGameStateValue(END_TURN_LOGGED)) > 0;
-        if ($lastRoundLogged && !$undo->lastRoundBefore) {
-            self::setGameStateValue(END_TURN_LOGGED, 0);
-        }
 
         self::notifyAllPlayers('undoSelectLine', clienttranslate('${player_name} cancels tile placement'), [
             'playerId' => $playerId,

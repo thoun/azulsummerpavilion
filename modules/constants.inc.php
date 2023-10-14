@@ -40,8 +40,8 @@ define('FAST_SCORING', 'FastScoring');
  * Variables
  */
 
-define('FIRST_PLAYER_FOR_NEXT_TURN', 'FirstPlayerForNextTurn');
-define('END_TURN_LOGGED', 'EndTurnLogged');
+const ROUND = 'ROUND';
+const FIRST_PLAYER_FOR_NEXT_TURN = 'FirstPlayerForNextTurn';
 
 /*
  * Global variables

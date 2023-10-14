@@ -27,12 +27,6 @@ trait StateTrait {
 
         if ($this->isVariant()) {
             self::DbQuery("UPDATE player SET selected_columns = '{}'");
-
-            $lastRoundLogged = intval(self::getGameStateValue(END_TURN_LOGGED)) > 0;
-            if ($lastRoundLogged) {
-                self::setGameStateValue(END_TURN_LOGGED, 0);
-                self::notifyAllPlayers('removeLastRound', '', []);
-            }
         }
 
         self::notifyAllPlayers("factoriesFilled", clienttranslate("A new round begins !"), [

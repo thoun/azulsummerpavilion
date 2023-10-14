@@ -33,6 +33,10 @@
         background: url('img/red.svg') #f5333f;
         border-color: #f5333f;
     }
+    &.tile6 {
+        background: url('img/fuchsia.svg') fuchsia;
+        border-color: fuchsia;
+    }
 
     overflow: hidden;
     // shimmer animation

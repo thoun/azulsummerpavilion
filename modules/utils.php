@@ -121,8 +121,8 @@ trait UtilTrait {
     function setupTiles() {
         $cards = [];
         $cards[] = [ 'type' => 0, 'type_arg' => null, 'nbr' => 1 ];
-        for ($color=1; $color<=5; $color++) {
-            $cards[] = [ 'type' => $color, 'type_arg' => null, 'nbr' => 20 ];
+        for ($color=1; $color<=6; $color++) {
+            $cards[] = [ 'type' => $color, 'type_arg' => null, 'nbr' => 22 ];
         }
         $this->tiles->createCards($cards, 'deck');
         $this->tiles->shuffle('deck');

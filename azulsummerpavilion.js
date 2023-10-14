@@ -688,7 +688,7 @@ var Factories = /** @class */ (function () {
         this.updateDiscardedTilesNumbers();
     };
     Factories.prototype.factoryTilesRemoved = function (factory) {
-        this.tilesInFactories[factory] = [[], [], [], [], [], []];
+        this.tilesInFactories[factory] = [[], [], [], [], [], [], []];
     };
     Factories.prototype.getCoordinatesInFactory = function (tileIndex, tileNumber) {
         var angle = tileIndex * Math.PI * 2 / tileNumber - Math.PI / 4; // in radians
@@ -713,7 +713,7 @@ var Factories = /** @class */ (function () {
         if (animation === void 0) { animation = true; }
         var tileIndex = 0;
         var _loop_3 = function (factoryIndex) {
-            this_1.tilesInFactories[factoryIndex] = [[], [], [], [], [], []]; // color, tiles
+            this_1.tilesInFactories[factoryIndex] = [[], [], [], [], [], [], []]; // color, tiles
             var factoryTiles = factories[factoryIndex];
             factoryTiles.forEach(function (tile, index) {
                 var left = null;
