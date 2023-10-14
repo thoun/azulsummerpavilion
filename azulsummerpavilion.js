@@ -792,7 +792,11 @@ var Factories = /** @class */ (function () {
             else {
                 var rotation = Math.round(Math.random() * 90 - 45);
                 _this.game.placeTile(tile, "factory".concat(args.factory), left, top, rotation);
-                _this.game.animationManager.slideFromElement(document.getElementById("tile".concat(tile.id)), document.getElementById("bag"), { finalTransform: "rotate(".concat(rotation, "deg)") });
+                _this.game.animationManager.play(new BgaSlideAnimation({
+                    element: document.getElementById("tile".concat(tile.id)),
+                    fromElement: document.getElementById("bag"),
+                    finalTransform: "rotate(".concat(rotation, "deg)"),
+                }));
             }
         });
         this.updateTilesInFactories(factoryTiles, args.factory);
@@ -1569,7 +1573,9 @@ var AzulSummerPavilion = /** @class */ (function () {
     AzulSummerPavilion.prototype.placeFirstPlayerToken = function (playerId) {
         var firstPlayerToken = document.getElementById('firstPlayerToken');
         if (firstPlayerToken) {
-            this.animationManager.attachWithSlideAnimation(firstPlayerToken, document.getElementById("player_board_".concat(playerId, "_firstPlayerWrapper")));
+            this.animationManager.attachWithAnimation(new BgaSlideAnimation({
+                element: firstPlayerToken
+            }), document.getElementById("player_board_".concat(playerId, "_firstPlayerWrapper")));
         }
         else {
             dojo.place('<div id="firstPlayerToken" class="tile tile0"></div>', "player_board_".concat(playerId, "_firstPlayerWrapper"));

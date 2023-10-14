@@ -164,11 +164,11 @@ class Factories {
                 } else {
                     const rotation = Math.round(Math.random()*90 - 45);
                     this.game.placeTile(tile, `factory${args.factory}`, left, top, rotation);
-                    this.game.animationManager.slideFromElement(
-                        document.getElementById(`tile${tile.id}`),
-                        document.getElementById(`bag`),
-                        { finalTransform: `rotate(${rotation}deg)` },
-                    );
+                    this.game.animationManager.play(new BgaSlideAnimation({
+                        element: document.getElementById(`tile${tile.id}`),
+                        fromElement: document.getElementById(`bag`),
+                        finalTransform: `rotate(${rotation}deg)`,
+                    }));
                 }
             });
             this.updateTilesInFactories(factoryTiles, args.factory);

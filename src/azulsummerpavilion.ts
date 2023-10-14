@@ -580,8 +580,10 @@ class AzulSummerPavilion implements AzulSummerPavilionGame {
     placeFirstPlayerToken(playerId: number) {
         const firstPlayerToken = document.getElementById('firstPlayerToken');
         if (firstPlayerToken) {
-            this.animationManager.attachWithSlideAnimation(
-                firstPlayerToken, 
+            this.animationManager.attachWithAnimation(
+                new BgaSlideAnimation({
+                    element: firstPlayerToken
+                }), 
                 document.getElementById(`player_board_${playerId}_firstPlayerWrapper`),
             );
         } else {
