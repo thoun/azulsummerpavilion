@@ -1033,33 +1033,31 @@ var PlayerTable = /** @class */ (function () {
         this.playerId = Number(player.id);
         var nameClass = player.name.indexOf(' ') !== -1 ? 'with-space' : 'without-space';
         var html = "<div id=\"player-table-wrapper-".concat(this.playerId, "\" class=\"player-table-wrapper\">\n        <div id=\"player-hand-").concat(this.playerId, "\" class=\"player-hand\">\n        </div>\n        <div id=\"player-table-").concat(this.playerId, "\" class=\"player-table ").concat(this.game.isVariant() ? 'variant' : '', "\" style=\"--player-color: #").concat(player.color, ";\">\n            <div class=\"player-name-wrapper shift\">\n                <div id=\"player-name-shift-").concat(this.playerId, "\" class=\"player-name color ").concat(game.isDefaultFont() ? 'standard' : 'azul', " ").concat(nameClass, "\">").concat(player.name, "</div>\n            </div>\n            <div class=\"player-name-wrapper\">\n                <div id=\"player-name-").concat(this.playerId, "\" class=\"player-name dark ").concat(game.isDefaultFont() ? 'standard' : 'azul', " ").concat(nameClass, "\">").concat(player.name, "</div>\n            </div>\n            ");
-        html += "<div id=\"player-table-".concat(this.playerId, "-line0\" class=\"floor line\"></div>");
-        html += "<div id=\"player-table-".concat(this.playerId, "-wall\" class=\"wall\">");
-        for (var line = 1; line <= 5; line++) {
-            for (var column = 1; column <= 5; column++) {
-                html += "<div id=\"player-table-".concat(this.playerId, "-wall-spot-").concat(line, "-").concat(column, "\" class=\"wall-spot\" style=\"left: ").concat(69 * (column - 1) - 1, "px; top: ").concat(70 * (line - 1) - 1, "px;\"></div>");
+        for (var star = 0; star <= 6; star++) {
+            html += "<div class=\"star star".concat(star, "\">");
+            for (var space = 1; space <= 6; space++) {
+                html += "<div id=\"player-table-".concat(this.playerId, "-star-").concat(star, "-space-").concat(space, "\" class=\"space space").concat(space, "\"></div>");
             }
+            html += "</div>";
         }
-        html += "</div>\n        <div id=\"player-table-".concat(this.playerId, "-column0\" class=\"floor wall-spot\"></div>");
-        html += "\n            <div class=\"score-magnified row\">2</div>\n            <div class=\"score-magnified column\">7</div>\n            <div class=\"score-magnified color\">10</div>\n        ";
-        html += "   \n            </div>\n        </div>";
+        html += "</div>";
+        html += "\n        </div>";
         dojo.place(html, 'centered-table');
         this.placeTilesOnHand(player.hand);
-        var _loop_4 = function (line) {
-            var _loop_6 = function (column) {
-                document.getElementById("player-table-".concat(this_3.playerId, "-wall-spot-").concat(line, "-").concat(column)).addEventListener('click', function () {
-                    _this.game.selectPlace(line, column);
+        var _loop_4 = function (star) {
+            var _loop_6 = function (space) {
+                document.getElementById("player-table-".concat(this_3.playerId, "-star-").concat(star, "-space-").concat(space)).addEventListener('click', function () {
+                    _this.game.selectPlace(star, space);
                 });
             };
-            for (var column = 1; column <= 5; column++) {
-                _loop_6(column);
+            for (var space = 1; space <= 5; space++) {
+                _loop_6(space);
             }
         };
         var this_3 = this;
-        for (var line = 1; line <= 5; line++) {
-            _loop_4(line);
+        for (var star = 0; star <= 6; star++) {
+            _loop_4(star);
         }
-        document.getElementById("player-table-".concat(this.playerId, "-column0")).addEventListener('click', function () { return _this.game.selectPlace(0, 0); });
         var _loop_5 = function (i) {
             var tiles = player.lines.filter(function (tile) { return tile.line === i; });
             this_4.placeTilesOnLine(tiles, i);
@@ -1084,7 +1082,7 @@ var PlayerTable = /** @class */ (function () {
     };
     PlayerTable.prototype.placeTilesOnWall = function (tiles) {
         var _this = this;
-        tiles.forEach(function (tile) { return _this.game.placeTile(tile, "player-table-".concat(_this.playerId, "-wall-spot-").concat(tile.line, "-").concat(tile.column)); });
+        tiles.forEach(function (tile) { return _this.game.placeTile(tile, "player-table-".concat(_this.playerId, "-star-").concat(tile.line, "-space-").concat(tile.column)); });
     };
     PlayerTable.prototype.setFont = function (prefValue) {
         var defaultFont = prefValue === 1;
@@ -1199,27 +1197,16 @@ var AzulSummerPavilion = /** @class */ (function () {
     AzulSummerPavilion.prototype.onEnteringChoosePlace = function (args) {
         if (this.isCurrentPlayerActive()) {
             var playerId = this.getPlayerId();
-            var _loop_7 = function (x) {
-                var _loop_8 = function (y) {
-                    document.getElementById("player-table-".concat(playerId, "-wall-spot-").concat(x, "-").concat(y)).classList.toggle('selectable', !args.placedTiles.some(function (tile) { return tile.line == x && tile.column == y; }));
-                };
-                for (var y = 1; y <= 5; y++) {
-                    _loop_8(y);
+            for (var star = 0; star <= 6; star++) {
+                for (var space = 1; space <= 6; space++) {
+                    document.getElementById("player-table-".concat(playerId, "-star-").concat(star, "-space-").concat(space)).classList.toggle('selectable', args.possibleSpaces.includes(star * 100 + space));
                 }
-            };
-            for (var x = 1; x <= 5; x++) {
-                _loop_7(x);
             }
         }
     };
     AzulSummerPavilion.prototype.onEnteringPlayTile = function (args) {
         if (this.isCurrentPlayerActive()) {
-            var playerId = this.getPlayerId();
-            for (var x = 1; x <= 5; x++) {
-                for (var y = 1; y <= 5; y++) {
-                    document.getElementById("player-table-".concat(playerId, "-wall-spot-").concat(x, "-").concat(y)).classList.toggle('selectable', args.selectedPlace[0] == x && args.selectedPlace[1] == y);
-                }
-            }
+            // TODO place ghost
         }
     };
     AzulSummerPavilion.prototype.onEnteringChooseKeptTiles = function (args) {
@@ -1253,14 +1240,14 @@ var AzulSummerPavilion = /** @class */ (function () {
     AzulSummerPavilion.prototype.onLeavingChoosePlace = function () {
         var _a;
         var playerId = this.getPlayerId();
-        for (var x = 1; x <= 5; x++) {
-            for (var y = 1; y <= 5; y++) {
-                (_a = document.getElementById("player-table-".concat(playerId, "-wall-spot-").concat(x, "-").concat(y))) === null || _a === void 0 ? void 0 : _a.classList.remove('selectable');
+        for (var star = 0; star <= 6; star++) {
+            for (var space = 1; space <= 6; space++) {
+                (_a = document.getElementById("player-table-".concat(playerId, "-star-").concat(star, "-space-").concat(space))) === null || _a === void 0 ? void 0 : _a.classList.remove('selectable');
             }
         }
     };
     AzulSummerPavilion.prototype.onLeavingPlayTile = function () {
-        this.onLeavingChoosePlace();
+        // TODO remove ghost
     };
     AzulSummerPavilion.prototype.onLeavingChooseKeptTiles = function () {
         var _a;
@@ -1319,14 +1306,14 @@ var AzulSummerPavilion = /** @class */ (function () {
                     break;
                 case 'playTile':
                     var playTileArgs = args;
-                    var _loop_9 = function (i) {
+                    var _loop_7 = function (i) {
                         var label = this_5.format_string_recursive('${number} ${color}', { number: playTileArgs.number - i, type: playTileArgs.color });
                         label += this_5.format_string_recursive('${number} ${color}', { number: i, type: playTileArgs.wildColor });
                         this_5.addActionButton("playTile".concat(i, "_button"), label, function () { return _this.playTile(i); });
                     };
                     var this_5 = this;
                     for (var i = 0; i <= playTileArgs.maxWildTiles; i++) {
-                        _loop_9(i);
+                        _loop_7(i);
                     }
                     this.addActionButton('undoPlayTile_button', _("Undo line selection"), function () { return _this.undoPlayTile(); }, null, null, 'gray');
                     break;
@@ -1490,16 +1477,11 @@ var AzulSummerPavilion = /** @class */ (function () {
             return Promise.resolve(true);
         }
     };
-    AzulSummerPavilion.prototype.removeColumnSelection = function () {
+    AzulSummerPavilion.prototype.removeGhostTile = function () {
         if (!this.gamedatas.players[this.getPlayerId()]) {
             return;
         }
-        for (var line = 1; line <= 5; line++) {
-            for (var column = 1; column <= 5; column++) {
-                dojo.removeClass("player-table-".concat(this.getPlayerId(), "-wall-spot-").concat(line, "-").concat(column), 'selectable');
-            }
-        }
-        dojo.removeClass("player-table-".concat(this.getPlayerId(), "-column0"), 'selectable');
+        // TODO remove ghost
     };
     AzulSummerPavilion.prototype.createPlayerPanels = function (gamedatas) {
         var _this = this;
@@ -1614,15 +1596,15 @@ var AzulSummerPavilion = /** @class */ (function () {
         }
         this.takeAction('undoPlayTile');
     };
-    AzulSummerPavilion.prototype.selectPlace = function (line, column) {
+    AzulSummerPavilion.prototype.selectPlace = function (star, space) {
         if (!this.checkAction('selectPlace')) {
             return;
         }
         this.takeAction('selectPlace', {
-            line: line,
-            column: column
+            star: star,
+            space: space
         });
-        this.removeColumnSelection();
+        this.removeGhostTile();
     };
     AzulSummerPavilion.prototype.selectKeptTiles = function (askConfirmation) {
         var _this = this;
@@ -1664,7 +1646,7 @@ var AzulSummerPavilion = /** @class */ (function () {
     };
     AzulSummerPavilion.prototype.displayScoringOnTile = function (tile, playerId, points) {
         // create a div over tile, same position and width, but no overflow hidden (that must be kept on tile for glowing effect)
-        dojo.place("<div id=\"tile".concat(tile.id, "-scoring\" class=\"scoring-tile\"></div>"), "player-table-".concat(playerId, "-wall-spot-").concat(tile.line, "-").concat(tile.column));
+        dojo.place("<div id=\"tile".concat(tile.id, "-scoring\" class=\"scoring-tile\"></div>"), "player-table-".concat(playerId, "-star-").concat(tile.line, "-space-").concat(tile.column));
         this.displayScoring("tile".concat(tile.id, "-scoring"), this.getPlayerColor(Number(playerId)), points, SCORE_MS);
     };
     ///////////////////////////////////////////////////
@@ -1752,7 +1734,7 @@ var AzulSummerPavilion = /** @class */ (function () {
         Object.keys(notif.args.floorLines).forEach(function (playerId) {
             var floorLine = notif.args.floorLines[playerId];
             setTimeout(function () { return _this.removeTiles(floorLine.tiles, true); }, SCORE_MS - 50);
-            _this.displayScoring("player-table-".concat(playerId, "-line0"), _this.getPlayerColor(Number(playerId)), floorLine.points, SCORE_MS);
+            //(this as any).displayScoring(`player-table-${playerId}-line0`, this.getPlayerColor(Number(playerId)), floorLine.points, SCORE_MS);
             _this.incScore(Number(playerId), floorLine.points);
         });
     };

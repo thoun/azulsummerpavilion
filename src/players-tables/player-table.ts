@@ -22,40 +22,30 @@ class PlayerTable {
                 <div id="player-name-${this.playerId}" class="player-name dark ${game.isDefaultFont() ? 'standard' : 'azul'} ${nameClass}">${player.name}</div>
             </div>
             `;
-            
-        html += `<div id="player-table-${this.playerId}-line0" class="floor line"></div>`;
-        html += `<div id="player-table-${this.playerId}-wall" class="wall">`;
 
-        for (let line=1; line<=5; line++) {
-            for (let column=1; column<=5; column++) {
-                html += `<div id="player-table-${this.playerId}-wall-spot-${line}-${column}" class="wall-spot" style="left: ${69*(column-1) - 1}px; top: ${70*(line-1) - 1}px;"></div>`;
+        for (let star=0; star<=6; star++) {
+            html += `<div class="star star${star}">`;
+            for (let space=1; space<=6; space++) {
+                html += `<div id="player-table-${this.playerId}-star-${star}-space-${space}" class="space space${space}"></div>`;
             }
+            html += `</div>`;
         }
-        html += `</div>
-        <div id="player-table-${this.playerId}-column0" class="floor wall-spot"></div>`;
-        
-        html += `
-            <div class="score-magnified row">2</div>
-            <div class="score-magnified column">7</div>
-            <div class="score-magnified color">10</div>
-        `;
+        html += `</div>`;
 
-        html += `   
-            </div>
+        html += `
         </div>`;
 
         dojo.place(html, 'centered-table');
 
         this.placeTilesOnHand(player.hand);
 
-        for (let line=1; line<=5; line++) {
-            for (let column=1; column<=5; column++) {
-                document.getElementById(`player-table-${this.playerId}-wall-spot-${line}-${column}`).addEventListener('click', () => {
-                    this.game.selectPlace(line, column);
+        for (let star=0; star<=6; star++) {
+            for (let space=1; space<=5; space++) {
+                document.getElementById(`player-table-${this.playerId}-star-${star}-space-${space}`).addEventListener('click', () => {
+                    this.game.selectPlace(star, space);
                 });
             }
         }
-        document.getElementById(`player-table-${this.playerId}-column0`).addEventListener('click', () => this.game.selectPlace(0, 0));
 
         for (let i=-1; i<=5; i++) {
             const tiles = player.lines.filter(tile => tile.line === i);
@@ -79,7 +69,7 @@ class PlayerTable {
     }
 
     public placeTilesOnWall(tiles: Tile[]) {
-        tiles.forEach(tile => this.game.placeTile(tile, `player-table-${this.playerId}-wall-spot-${tile.line}-${tile.column}`));
+        tiles.forEach(tile => this.game.placeTile(tile, `player-table-${this.playerId}-star-${tile.line}-space-${tile.column}`));
     }
     
     public setFont(prefValue: number): void {

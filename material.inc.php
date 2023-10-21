@@ -26,10 +26,20 @@
 ];
 
 
-$this->indexForDefaultWall = [
+$this->indexForDefaultWall = [ // TODO remove
   1 => 3,
   2 => 4,
   3 => 0,
   4 => 1,
   5 => 2,
+];
+
+$this->STANDARD_FACE_STAR_COLORS = [
+  0 => 0,
+  1 => 1,
+  2 => 3,
+  3 => 6,
+  4 => 5, 
+  5 => 4, 
+  6 => 2,
 ];

@@ -146,22 +146,22 @@ trait ActionTrait {
         $this->gamestate->nextState('undo');
     }
 
-    function selectPlace(int $line, int $column, $skipActionCheck = false) {
+    function selectPlace(int $star, int $space, $skipActionCheck = false) {
         if (!$skipActionCheck) {
             $this->checkAction('selectPlace');
         }
         
         $playerId = self::getActivePlayerId();
 
-        /*if (array_search($line, $this->availableLines($playerId)) === false) {
+        /*if (array_search($star, $this->availableLines($playerId)) === false) {
             throw new BgaUserException('Line not available');
         }*/
 
         /*$tiles = $this->getTilesFromDb($this->tiles->getCardsInLocation('hand', $playerId));
-        $this->placeTilesOnLine($playerId, $tiles, $line, true);
+        $this->placeTilesOnLine($playerId, $tiles, $star, true);
 
         $this->setGlobalVariable(UNDO_PLACE, new Undo($tiles, null, null, false)); */
-        $this->setGlobalVariable(SELECTED_PLACE, [$line, $column]);
+        $this->setGlobalVariable(SELECTED_PLACE, [$star, $space]);
 
         $this->gamestate->nextState('next');
 
@@ -177,16 +177,6 @@ trait ActionTrait {
             $this->checkAction('selectColor');
         }
         
-        $playerId = self::getActivePlayerId();
-
-        /*if (array_search($line, $this->availableLines($playerId)) === false) {
-            throw new BgaUserException('Line not available');
-        }*/
-
-        /*$tiles = $this->getTilesFromDb($this->tiles->getCardsInLocation('hand', $playerId));
-        $this->placeTilesOnLine($playerId, $tiles, $line, true);
-
-        $this->setGlobalVariable(UNDO_PLACE, new Undo($tiles, null, null, false)); */
         $this->setGlobalVariable(SELECTED_COLOR, $color);
 
         $this->gamestate->nextState('next');
@@ -205,18 +195,14 @@ trait ActionTrait {
         
         $playerId = self::getActivePlayerId();
 
-        /*if (array_search($line, $this->availableLines($playerId)) === false) {
-            throw new BgaUserException('Line not available');
-        }*/
-
         $hand = $this->getTilesFromDb($this->tiles->getCardsInLocation('hand', $playerId));
 
         $selectedPlace = $this->getGlobalVariable(SELECTED_PLACE);
-        $row = $selectedPlace[0];
-        $column = $selectedPlace[1];
-        $selectedColor = ($row + $this->indexForDefaultWall[$column] - 1) % 5 + 1; // TODO
+        $star = $selectedPlace[0];
+        $space = $selectedPlace[1];
+        $selectedColor = $this->getGlobalVariable(SELECTED_COLOR);
         $wildColor = $this->getWildColor();
-        $number = $row;
+        $number = $space;
 
         $colorTiles = array_values(array_filter($hand, fn($tile) => $tile->type == $selectedColor));
         $wildTiles = array_values(array_filter($hand, fn($tile) => $tile->type == $wildColor));
@@ -226,7 +212,28 @@ trait ActionTrait {
             array_slice($wildTiles, 0, $wilds),
         );
 
-        $this->placeTilesOnLine($playerId, $tiles, $wilds, true);
+        $placedTile = $tiles[0];
+        $discardedTiles = array_slice($tiles, 1);
+        $placedTile->star = $star;
+        $placedTile->space = $space;
+        $this->tiles->moveCard($placedTile->id, 'wall'.$playerId, $placedTile->star * 100 + $placedTile->space);
+        $this->tiles->moveCards(array_map('getIdPredicate', $discardedTiles), 'discard');
+
+        /*self::notifyAllPlayers('placeTileOnWall', '', [
+            'completeLines' => $completeLinesNotif,
+        ]);
+
+        foreach ($completeLinesNotif as $playerId => $notif) {
+            self::notifyAllPlayers('placeTileOnWallTextLogDetails', clienttranslate('${player_name} places ${number} ${color} and gains ${points} point(s)'), [
+                'player_name' => $this->getPlayerName($playerId),
+                'number' => 1,
+                'color' => $this->getColor($notif->placedTile->type),
+                'i18n' => ['color'],
+                'type' => $notif->placedTile->type,
+                'preserve' => [ 2 => 'type' ],
+                'points' => $notif->pointsDetail->points,
+            ]);
+        }*/
 
         $this->setGlobalVariable(UNDO_PLACE, new Undo($tiles, null, null, false));
 

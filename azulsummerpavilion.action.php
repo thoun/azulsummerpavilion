@@ -65,10 +65,10 @@
       self::setAjaxMode();
 
       // Retrieve arguments
-      $line = self::getArg("line", AT_posint, true);
-      $column = self::getArg("column", AT_posint, true);
+      $star = self::getArg("star", AT_posint, true);
+      $space = self::getArg("space", AT_posint, true);
 
-      $this->game->selectPlace($line, $column);
+      $this->game->selectPlace($star, $space);
 
       self::ajaxResponse();
     }

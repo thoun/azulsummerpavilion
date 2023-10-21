@@ -21,31 +21,65 @@ trait ArgsTrait {
     function argChoosePlace() {
         $playerId = self::getActivePlayerId();
 
-        $placedTiles = $this->getTilesFromDb($this->tiles->getCardsInLocation('line'.$playerId));
+        $placedTiles = $this->getTilesFromDb($this->tiles->getCardsInLocation('wall'.$playerId));
+        $hand = $this->getTilesFromDb($this->tiles->getCardsInLocation('hand', $playerId));
+        $wildColor = $this->getWildColor();
+        $possibleSpaces = [];
+        $variant = $this->isVariant();
 
-        //$number = count($tiles);
-        // TODO filter where player can place
+        for ($star = 0; $star <= 6; $star++) {
+            $forcedColor = $this->STANDARD_FACE_STAR_COLORS[$star];
+
+            for ($space = 1; $space <= 6; $space++) {
+                if ($this->array_some($placedTiles, fn($placedTile) => $placedTile->star == $star && $placedTile->space == $space)) {
+                    continue;
+                }
+
+                $colors = [$forcedColor];
+                if ($variant || $forcedColor == 0) {
+                    $starTiles = array_values(array_filter($placedTiles, fn($placedTile) => $placedTile->star == $star));
+                    $starColors = array_map(fn($starTile) => $starTile->type, $starTiles);
+                    $colors = array_diff([1, 2, 3, 4, 5, 6], $starColors);
+                    if ($variant && count($starColors) >= 2 && $starColors[0] == $starColors[1]) {
+                        $colors = [$starColors[0]];
+                    }
+                }
+
+                if ($this->array_some($colors, fn($color) => $this->getMaxWildTiles($hand, $space, $color, $wildColor) !== null)) {
+                    $possibleSpaces[] = $star * 100 + $space;
+                }
+            }
+        }
 
         return [
-            'placedTiles' => $placedTiles,
+            'possibleSpaces' => $possibleSpaces,
         ];
     }
 
     function argChooseColor() {
+        $playerId = self::getActivePlayerId();
+
         $selectedPlace = $this->getGlobalVariable(SELECTED_PLACE);
-        $row = $selectedPlace[0];
-        $column = $selectedPlace[1];
-        $selectedColor = ($row + $this->indexForDefaultWall[$column] - 1) % 5 + 1; // TODO
+        $star = $selectedPlace[0];
+        $space = $selectedPlace[1];
+        $selectedColor = $this->STANDARD_FACE_STAR_COLORS[$star];
 
         $possibleColors = [];
-        if ($selectedColor == 0) {
-            $playerId = self::getActivePlayerId();
+        $variant = $this->isVariant();
+        if ($variant || $selectedColor == 0) {
+            $placedTiles = $this->getTilesFromDb($this->tiles->getCardsInLocation('wall'.$playerId));
             $hand = $this->getTilesFromDb($this->tiles->getCardsInLocation('hand', $playerId));
             $wildColor = $this->getWildColor();
-            $number = $row;
-            for ($i = 1; $i <=6; $i++) {
-                if ($this->getMaxWildTiles($hand, $number, $i, $wildColor) !== null) {
-                    $possibleColors[] = $i;
+            $starTiles = array_values(array_filter($placedTiles, fn($placedTile) => $placedTile->star == $star));
+            $starColors = array_map(fn($starTile) => $starTile->type, $starTiles);
+            $colors = array_diff([1, 2, 3, 4, 5, 6], $starColors);
+            if ($variant && count($starColors) >= 2 && $starColors[0] == $starColors[1]) {
+                $colors = [$starColors[0]];
+            }
+
+            foreach ($colors as $possibleColor) {
+                if ($this->getMaxWildTiles($hand, $space, $possibleColor, $wildColor) !== null) {
+                    $possibleColors[] = $possibleColor;
                 }
             }
 
@@ -75,11 +109,10 @@ trait ArgsTrait {
         $hand = $this->getTilesFromDb($this->tiles->getCardsInLocation('hand', $playerId));
 
         $selectedPlace = $this->getGlobalVariable(SELECTED_PLACE);
-        $row = $selectedPlace[0];
-        $column = $selectedPlace[1];
-        $selectedColor = ($row + $this->indexForDefaultWall[$column] - 1) % 5 + 1; // TODO
+        $space = $selectedPlace[1];
+        $selectedColor = $this->getGlobalVariable(SELECTED_COLOR);
         $wildColor = $this->getWildColor();
-        $number = $row;
+        $number = $space;
         $maxWildTiles = $this->getMaxWildTiles($hand, $number, $selectedColor, $wildColor);
 
         return [

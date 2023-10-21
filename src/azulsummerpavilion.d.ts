@@ -51,7 +51,7 @@ interface AzulSummerPavilionGame extends Game {
     isVariant(): boolean;
     takeTiles(id: number): void;
     playTile(line: number): void;
-    selectPlace(line: number, column: number): void;
+    selectPlace(star: number, space: number): void;
     removeTile(tile: Tile): void;
     removeTiles(tiles: Tile[]): void;
     placeTile(tile: Tile, destinationId: string, left?: number, top?: number, rotation?: number): Promise<boolean>;
@@ -62,7 +62,7 @@ interface EnteringChooseTileArgs {
 }
 
 interface EnteringChoosePlaceArgs {
-    placedTiles: Tile[]; // TODO temp
+    possibleSpaces: number[];
 }
 
 interface EnteringChooseColorArgs {

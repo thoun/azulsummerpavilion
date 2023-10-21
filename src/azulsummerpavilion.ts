@@ -136,10 +136,10 @@ class AzulSummerPavilion implements AzulSummerPavilionGame {
     onEnteringChoosePlace(args: EnteringChoosePlaceArgs) {
         if ((this as any).isCurrentPlayerActive()) {
             const playerId = this.getPlayerId();
-            for (let x = 1; x <= 5; x++) {
-                for (let y = 1; y <= 5; y++) {
-                    document.getElementById(`player-table-${playerId}-wall-spot-${x}-${y}`).classList.toggle('selectable',
-                        !args.placedTiles.some(tile => tile.line == x && tile.column == y)
+            for (let star = 0; star <= 6; star++) {
+                for (let space = 1; space <= 6; space++) {
+                    document.getElementById(`player-table-${playerId}-star-${star}-space-${space}`).classList.toggle('selectable',
+                        args.possibleSpaces.includes(star * 100 + space)
                     );
                 }
             }
@@ -148,14 +148,7 @@ class AzulSummerPavilion implements AzulSummerPavilionGame {
 
     onEnteringPlayTile(args: EnteringPlayTileArgs) {
         if ((this as any).isCurrentPlayerActive()) {
-            const playerId = this.getPlayerId();
-            for (let x = 1; x <= 5; x++) {
-                for (let y = 1; y <= 5; y++) {
-                    document.getElementById(`player-table-${playerId}-wall-spot-${x}-${y}`).classList.toggle('selectable',
-                        args.selectedPlace[0] == x && args.selectedPlace[1] == y
-                    );
-                }
-            }
+            // TODO place ghost
         }
     }
 
@@ -193,15 +186,15 @@ class AzulSummerPavilion implements AzulSummerPavilionGame {
 
     onLeavingChoosePlace() {
         const playerId = this.getPlayerId();
-        for (let x = 1; x <= 5; x++) {
-            for (let y = 1; y <= 5; y++) {
-                document.getElementById(`player-table-${playerId}-wall-spot-${x}-${y}`)?.classList.remove('selectable');
+        for (let star = 0; star <= 6; star++) {
+            for (let space = 1; space <= 6; space++) {
+                document.getElementById(`player-table-${playerId}-star-${star}-space-${space}`)?.classList.remove('selectable');
             }
         }
     }
 
     onLeavingPlayTile() {
-        this.onLeavingChoosePlace();
+        // TODO remove ghost
     }
 
     onLeavingChooseKeptTiles() {
@@ -457,17 +450,12 @@ class AzulSummerPavilion implements AzulSummerPavilionGame {
         
     }
 
-    private removeColumnSelection() {
+    private removeGhostTile() {
         if (!this.gamedatas.players[this.getPlayerId()]) {
             return;
         }
 
-        for (let line=1; line<=5; line++) {
-            for (let column=1; column<=5; column++) {
-                dojo.removeClass(`player-table-${this.getPlayerId()}-wall-spot-${line}-${column}`, 'selectable');
-            }
-        }
-        dojo.removeClass(`player-table-${this.getPlayerId()}-column0`, 'selectable');
+        // TODO remove ghost
     }
 
     private createPlayerPanels(gamedatas: AzulSummerPavilionGamedatas) {
@@ -603,17 +591,17 @@ class AzulSummerPavilion implements AzulSummerPavilionGame {
         this.takeAction('undoPlayTile');
     }
 
-    public selectPlace(line: number, column: number) {
+    public selectPlace(star: number, space: number) {
         if(!(this as any).checkAction('selectPlace')) {
             return;
         }
 
         this.takeAction('selectPlace', {
-            line,
-            column
+            star,
+            space
         });
 
-        this.removeColumnSelection();
+        this.removeGhostTile();
     }
 
     public selectKeptTiles(askConfirmation = true) {
@@ -664,7 +652,7 @@ class AzulSummerPavilion implements AzulSummerPavilionGame {
 
     private displayScoringOnTile(tile: Tile, playerId: string | number, points: number) {
         // create a div over tile, same position and width, but no overflow hidden (that must be kept on tile for glowing effect)
-        dojo.place(`<div id="tile${tile.id}-scoring" class="scoring-tile"></div>`, `player-table-${playerId}-wall-spot-${tile.line}-${tile.column}`);
+        dojo.place(`<div id="tile${tile.id}-scoring" class="scoring-tile"></div>`, `player-table-${playerId}-star-${tile.line}-space-${tile.column}`);
         (this as any).displayScoring(`tile${tile.id}-scoring`, this.getPlayerColor(Number(playerId)), points, SCORE_MS);
     }
 
@@ -767,7 +755,7 @@ class AzulSummerPavilion implements AzulSummerPavilionGame {
             const floorLine: FloorLine = notif.args.floorLines[playerId];
             
             setTimeout(() => this.removeTiles(floorLine.tiles, true), SCORE_MS - 50);
-            (this as any).displayScoring(`player-table-${playerId}-line0`, this.getPlayerColor(Number(playerId)), floorLine.points, SCORE_MS);
+            //(this as any).displayScoring(`player-table-${playerId}-line0`, this.getPlayerColor(Number(playerId)), floorLine.points, SCORE_MS);
             this.incScore(Number(playerId), floorLine.points);
         });
     }

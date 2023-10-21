@@ -120,6 +120,8 @@ trait UtilTrait {
         }
         $this->tiles->createCards($cards, 'deck');
         $this->tiles->shuffle('deck');
+
+        $this->fillTableCenter();
     }
 
     function putFirstPlayerTile(array $firstPlayerTokens, int $playerId) {
@@ -538,5 +540,20 @@ trait UtilTrait {
                 ]);
             }
         }
+    }
+
+    function fillTableCenter() {
+        $newTiles = [];
+        for ($i=1; $i<=10; $i++) {
+            if (intval($this->tiles->countCardInLocation('table', $i)) == 0) {
+                $newTiles[] = $this->getTileFromDb($this->tiles->pickCardForLocation('deck', 'table', $i));
+            }
+        }
+
+        self::notifyAllPlayers("tableFilled", '', [
+            'newTiles' => $newTiles,
+            'remainingTiles' => intval($this->tiles->countCardInLocation('deck')),
+        ]);
+        // TODO hanfle notif
     }
 }
