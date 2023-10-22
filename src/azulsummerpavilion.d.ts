@@ -9,6 +9,7 @@ interface Tile {
 interface AzulSummerPavilionPlayer extends Player {
     wall: Tile[];
     hand: Tile[];
+    corner: Tile[];
     playerNo: number;
     selectedColumns: SelectedColumn[];
 }
@@ -154,8 +155,15 @@ interface FloorLine {
     tiles: Tile[];
 }
 
-interface NotifEmptyFloorLineArgs {
-    floorLines: { [playerId: number]: FloorLine };
+interface NotifPutToCornerArgs {
+    playerId: number;
+    keptTiles: Tile[];
+    discardedTiles: Tile[];
+}
+
+interface NotifCornerToHandArgs {
+    playerId: number;
+    tiles: Tile[];
 }
 
 interface EndScoreTiles {

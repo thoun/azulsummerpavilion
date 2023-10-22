@@ -23,6 +23,9 @@ class PlayerTable {
             </div>
             `;
 
+        for (let corner=0; corner<4; corner++) {
+            html += `<div id="player-table-${this.playerId}-corner-${corner}" class="corner corner${corner}"></div>`;
+        }
         for (let star=0; star<=6; star++) {
             html += `<div id="player-table-${this.playerId}-star-${star}" class="star star${star}">`;
             for (let space=1; space<=6; space++) {
@@ -38,6 +41,7 @@ class PlayerTable {
         dojo.place(html, 'centered-table');
 
         this.placeTilesOnHand(player.hand);
+        this.placeTilesOnCorner(player.corner);
 
         for (let star=0; star<=6; star++) {
             for (let space=1; space<=5; space++) {
@@ -52,6 +56,10 @@ class PlayerTable {
 
     public placeTilesOnHand(tiles: Tile[]) {
         tiles.forEach(tile => this.game.placeTile(tile, `player-hand-${this.playerId}`));
+    }
+
+    public placeTilesOnCorner(tiles: Tile[]) {
+        tiles.forEach((tile, index) => this.game.placeTile(tile, `player-table-${this.playerId}-corner-${index}`));
     }
 
     public placeTilesOnWall(tiles: Tile[]) {

@@ -160,6 +160,7 @@ class AzulSummerPavilion extends Table {
             $player['wall'] = $this->getTilesFromDb($this->tiles->getCardsInLocation('wall'.$playerId));
             $player['playerNo'] = intval($player['playerNo']);
             $player['hand'] = $this->getTilesFromDb($this->tiles->getCardsInLocation('hand', $playerId));
+            $player['corner'] = $this->getTilesFromDb($this->tiles->getCardsInLocation('corner', $playerId));
         }
 
         $result['endRound'] = $endRound;

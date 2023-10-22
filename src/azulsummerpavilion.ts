@@ -205,7 +205,7 @@ class AzulSummerPavilion implements AzulSummerPavilionGame {
         const button = document.getElementById(`selectKeptTiles_button`);
 
         const handDiv = document.getElementById(`player-hand-${this.getPlayerId()}`);
-        const handTileDivs = Array.from(handDiv.querySelectorAll('.tile'));
+        const handTileDivs = Array.from(handDiv.querySelectorAll('.tile:not(.tile0)'));
         const selectedTileDivs = Array.from(handDiv.querySelectorAll('.tile.selected'));
         const selectedTileDivsIds = selectedTileDivs.map((div: HTMLElement) => Number(div.dataset.id));
         const discardedTileDivs = handTileDivs.filter((div: HTMLElement) => !selectedTileDivsIds.includes(Number(div.dataset.id)));
@@ -444,8 +444,10 @@ class AzulSummerPavilion implements AzulSummerPavilionGame {
             const newTileDiv = document.getElementById(`tile${tile.id}`);
             newTileDiv.style.setProperty('--rotation', `${rotation ?? 0}deg`);
             newTileDiv.addEventListener('click', () => {
-                this.onTileClick(tile);
-                this.factories.tileMouseLeave(tile.id);
+                if (tile.type > 0) {
+                    this.onTileClick(tile);
+                    this.factories.tileMouseLeave(tile.id);
+                }
             });
             newTileDiv.addEventListener('mouseenter', () => this.factories.tileMouseEnter(tile.id));
             newTileDiv.addEventListener('mouseleave', () => this.factories.tileMouseLeave(tile.id));
@@ -687,8 +689,9 @@ class AzulSummerPavilion implements AzulSummerPavilionGame {
             ['tilesSelected', ANIMATION_MS],
             ['undoTakeTiles', ANIMATION_MS],
             ['undoPlayTile', ANIMATION_MS],
-            ['placeTileOnWall', this.gamedatas.fastScoring ? SCORE_MS : SLOW_SCORE_MS],
-            ['emptyFloorLine', this.gamedatas.fastScoring ? SCORE_MS : SLOW_SCORE_MS],
+            ['placeTileOnWall', ANIMATION_MS],
+            ['putToCorner', ANIMATION_MS],
+            ['cornerToHand', 1],
             ['endScore', this.gamedatas.fastScoring ? SCORE_MS : SLOW_SCORE_MS],
             ['firstPlayerToken', 1],
             ['lastRound', 1],
@@ -756,14 +759,15 @@ class AzulSummerPavilion implements AzulSummerPavilionGame {
         this.incScore(playerId, scoredTiles.length);
     }
 
-    notif_emptyFloorLine(notif: Notif<NotifEmptyFloorLineArgs>) {
-        Object.keys(notif.args.floorLines).forEach(playerId => {
-            const floorLine: FloorLine = notif.args.floorLines[playerId];
-            
-            setTimeout(() => this.removeTiles(floorLine.tiles, true), SCORE_MS - 50);
-            //(this as any).displayScoring(`player-table-${playerId}-line0`, this.getPlayerColor(Number(playerId)), floorLine.points, SCORE_MS);
-            this.incScore(Number(playerId), floorLine.points);
-        });
+    notif_putToCorner(notif: Notif<NotifPutToCornerArgs>) {
+        const { playerId, keptTiles, discardedTiles } = notif.args;
+        this.getPlayerTable(playerId).placeTilesOnCorner(keptTiles);
+        this.removeTiles(discardedTiles, true);
+    }
+
+    notif_cornerToHand(notif: Notif<NotifCornerToHandArgs>) {
+        const { playerId, tiles } = notif.args;
+        this.getPlayerTable(playerId).placeTilesOnHand(tiles);
     }
 
     notif_endScore(notif: Notif<NotifEndScoreArgs>) {

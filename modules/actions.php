@@ -302,11 +302,45 @@ trait ActionTrait {
         if (!$skipActionCheck) {
             $this->checkAction('selectKeptTiles');
         }
-        
-        $playerId = self::getActivePlayerId();
 
-        // TODO keep $ids and discard the rest of the hand
-        $this->notifDiscardTiles($playerId);
+        if (count($ids) > 4) {
+            throw new BgaUserException("You cannot keep more than 4 tiles");
+        }
+        
+        $playerId = intval(self::getActivePlayerId());
+        $hand = $this->getTilesFromDb($this->tiles->getCardsInLocation('hand', $playerId));
+        $keptTiles = [];
+        $discardedTiles = [];
+        foreach ($hand as $tile) {
+            if ($tile->type > 0) {
+                if (in_array($tile->id, $ids)) {
+                    $keptTiles[] = $tile;
+                } else {
+                    $discardedTiles[] = $tile;
+                }
+            }
+        }
+
+        if (count($ids) != count($keptTiles)) {
+            throw new BgaUserException("You must select hand tiles");
+        }
+
+        $keptNumber = count($keptTiles);
+        $discardedNumber = count($discardedTiles);
+
+        if ($keptNumber > 0 || $discardedNumber > 0) {        
+            $this->tiles->moveCards(array_map('getIdPredicate', $keptTiles), 'corner', $playerId);
+            $this->tiles->moveCards(array_map('getIdPredicate', $discardedTiles), 'discard');
+
+            self::notifyAllPlayers('putToCorner', clienttranslate('${player_name} keeps ${keptNumber} tiles and discards ${discardedNumber} tiles'), [
+                'playerId' => $playerId,
+                'player_name' => $this->getPlayerName($playerId),
+                'keptTiles' => $keptTiles,
+                'discardedTiles' => $discardedTiles,
+                'keptNumber' => $keptNumber,
+                'discardedNumber' => $discardedNumber,
+            ]);
+        }
 
         $this->gamestate->nextState('nextPlayer');
     }

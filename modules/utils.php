@@ -388,33 +388,6 @@ trait UtilTrait {
         }
     }
 
-    function notifDiscardTiles(int $playerId) {
-        $playerTiles = $this->getTilesFromLine($playerId, 0);
-        if (count($playerTiles) > 0) {                
-            $this->tiles->moveCards(array_map('getIdPredicate', $playerTiles), 'discard');
-            $points = 0;
-            for ($i = 0; $i < min(7, count($playerTiles)); $i++) {
-                $points += $this->getPointsForFloorLine($i);
-            }
-
-            $obj = new stdClass();
-            $obj->tiles = $playerTiles;
-            $obj->points = -$points;
-
-            $floorLinesNotif[$playerId] = $obj;
-
-            $this->decPlayerScore($playerId, $points);
-
-            self::incStat($points, 'pointsLossFloorLine');
-            self::incStat($points, 'pointsLossFloorLine', $playerId);
-        }
-        self::notifyAllPlayers('emptyFloorLine', clienttranslate('${player_name} loses ${points} point(s) with Floor line'), $obj + [
-            'playerId' => $playerId,
-            'player_name' => $this->getPlayerName($playerId),
-            'points' => -$points,
-        ]);
-    }
-
     function notifCompleteStar(array $playersIds, array $walls, int $star, bool $variant) {                
         $scoresNotif = [];
         foreach ($playersIds as $playerId) {

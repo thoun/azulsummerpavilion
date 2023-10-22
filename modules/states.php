@@ -26,7 +26,7 @@ trait StateTrait {
         }
 
         self::DbQuery("UPDATE player SET passed = false");
-        // TODO notif players ?
+        // TODO notif players ? => include to followingnotif
 
         self::notifyAllPlayers("factoriesFilled", clienttranslate("A new round begins !"), [
             'factories' => $factories,
@@ -36,7 +36,20 @@ trait StateTrait {
         self::incStat(1, 'roundsNumber');
         self::incStat(1, 'firstPlayer', intval(self::getGameStateValue(FIRST_PLAYER_FOR_NEXT_TURN)));
 
-        // TODO place stored tiles in hand
+
+        // place stored tiles in hand
+        $playersIds = $this->getPlayersIds();
+        foreach ($playersIds as $playerId) {
+            if (intval($this->tiles->countCardInLocation('corner', $playerId)) > 0) {
+                $tiles = $this->getTilesFromDb($this->tiles->getCardsInLocation('corner', $playerId));
+                $this->tiles->moveAllCardsInLocation('corner', 'hand', $playerId, $playerId);
+
+                self::notifyAllPlayers("cornerToHand", '', [
+                    'playerId' => $playerId,
+                    'tiles' => $tiles,
+                ]);
+            }
+        }
 
         $this->gamestate->nextState('next');
     }
