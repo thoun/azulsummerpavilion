@@ -243,7 +243,8 @@ class AzulSummerPavilion implements AzulSummerPavilionGame {
                     this.startActionTimer('confirmAcquire_button', 5);
                     break;
                 case 'choosePlace':
-                    (this as any).addActionButton('pass_button', _("Pass (end round)"), () => this.pass(), null, null, 'red');
+                    const choosePlaceArgs = args as EnteringChoosePlaceArgs;
+                    (this as any).addActionButton('pass_button', _("Pass (end round)"), () => this.pass(), null, null, choosePlaceArgs.skipIsFree ? undefined : 'red');
                     break;
                 case 'chooseColor':
                     const chooseColorArgs = args as EnteringChooseColorArgs;
@@ -256,9 +257,12 @@ class AzulSummerPavilion implements AzulSummerPavilionGame {
                 case 'playTile':
                     const playTileArgs = args as EnteringPlayTileArgs;
                     for (let i = 0; i <= playTileArgs.maxWildTiles; i++) {
-                        let label = this.format_string_recursive('${number} ${color}', { number: playTileArgs.number - i, type: playTileArgs.color });
-                        label += this.format_string_recursive('${number} ${color}', { number: i, type: playTileArgs.wildColor });
-                        (this as any).addActionButton(`playTile${i}_button`, label, () => this.playTile(i));
+                        const colorNumber = playTileArgs.number - i;
+                        if (colorNumber <= args.maxColor) {
+                            let label = this.format_string_recursive('${number} ${color}', { number: colorNumber, type: playTileArgs.color });
+                            label += this.format_string_recursive('${number} ${color}', { number: i, type: playTileArgs.wildColor });
+                            (this as any).addActionButton(`playTile${i}_button`, label, () => this.playTile(i));
+                        }
                     }
                     (this as any).addActionButton('undoPlayTile_button', _("Undo line selection"), () => this.undoPlayTile(), null, null, 'gray');
                     break;
@@ -736,18 +740,16 @@ class AzulSummerPavilion implements AzulSummerPavilionGame {
         this.getPlayerTable(notif.args.playerId).placeTilesOnLine(notif.args.placedTiles, notif.args.line);
     }*/
     notif_placeTileOnWall(notif: Notif<NotifPlaceTileOnWallArgs>) {
-        Object.keys(notif.args.completeLines).forEach(playerId => {
-            const completeLine: PlacedTileOnWall = notif.args.completeLines[playerId];
-            
-            this.getPlayerTable(Number(playerId)).placeTilesOnWall([completeLine.placedTile]);
+        const { playerId, placedTile, discardedTiles, scoredTiles } = notif.args;
+        console.log(notif.args, playerId);
+        this.getPlayerTable(playerId).placeTilesOnWall([placedTile]);
+        this.removeTiles(discardedTiles, true);
 
-            completeLine.pointsDetail.columnTiles.forEach(tile => dojo.addClass(`tile${tile.id}`, 'highlight'));
-            setTimeout(() => completeLine.pointsDetail.columnTiles.forEach(tile => dojo.removeClass(`tile${tile.id}`, 'highlight')), SCORE_MS - 50);
+        scoredTiles.forEach(tile => dojo.addClass(`tile${tile.id}`, 'highlight'));
+        setTimeout(() => scoredTiles.forEach(tile => dojo.removeClass(`tile${tile.id}`, 'highlight')), SCORE_MS - 50);
 
-            this.removeTiles(completeLine.discardedTiles, true);
-            this.displayScoringOnTile(completeLine.placedTile, playerId, completeLine.pointsDetail.points);
-            this.incScore(Number(playerId), completeLine.pointsDetail.points);
-        });
+        this.displayScoringOnTile(placedTile, playerId, scoredTiles.length);
+        this.incScore(playerId, scoredTiles.length);
     }
 
     notif_emptyFloorLine(notif: Notif<NotifEmptyFloorLineArgs>) {

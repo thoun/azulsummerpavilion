@@ -312,6 +312,9 @@ class Factories {
                             selectionTiles.push(tilesInFactory[this.wildColor][0]);
                         }
                     }
+                    if (tilesInFactory[0].length) {
+                        selectionTiles.push(tilesInFactory[0][0]);
+                    }
                 }
             }
         }

@@ -954,6 +954,9 @@ var Factories = /** @class */ (function () {
                             selectionTiles.push(tilesInFactory[this.wildColor][0]);
                         }
                     }
+                    if (tilesInFactory[0].length) {
+                        selectionTiles.push(tilesInFactory[0][0]);
+                    }
                 }
             }
         }
@@ -1281,7 +1284,8 @@ var AzulSummerPavilion = /** @class */ (function () {
                     this.startActionTimer('confirmAcquire_button', 5);
                     break;
                 case 'choosePlace':
-                    this.addActionButton('pass_button', _("Pass (end round)"), function () { return _this.pass(); }, null, null, 'red');
+                    var choosePlaceArgs = args;
+                    this.addActionButton('pass_button', _("Pass (end round)"), function () { return _this.pass(); }, null, null, choosePlaceArgs.skipIsFree ? undefined : 'red');
                     break;
                 case 'chooseColor':
                     var chooseColorArgs = args;
@@ -1294,9 +1298,12 @@ var AzulSummerPavilion = /** @class */ (function () {
                 case 'playTile':
                     var playTileArgs = args;
                     var _loop_6 = function (i) {
-                        var label = this_4.format_string_recursive('${number} ${color}', { number: playTileArgs.number - i, type: playTileArgs.color });
-                        label += this_4.format_string_recursive('${number} ${color}', { number: i, type: playTileArgs.wildColor });
-                        this_4.addActionButton("playTile".concat(i, "_button"), label, function () { return _this.playTile(i); });
+                        var colorNumber = playTileArgs.number - i;
+                        if (colorNumber <= args.maxColor) {
+                            var label = this_4.format_string_recursive('${number} ${color}', { number: colorNumber, type: playTileArgs.color });
+                            label += this_4.format_string_recursive('${number} ${color}', { number: i, type: playTileArgs.wildColor });
+                            this_4.addActionButton("playTile".concat(i, "_button"), label, function () { return _this.playTile(i); });
+                        }
                     };
                     var this_4 = this;
                     for (var i = 0; i <= playTileArgs.maxWildTiles; i++) {
@@ -1705,16 +1712,14 @@ var AzulSummerPavilion = /** @class */ (function () {
         this.getPlayerTable(notif.args.playerId).placeTilesOnLine(notif.args.placedTiles, notif.args.line);
     }*/
     AzulSummerPavilion.prototype.notif_placeTileOnWall = function (notif) {
-        var _this = this;
-        Object.keys(notif.args.completeLines).forEach(function (playerId) {
-            var completeLine = notif.args.completeLines[playerId];
-            _this.getPlayerTable(Number(playerId)).placeTilesOnWall([completeLine.placedTile]);
-            completeLine.pointsDetail.columnTiles.forEach(function (tile) { return dojo.addClass("tile".concat(tile.id), 'highlight'); });
-            setTimeout(function () { return completeLine.pointsDetail.columnTiles.forEach(function (tile) { return dojo.removeClass("tile".concat(tile.id), 'highlight'); }); }, SCORE_MS - 50);
-            _this.removeTiles(completeLine.discardedTiles, true);
-            _this.displayScoringOnTile(completeLine.placedTile, playerId, completeLine.pointsDetail.points);
-            _this.incScore(Number(playerId), completeLine.pointsDetail.points);
-        });
+        var _a = notif.args, playerId = _a.playerId, placedTile = _a.placedTile, discardedTiles = _a.discardedTiles, scoredTiles = _a.scoredTiles;
+        console.log(notif.args, playerId);
+        this.getPlayerTable(playerId).placeTilesOnWall([placedTile]);
+        this.removeTiles(discardedTiles, true);
+        scoredTiles.forEach(function (tile) { return dojo.addClass("tile".concat(tile.id), 'highlight'); });
+        setTimeout(function () { return scoredTiles.forEach(function (tile) { return dojo.removeClass("tile".concat(tile.id), 'highlight'); }); }, SCORE_MS - 50);
+        this.displayScoringOnTile(placedTile, playerId, scoredTiles.length);
+        this.incScore(playerId, scoredTiles.length);
     };
     AzulSummerPavilion.prototype.notif_emptyFloorLine = function (notif) {
         var _this = this;

@@ -26,6 +26,8 @@ trait ArgsTrait {
         $wildColor = $this->getWildColor();
         $possibleSpaces = [];
         $variant = $this->isVariant();
+        $remainingColorTiles = count(array_filter($hand, fn($tile) => $tile->type > 0));
+        $skipIsFree = $remainingColorTiles <= ($this->getRound() >= 6 ? 0 : 4);
 
         for ($star = 0; $star <= 6; $star++) {
             $forcedColor = $this->STANDARD_FACE_STAR_COLORS[$star];
@@ -54,6 +56,7 @@ trait ArgsTrait {
 
         return [
             'possibleSpaces' => $possibleSpaces,
+            'skipIsFree' => $skipIsFree,
         ];
     }
 
@@ -99,7 +102,7 @@ trait ArgsTrait {
 
         if ($color == $wildColor) {
             return count($colorTiles) < $cost ? null : 0;
-        } else if (count($colorTiles) + count($wildTiles) < $cost) {
+        } else if (count($colorTiles) + count($wildTiles) < $cost || count($colorTiles) < 1) {
             return null;
         } else {
             return min($cost - 1, count($wildTiles));
@@ -118,12 +121,14 @@ trait ArgsTrait {
         $wildColor = $this->getWildColor();
         $number = $this->getSpaceNumber($star, $space, $variant);
         $maxWildTiles = $this->getMaxWildTiles($hand, $number, $selectedColor, $wildColor);
+        $colorTiles = array_values(array_filter($hand, fn($tile) => $tile->type == $selectedColor));
 
         return [
             'selectedPlace' => $selectedPlace,
             'number' => $number,
             'color' => $selectedColor,
             'wildColor' => $wildColor,
+            'maxColor' => count($colorTiles),
             'maxWildTiles' => $maxWildTiles,
         ];
     }

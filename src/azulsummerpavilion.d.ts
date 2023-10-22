@@ -62,6 +62,7 @@ interface EnteringChooseTileArgs {
 
 interface EnteringChoosePlaceArgs {
     possibleSpaces: number[];
+    skipIsFree: boolean;
 }
 
 interface EnteringChooseColorArgs {
@@ -74,6 +75,7 @@ interface EnteringPlayTileArgs {
     number: number;
     color: number;
     wildColor: number;
+    maxColor: number;
     maxWildTiles: number;
 }
 
@@ -138,14 +140,11 @@ interface WallTilePointDetail {
     columnTiles: Tile[];
 }
 
-interface PlacedTileOnWall {
+interface NotifPlaceTileOnWallArgs {
+    playerId: number;
     placedTile: Tile;
     discardedTiles: Tile[];
-    pointsDetail: WallTilePointDetail;
-}
-
-interface NotifPlaceTileOnWallArgs {
-    completeLines: { [playerId: number]: PlacedTileOnWall };
+    scoredTiles: Tile[];
 }
 
 interface FloorLine {

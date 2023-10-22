@@ -124,10 +124,8 @@ trait UtilTrait {
         $this->fillTableCenter();
     }
 
-    function putFirstPlayerTile(array $firstPlayerTokens, int $playerId) {
+    function putFirstPlayerTile(int $playerId) {
         self::setGameStateValue(FIRST_PLAYER_FOR_NEXT_TURN, $playerId);
-
-        // TODO place on hand? $this->placeTilesOnLine($playerId, $firstPlayerTokens, 0, false);
 
         self::notifyAllPlayers('firstPlayerToken', clienttranslate('${player_name} took First Player tile and will start next round'), [
             'playerId' => $playerId,
@@ -181,11 +179,12 @@ trait UtilTrait {
     function getColor(int $type) {
         $colorName = null;
         switch ($type) {
-            case 1: $colorName = clienttranslate('Black'); break;
-            case 2: $colorName = clienttranslate('Cyan'); break;
-            case 3: $colorName = clienttranslate('Blue'); break;
+            case 1: $colorName = clienttranslate('Fuschia'); break;
+            case 2: $colorName = clienttranslate('Green'); break;
+            case 3: $colorName = clienttranslate('Orange'); break;
             case 4: $colorName = clienttranslate('Yellow'); break;
-            case 5: $colorName = clienttranslate('Red'); break;
+            case 5: $colorName = clienttranslate('Blue'); break;
+            case 6: $colorName = clienttranslate('Red'); break;
         }
         return $colorName;
     }
@@ -554,5 +553,37 @@ trait UtilTrait {
         } else {
             return $space;
         }
+    }
+
+    function getScoredTiles(int $playerId, $placedTile) {
+        $scoredTiles = [$placedTile];
+
+        $wall = $this->getTilesFromDb($this->tiles->getCardsInLocation('wall'.$playerId));
+        $starTiles = array_values(array_filter($wall, fn($tile) => $tile->star == $placedTile->star));
+        if (count($starTiles) >= 5) {
+            $scoredTiles = $starTiles;
+        } else {
+            for ($i = $placedTile->space + 1; $i <= $placedTile->space + 5; $i++) {
+                $iSpace = (($i - 1) % 6) + 1;
+                $iTile = $this->array_find($wall, fn($tile) => $tile->space == $iSpace);
+                if ($iTile && !$this->array_find($scoredTiles, fn($tile) => $tile->id == $iTile->id)) {
+                    $scoredTiles[] = $iTile;
+                } else {
+                    break;
+                }
+            }
+            
+            for ($i = $placedTile->space - 1; $i >= $placedTile->space - 5; $i--) {
+                $iSpace = (($i + 11) % 6) + 1;
+                $iTile = $this->array_find($wall, fn($tile) => $tile->space == $iSpace);
+                if ($iTile && !$this->array_find($scoredTiles, fn($tile) => $tile->id == $iTile->id)) {
+                    $scoredTiles[] = $iTile;
+                } else {
+                    break;
+                }
+            }
+        }
+
+        return $scoredTiles;
     }
 }

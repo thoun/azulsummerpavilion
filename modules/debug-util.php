@@ -214,7 +214,7 @@ trait DebugUtilTrait {
         $firstPlayerTokens = array_values(array_filter($factoryTiles, fn($fpTile) => $fpTile->type == 0));
         $hasFirstPlayer = count($firstPlayerTokens) > 0;
         if ($hasFirstPlayer) {
-            $this->putFirstPlayerTile($firstPlayerTokens, 2343492);
+            $this->putFirstPlayerTile(2343492);
         }
     }
 

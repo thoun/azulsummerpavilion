@@ -66,7 +66,8 @@ trait ActionTrait {
 
 
             if ($hasFirstPlayer) {
-                $this->putFirstPlayerTile($firstPlayerTokens, $playerId);
+                $selectedTiles[] = $firstPlayerTokens[0];
+                $this->putFirstPlayerTile($playerId);
             }
         } else {
             foreach($factoryTiles as $factoryTile) {
@@ -150,9 +151,8 @@ trait ActionTrait {
         if (!$skipActionCheck) {
             $this->checkAction('selectPlace');
         }
-        
-        $playerId = self::getActivePlayerId();
 
+        $args = $this->argChoosePlace();
         if (!in_array($star * 100 + $space, $args['possibleSpaces'])) {
             throw new BgaUserException('Space not available');
         }
@@ -178,10 +178,12 @@ trait ActionTrait {
 
         $this->gamestate->nextState('next');
 
-        // if only one option (no use of wilds), auto-play it
+        // if only one option (no wild, or exact count of color+wilds), auto-play it
         $args = $this->argPlayTile();
         if ($args['maxWildTiles'] === 0) {
             $this->playTile(0, true);
+        } else if ($args['maxWildTiles'] + $args['maxColor'] == $args['number']) {
+            $this->playTile($args['maxWildTiles'], true);
         }
     }
 
@@ -190,7 +192,7 @@ trait ActionTrait {
             $this->checkAction('playTile');
         }
         
-        $playerId = self::getActivePlayerId();
+        $playerId = intval(self::getActivePlayerId());
         $variant = $this->isVariant();
 
         $hand = $this->getTilesFromDb($this->tiles->getCardsInLocation('hand', $playerId));
@@ -217,21 +219,21 @@ trait ActionTrait {
         $this->tiles->moveCard($placedTile->id, 'wall'.$playerId, $placedTile->star * 100 + $placedTile->space);
         $this->tiles->moveCards(array_map('getIdPredicate', $discardedTiles), 'discard');
 
-        /*self::notifyAllPlayers('placeTileOnWall', '', [
-            'completeLines' => $completeLinesNotif,
-        ]);
+        $scoredTiles = $this->getScoredTiles($playerId, $placedTile);
 
-        foreach ($completeLinesNotif as $playerId => $notif) {
-            self::notifyAllPlayers('placeTileOnWallTextLogDetails', clienttranslate('${player_name} places ${number} ${color} and gains ${points} point(s)'), [
-                'player_name' => $this->getPlayerName($playerId),
-                'number' => 1,
-                'color' => $this->getColor($notif->placedTile->type),
-                'i18n' => ['color'],
-                'type' => $notif->placedTile->type,
-                'preserve' => [ 2 => 'type' ],
-                'points' => $notif->pointsDetail->points,
-            ]);
-        }*/
+        self::notifyAllPlayers('placeTileOnWall', clienttranslate('${player_name} places ${number} ${color} and gains ${points} point(s)'), [
+            'placedTile' => $placedTile,
+            'discardedTiles' => $discardedTiles,
+            'scoredTiles' => $scoredTiles,
+            'playerId' => $playerId,
+            'player_name' => $this->getPlayerName($playerId),
+            'number' => 1,
+            'color' => $this->getColor($placedTile->type),
+            'i18n' => ['color'],
+            'type' => $placedTile->type,
+            'preserve' => [ 2 => 'type' ],
+            'points' => count($scoredTiles),
+        ]);
 
         $this->setGlobalVariable(UNDO_PLACE, new Undo($tiles, null, null, false));
 
