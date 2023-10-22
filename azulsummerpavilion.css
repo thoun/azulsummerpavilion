@@ -345,6 +345,7 @@
 }
 
 .tile {
+  --rotation: 0deg;
   width: 58px;
   height: 58px;
   display: inline-block;
@@ -353,7 +354,7 @@
   border-radius: 5px;
   box-shadow: 1px 1px 2px 2px black;
   pointer-events: none;
-  clip-path: polygon(50% 0%, 75% 50%, 50% 100%, 25% 50%);
+  transform: rotate(calc(45deg + var(--rotation))) skew(15deg, 15deg);
   overflow: hidden;
 }
 .tile.tile0 {

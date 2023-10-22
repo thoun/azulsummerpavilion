@@ -19,7 +19,8 @@ function slideToObjectAndAttach(game: AzulSummerPavilionGame, object: HTMLElemen
             object.style.left = posX !== undefined ? `${posX}px` : 'unset';
             object.style.position = (posX !== undefined || posY !== undefined) ? 'absolute' : 'relative';
             object.style.zIndex = originalZIndex ? ''+originalZIndex : 'unset';
-            object.style.transform = rotation ? `rotate(${rotation}deg)` : 'unset';
+            object.style.transform = '';
+            object.style.setProperty('--rotation', `${rotation ?? 0}deg`);
             object.style.transition = null;
             destination.appendChild(object);
         }
@@ -29,7 +30,8 @@ function slideToObjectAndAttach(game: AzulSummerPavilionGame, object: HTMLElemen
             attachToNewParent();
         } else {
             object.style.transition = `transform 0.5s ease-in`;
-            object.style.transform = `translate(${deltaX / game.getZoom()}px, ${deltaY / game.getZoom()}px) rotate(${rotation}deg)`;
+            object.style.setProperty('--rotation', `${rotation ?? 0}deg`);
+            object.style.transform = `translate(${deltaX / game.getZoom()}px, ${deltaY / game.getZoom()}px) rotate(calc(45deg + var(--rotation))) skew(15deg, 15deg)`;
 
             let securityTimeoutId = null;
 

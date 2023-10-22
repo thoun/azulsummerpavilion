@@ -436,8 +436,9 @@ class AzulSummerPavilion implements AzulSummerPavilionGame {
         if (tileDiv) {
             return slideToObjectAndAttach(this, tileDiv, destinationId, left, top, rotation);
         } else {
-            dojo.place(`<div id="tile${tile.id}" class="tile tile${tile.type}" data-id="${tile.id}" data-type="${tile.type}" style="${left !== undefined ? `left: ${left}px;` : ''}${top !== undefined ? `top: ${top}px;` : ''}${rotation ? `transform: rotate(${rotation}deg)` : ''}" data-rotation="${rotation ?? 0}"></div>`, destinationId);
+            dojo.place(`<div id="tile${tile.id}" class="tile tile${tile.type}" data-id="${tile.id}" data-type="${tile.type}" style="${left !== undefined ? `left: ${left}px;` : ''}${top !== undefined ? `top: ${top}px;` : ''}" data-rotation="${rotation ?? 0}"></div>`, destinationId);
             const newTileDiv = document.getElementById(`tile${tile.id}`);
+            newTileDiv.style.setProperty('--rotation', `${rotation ?? 0}deg`);
             newTileDiv.addEventListener('click', () => {
                 this.onTileClick(tile);
                 this.factories.tileMouseLeave(tile.id);

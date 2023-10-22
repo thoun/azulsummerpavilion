@@ -628,7 +628,8 @@ function slideToObjectAndAttach(game, object, destinationId, posX, posY, rotatio
             object.style.left = posX !== undefined ? "".concat(posX, "px") : 'unset';
             object.style.position = (posX !== undefined || posY !== undefined) ? 'absolute' : 'relative';
             object.style.zIndex = originalZIndex ? '' + originalZIndex : 'unset';
-            object.style.transform = rotation ? "rotate(".concat(rotation, "deg)") : 'unset';
+            object.style.transform = '';
+            object.style.setProperty('--rotation', "".concat(rotation !== null && rotation !== void 0 ? rotation : 0, "deg"));
             object.style.transition = null;
             destination.appendChild(object);
         };
@@ -638,7 +639,8 @@ function slideToObjectAndAttach(game, object, destinationId, posX, posY, rotatio
         }
         else {
             object.style.transition = "transform 0.5s ease-in";
-            object.style.transform = "translate(".concat(deltaX / game.getZoom(), "px, ").concat(deltaY / game.getZoom(), "px) rotate(").concat(rotation, "deg)");
+            object.style.setProperty('--rotation', "".concat(rotation !== null && rotation !== void 0 ? rotation : 0, "deg"));
+            object.style.transform = "translate(".concat(deltaX / game.getZoom(), "px, ").concat(deltaY / game.getZoom(), "px) rotate(calc(45deg + var(--rotation))) skew(15deg, 15deg)");
             var securityTimeoutId_1 = null;
             var transitionend_1 = function () {
                 attachToNewParent();
@@ -1451,8 +1453,9 @@ var AzulSummerPavilion = /** @class */ (function () {
             return slideToObjectAndAttach(this, tileDiv, destinationId, left, top, rotation);
         }
         else {
-            dojo.place("<div id=\"tile".concat(tile.id, "\" class=\"tile tile").concat(tile.type, "\" data-id=\"").concat(tile.id, "\" data-type=\"").concat(tile.type, "\" style=\"").concat(left !== undefined ? "left: ".concat(left, "px;") : '').concat(top !== undefined ? "top: ".concat(top, "px;") : '').concat(rotation ? "transform: rotate(".concat(rotation, "deg)") : '', "\" data-rotation=\"").concat(rotation !== null && rotation !== void 0 ? rotation : 0, "\"></div>"), destinationId);
+            dojo.place("<div id=\"tile".concat(tile.id, "\" class=\"tile tile").concat(tile.type, "\" data-id=\"").concat(tile.id, "\" data-type=\"").concat(tile.type, "\" style=\"").concat(left !== undefined ? "left: ".concat(left, "px;") : '').concat(top !== undefined ? "top: ".concat(top, "px;") : '', "\" data-rotation=\"").concat(rotation !== null && rotation !== void 0 ? rotation : 0, "\"></div>"), destinationId);
             var newTileDiv = document.getElementById("tile".concat(tile.id));
+            newTileDiv.style.setProperty('--rotation', "".concat(rotation !== null && rotation !== void 0 ? rotation : 0, "deg"));
             newTileDiv.addEventListener('click', function () {
                 _this.onTileClick(tile);
                 _this.factories.tileMouseLeave(tile.id);
