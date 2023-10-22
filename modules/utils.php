@@ -301,4 +301,67 @@ trait UtilTrait {
 
         return $scoredTiles;
     }
+
+    function countAdditionalTiles(int $playerId, $placedTile) {
+        $wall = $this->getTilesFromDb($this->tiles->getCardsInLocation('wall'.$playerId));
+        $additionalTiles = 0;
+
+        if ($placedTile->star > 0) {
+            if (in_array($placedTile->space, [1, 2])) {
+                $otherTile = $this->array_find($wall, fn($tile) => $tile->star == $placedTile->star && $tile->space == 3 - $placedTile->space);
+                if ($otherTile) {
+                    $otherStar = (($placedTile->star + 1) % 6) + 1;
+                    if (
+                        $this->array_find($wall, fn($tile) => $tile->star == $otherStar && $tile->space == 3) &&
+                        $this->array_find($wall, fn($tile) => $tile->star == $otherStar && $tile->space == 4)
+                    ) {
+                        $additionalTiles += 2;
+                    }
+                }
+            }
+            if (in_array($placedTile->space, [3, 4])) {
+                $otherTile = $this->array_find($wall, fn($tile) => $tile->star == $placedTile->star && $tile->space == 7 - $placedTile->space);
+                if ($otherTile) {
+                    $otherStar = (($placedTile->star + 5) % 6) + 1;
+                    if (
+                        $this->array_find($wall, fn($tile) => $tile->star == $otherStar && $tile->space == 1) &&
+                        $this->array_find($wall, fn($tile) => $tile->star == $otherStar && $tile->space == 2)
+                    ) {
+                        $additionalTiles += 2;
+                    }
+                }
+            }
+            if (in_array($placedTile->space, [5, 6])) {
+                $otherTile = $this->array_find($wall, fn($tile) => $tile->star == $placedTile->star && $tile->space == 11 - $placedTile->space);
+                if ($otherTile) {
+                    $additionalTiles += 3;
+                }
+            }
+        } else { // star 0
+            $spaceBefore = (($placedTile->space + 5) % 6) + 1;            
+            $otherTile = $this->array_find($wall, fn($tile) => $tile->star == 0 && $tile->space == $spaceBefore);
+            if ($otherTile) {
+                $otherStar = (($placedTile->space + 4) % 6) + 1;
+                if (
+                    $this->array_find($wall, fn($tile) => $tile->star == $otherStar && $tile->space == 2) &&
+                    $this->array_find($wall, fn($tile) => $tile->star == $otherStar && $tile->space == 3)
+                ) {
+                    $additionalTiles += 1;
+                }
+            }
+            $spaceAfter = (($placedTile->space + 1) % 6) + 1;
+            $otherTile = $this->array_find($wall, fn($tile) => $tile->star == 0 && $tile->space == $spaceAfter);
+            if ($otherTile) {
+                $otherStar = (($placedTile->space + 5) % 6) + 1;
+                if (
+                    $this->array_find($wall, fn($tile) => $tile->star == $otherStar && $tile->space == 2) &&
+                    $this->array_find($wall, fn($tile) => $tile->star == $otherStar && $tile->space == 3)
+                ) {
+                    $additionalTiles += 1;
+                }
+            }
+        }
+
+        return $additionalTiles;
+    }
 }

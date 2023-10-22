@@ -241,6 +241,11 @@ trait ActionTrait {
 
         $this->setGlobalVariable(UNDO_PLACE, new Undo($tiles, null, null, false));
 
+        $additionalTiles = $this->countAdditionalTiles($playerId, $placedTile);
+        if ($additionalTiles > 0) {
+            $this->debug("additionalTiles $additionalTiles");
+        }
+
         if ($this->allowUndo()) {
             $this->gamestate->nextState('confirm');
         } else {
