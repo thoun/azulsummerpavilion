@@ -1070,8 +1070,7 @@ var PlayerTable = /** @class */ (function () {
     }
     PlayerTable.prototype.placeTilesOnHand = function (tiles) {
         var _this = this;
-        var startX = HAND_CENTER - tiles.length * (HALF_TILE_SIZE + 5);
-        tiles.forEach(function (tile, index) { return _this.game.placeTile(tile, "player-hand-".concat(_this.playerId), startX + (tiles.length - index) * (HALF_TILE_SIZE + 5) * 2, 5); });
+        tiles.forEach(function (tile) { return _this.game.placeTile(tile, "player-hand-".concat(_this.playerId)); });
     };
     PlayerTable.prototype.placeTilesOnWall = function (tiles) {
         var _this = this;

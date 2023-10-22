@@ -51,8 +51,7 @@ class PlayerTable {
     }
 
     public placeTilesOnHand(tiles: Tile[]) {
-        const startX = HAND_CENTER - tiles.length * (HALF_TILE_SIZE + 5);
-        tiles.forEach((tile, index) => this.game.placeTile(tile, `player-hand-${this.playerId}`, startX + (tiles.length - index) * (HALF_TILE_SIZE + 5) * 2, 5));
+        tiles.forEach(tile => this.game.placeTile(tile, `player-hand-${this.playerId}`));
     }
 
     public placeTilesOnWall(tiles: Tile[]) {
