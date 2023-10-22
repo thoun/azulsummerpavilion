@@ -12,6 +12,7 @@ interface AzulSummerPavilionPlayer extends Player {
     corner: Tile[];
     playerNo: number;
     selectedColumns: SelectedColumn[];
+    passed: boolean;
 }
 
 /**
@@ -40,6 +41,7 @@ interface AzulSummerPavilionGamedatas {
     fastScoring: boolean;
     remainingTiles: number;
     round: number; // 1..6
+    center: Tile[];
 }
 
 interface AzulSummerPavilionGame extends Game {
@@ -102,6 +104,7 @@ interface NotifFirstPlayerTokenArgs {
 interface NotifFactoriesFilledArgs {
     factories: { [factoryId: number]: Tile[] };
     remainingTiles: number;
+    roundNumber: number;
 }
 
 interface NotifFactoriesChangedArgs extends NotifFactoriesFilledArgs {

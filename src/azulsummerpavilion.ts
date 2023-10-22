@@ -28,6 +28,7 @@ class AzulSummerPavilion implements AzulSummerPavilionGame {
     private gamedatas: AzulSummerPavilionGamedatas;
     private zoomManager: ZoomManager;
     private factories: Factories;
+    private scoringBoard: ScoringBoard;
     private playersTables: PlayerTable[] = [];
 
     public zoom: number = 0.75;
@@ -71,6 +72,7 @@ class AzulSummerPavilion implements AzulSummerPavilionGame {
 
         this.createPlayerPanels(gamedatas);
         this.factories = new Factories(this, gamedatas.factoryNumber, gamedatas.factories, gamedatas.remainingTiles);
+        this.scoringBoard = new ScoringBoard(this, gamedatas.round, gamedatas.center);
         this.createPlayerTables(gamedatas);
 
         // before set
@@ -476,6 +478,8 @@ class AzulSummerPavilion implements AzulSummerPavilionGame {
             if (gamedatas.firstPlayerTokenPlayerId === playerId) {
                 this.placeFirstPlayerToken(gamedatas.firstPlayerTokenPlayerId);
             }
+
+            document.getElementById(`overall_player_board_${playerId}`).classList.toggle('passed', player.passed);
         });
     }
 
@@ -692,9 +696,11 @@ class AzulSummerPavilion implements AzulSummerPavilionGame {
             ['placeTileOnWall', ANIMATION_MS],
             ['putToCorner', ANIMATION_MS],
             ['cornerToHand', 1],
+            ['cornerToHand', 1],
             ['endScore', this.gamedatas.fastScoring ? SCORE_MS : SLOW_SCORE_MS],
             ['firstPlayerToken', 1],
             ['lastRound', 1],
+            ['pass', 1],
         ];
 
         notifs.forEach((notif) => {
@@ -705,6 +711,8 @@ class AzulSummerPavilion implements AzulSummerPavilionGame {
 
     notif_factoriesFilled(notif: Notif<NotifFactoriesFilledArgs>) {
         this.factories.fillFactories(notif.args.factories, notif.args.remainingTiles);
+        this.scoringBoard.setRoundNumber(notif.args.roundNumber);
+        Object.keys(this.gamedatas.players).forEach(playerId => document.getElementById(`overall_player_board_${playerId}`).classList.remove('passed'));
     }
 
     notif_factoriesChanged(notif: Notif<NotifFactoriesChangedArgs>) {
@@ -768,6 +776,11 @@ class AzulSummerPavilion implements AzulSummerPavilionGame {
     notif_cornerToHand(notif: Notif<NotifCornerToHandArgs>) {
         const { playerId, tiles } = notif.args;
         this.getPlayerTable(playerId).placeTilesOnHand(tiles);
+    }
+
+    notif_pass(notif: Notif<NotifCornerToHandArgs>) {
+        const { playerId } = notif.args;
+        document.getElementById(`overall_player_board_${playerId}`).classList.add('passed');
     }
 
     notif_endScore(notif: Notif<NotifEndScoreArgs>) {

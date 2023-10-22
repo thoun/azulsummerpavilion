@@ -161,6 +161,7 @@ class AzulSummerPavilion extends Table {
             $player['playerNo'] = intval($player['playerNo']);
             $player['hand'] = $this->getTilesFromDb($this->tiles->getCardsInLocation('hand', $playerId));
             $player['corner'] = $this->getTilesFromDb($this->tiles->getCardsInLocation('corner', $playerId));
+            $player['passed'] = boolval(self::getUniqueValueFromDB("SELECT passed FROM player WHERE player_id = $playerId"));
         }
 
         $result['endRound'] = $endRound;
@@ -168,6 +169,7 @@ class AzulSummerPavilion extends Table {
         $result['fastScoring'] = $this->isFastScoring();
         $result['remainingTiles'] = intval($this->tiles->countCardInLocation('deck'));
         $result['round'] = $this->getRound();
+        $result['center'] = $this->getTilesFromDb($this->tiles->getCardsInLocation('center'));
   
         return $result;
     }

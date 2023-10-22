@@ -286,7 +286,10 @@ trait ActionTrait {
         $playerId = self::getActivePlayerId();
 
         self::DbQuery("UPDATE player SET passed = TRUE WHERE player_id = $playerId" );
-        // TODO notif players ?
+        self::notifyAllPlayers('pass', clienttranslate('${player_name} chooses to pass'), [
+            'playerId' => $playerId,
+            'player_name' => self::getActivePlayerName(),
+        ]);
 
         $tiles = $this->getTilesFromDb($this->tiles->getCardsInLocation('hand', $playerId));
         if (count($tiles) > 4) { // TODO always ask ?

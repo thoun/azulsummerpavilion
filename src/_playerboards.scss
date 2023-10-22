@@ -5,3 +5,9 @@
         pointer-events: all;
     }
 }
+
+.player-board {  
+  &.passed {
+    background-color: lightgray;
+  }
+}

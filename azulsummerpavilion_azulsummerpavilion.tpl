@@ -7,6 +7,7 @@
                 <span id="bag-counter"></span>
             </div>
         </div>
+        <div id="scoring-board"></div>
     </div>
 </div>
 

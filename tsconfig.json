@@ -20,6 +20,7 @@
         "src/azulsummerpavilion.d.ts",
         "src/slide-utils.ts",
         "src/factories/factories.ts",
+        "src/scoring-board/scoring-board.ts",
         "src/players-tables/player-table.ts",
         "src/azulsummerpavilion.ts",
         "src/define.ts"

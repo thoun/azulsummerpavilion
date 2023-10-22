@@ -25,16 +25,17 @@ trait StateTrait {
             $factories[$factory] = $this->getTilesFromDb($this->tiles->pickCardsForLocation(4, 'deck', 'factory', $factory));
         }
 
-        self::DbQuery("UPDATE player SET passed = false");
-        // TODO notif players ? => include to followingnotif
-
-        self::notifyAllPlayers("factoriesFilled", clienttranslate("A new round begins !"), [
-            'factories' => $factories,
-            'remainingTiles' => intval($this->tiles->countCardInLocation('deck')),
-        ]);
-
         self::incStat(1, 'roundsNumber');
         self::incStat(1, 'firstPlayer', intval(self::getGameStateValue(FIRST_PLAYER_FOR_NEXT_TURN)));
+
+        self::DbQuery("UPDATE player SET passed = false");
+
+        self::notifyAllPlayers("factoriesFilled", clienttranslate('Round ${round_number}/6 begins !'), [
+            'factories' => $factories,
+            'remainingTiles' => intval($this->tiles->countCardInLocation('deck')),
+            'roundNumber' => intval(self::getStat('roundsNumber')),
+            'round_number' => intval(self::getStat('roundsNumber')), // for logs
+        ]);
 
 
         // place stored tiles in hand
@@ -99,29 +100,12 @@ trait StateTrait {
     }
 
 
-    function stEndRound() {
-        $round = $this->getRound();
-        $this->gamestate->nextState($round < 6 ? 'newRound' : 'endScore');
-    }
-
-    // TODO delete
-    function stPlaceTiles() {
-        $playersIds = $this->getPlayersIds();
-
-        $this->notifPlaceLines($playersIds);
-    
+    function stEndRound() {    
         $firstPlayerTile = $this->getTilesFromDb($this->tiles->getCardsOfType(0))[0];
         $this->tiles->moveCard($firstPlayerTile->id, 'factory', 0);
 
-        if ($this->getGameProgression() == 100) {
-            $this->gamestate->nextState('endScore');
-        } else {
-            $playerId = intval(self::getGameStateValue(FIRST_PLAYER_FOR_NEXT_TURN));
-            $this->gamestate->changeActivePlayer($playerId);
-            self::giveExtraTime($playerId);
-
-            $this->gamestate->nextState('newRound');
-        }
+        $round = $this->getRound();
+        $this->gamestate->nextState($round < 6 ? 'newRound' : 'endScore');
     }
 
     private function endScoreNotifs(array $playersIds, array $walls, bool $variant) {

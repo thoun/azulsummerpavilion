@@ -123,8 +123,8 @@
       self::setAjaxMode();
 
       // Retrieve arguments
-        $idsStr = self::getArg( "ids", AT_numberlist, true );
-        $ids = array_map(fn($str) => intval($str), explode(',', $idsStr));
+      $idsStr = self::getArg( "ids", AT_numberlist, true );
+      $ids = strlen($idsStr) > 0 ? array_map(fn($str) => intval($str), explode(',', $idsStr)) : [];
 
       $this->game->selectKeptTiles($ids);
 

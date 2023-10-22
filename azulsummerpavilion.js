@@ -1033,6 +1033,33 @@ var Factories = /** @class */ (function () {
     };
     return Factories;
 }());
+var ScoringBoard = /** @class */ (function () {
+    function ScoringBoard(game, roundNumber, centerTiles) {
+        this.game = game;
+        var scoringBoardDiv = document.getElementById('scoring-board');
+        var html = "<div id=\"round-counter\">";
+        for (var i = 1; i <= 6; i++) {
+            html += "<div id=\"round-space-".concat(i, "\" class=\"round-space\">").concat(roundNumber == i ? "<div id=\"round-marker\"></div>" : '', "</div>");
+        }
+        html += "</div>\n        <div class=\"supply\">";
+        for (var i = 1; i <= 10; i++) {
+            html += "<div id=\"supply-space-".concat(i, "\" class=\"supply-space space").concat(i, "\"></div>");
+        }
+        html += "</div>";
+        scoringBoardDiv.insertAdjacentHTML('beforeend', html);
+        this.placeTiles(centerTiles);
+    }
+    ScoringBoard.prototype.placeTiles = function (tiles) {
+        var _this = this;
+        tiles.forEach(function (tile) { return _this.game.placeTile(tile, "supply-space-".concat(tile.space)); });
+    };
+    ScoringBoard.prototype.setRoundNumber = function (roundNumber) {
+        this.game.animationManager.attachWithAnimation(new BgaSlideAnimation({
+            element: document.getElementById("round-marker")
+        }), document.getElementById("round-space-".concat(roundNumber)));
+    };
+    return ScoringBoard;
+}());
 var HAND_CENTER = 327;
 var PlayerTable = /** @class */ (function () {
     function PlayerTable(game, player) {
@@ -1141,6 +1168,7 @@ var AzulSummerPavilion = /** @class */ (function () {
         this.animationManager = new AnimationManager(this);
         this.createPlayerPanels(gamedatas);
         this.factories = new Factories(this, gamedatas.factoryNumber, gamedatas.factories, gamedatas.remainingTiles);
+        this.scoringBoard = new ScoringBoard(this, gamedatas.round, gamedatas.center);
         this.createPlayerTables(gamedatas);
         // before set
         this.zoomManager = new ZoomManager({
@@ -1499,6 +1527,7 @@ var AzulSummerPavilion = /** @class */ (function () {
             if (gamedatas.firstPlayerTokenPlayerId === playerId) {
                 _this.placeFirstPlayerToken(gamedatas.firstPlayerTokenPlayerId);
             }
+            document.getElementById("overall_player_board_".concat(playerId)).classList.toggle('passed', player.passed);
         });
     };
     AzulSummerPavilion.prototype.createPlayerTables = function (gamedatas) {
@@ -1683,9 +1712,11 @@ var AzulSummerPavilion = /** @class */ (function () {
             ['placeTileOnWall', ANIMATION_MS],
             ['putToCorner', ANIMATION_MS],
             ['cornerToHand', 1],
+            ['cornerToHand', 1],
             ['endScore', this.gamedatas.fastScoring ? SCORE_MS : SLOW_SCORE_MS],
             ['firstPlayerToken', 1],
             ['lastRound', 1],
+            ['pass', 1],
         ];
         notifs.forEach(function (notif) {
             dojo.subscribe(notif[0], _this, "notif_".concat(notif[0]));
@@ -1694,6 +1725,8 @@ var AzulSummerPavilion = /** @class */ (function () {
     };
     AzulSummerPavilion.prototype.notif_factoriesFilled = function (notif) {
         this.factories.fillFactories(notif.args.factories, notif.args.remainingTiles);
+        this.scoringBoard.setRoundNumber(notif.args.roundNumber);
+        Object.keys(this.gamedatas.players).forEach(function (playerId) { return document.getElementById("overall_player_board_".concat(playerId)).classList.remove('passed'); });
     };
     AzulSummerPavilion.prototype.notif_factoriesChanged = function (notif) {
         this.factories.factoriesChanged(notif.args);
@@ -1745,6 +1778,10 @@ var AzulSummerPavilion = /** @class */ (function () {
     AzulSummerPavilion.prototype.notif_cornerToHand = function (notif) {
         var _a = notif.args, playerId = _a.playerId, tiles = _a.tiles;
         this.getPlayerTable(playerId).placeTilesOnHand(tiles);
+    };
+    AzulSummerPavilion.prototype.notif_pass = function (notif) {
+        var playerId = notif.args.playerId;
+        document.getElementById("overall_player_board_".concat(playerId)).classList.add('passed');
     };
     AzulSummerPavilion.prototype.notif_endScore = function (notif) {
         var _this = this;
