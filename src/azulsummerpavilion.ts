@@ -661,6 +661,10 @@ class AzulSummerPavilion implements AzulSummerPavilionGame {
         (this as any).displayScoring(`tile${tile.id}-scoring`, this.getPlayerColor(Number(playerId)), points, SCORE_MS);
     }
 
+    private displayScoringOnStar(star: number, playerId: string | number, points: number) {
+        (this as any).displayScoring(`player-table-${playerId}-star-${star}`, this.getPlayerColor(Number(playerId)), points, SCORE_MS);
+    }
+
     ///////////////////////////////////////////////////
     //// Reaction to cometD notifications
 
@@ -769,7 +773,7 @@ class AzulSummerPavilion implements AzulSummerPavilionGame {
             endScore.tiles.forEach(tile => dojo.addClass(`tile${tile.id}`, 'highlight'));
             setTimeout(() => endScore.tiles.forEach(tile => dojo.removeClass(`tile${tile.id}`, 'highlight')), SCORE_MS - 50);
 
-            this.displayScoringOnTile(endScore.tiles[2], playerId, endScore.points);
+            this.displayScoringOnStar(endScore.star, playerId, endScore.points);
             this.incScore(Number(playerId), endScore.points);
         });
     }

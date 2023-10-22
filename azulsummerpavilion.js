@@ -1042,7 +1042,7 @@ var PlayerTable = /** @class */ (function () {
         var nameClass = player.name.indexOf(' ') !== -1 ? 'with-space' : 'without-space';
         var html = "<div id=\"player-table-wrapper-".concat(this.playerId, "\" class=\"player-table-wrapper\">\n        <div id=\"player-hand-").concat(this.playerId, "\" class=\"player-hand\">\n        </div>\n        <div id=\"player-table-").concat(this.playerId, "\" class=\"player-table ").concat(this.game.isVariant() ? 'variant' : '', "\" style=\"--player-color: #").concat(player.color, ";\">\n            <div class=\"player-name-wrapper shift\">\n                <div id=\"player-name-shift-").concat(this.playerId, "\" class=\"player-name color ").concat(game.isDefaultFont() ? 'standard' : 'azul', " ").concat(nameClass, "\">").concat(player.name, "</div>\n            </div>\n            <div class=\"player-name-wrapper\">\n                <div id=\"player-name-").concat(this.playerId, "\" class=\"player-name dark ").concat(game.isDefaultFont() ? 'standard' : 'azul', " ").concat(nameClass, "\">").concat(player.name, "</div>\n            </div>\n            ");
         for (var star = 0; star <= 6; star++) {
-            html += "<div class=\"star star".concat(star, "\">");
+            html += "<div id=\"player-table-".concat(this.playerId, "-star-").concat(star, "\" class=\"star star").concat(star, "\">");
             for (var space = 1; space <= 6; space++) {
                 html += "<div id=\"player-table-".concat(this.playerId, "-star-").concat(star, "-space-").concat(space, "\" class=\"space space").concat(space, "\"></div>");
             }
@@ -1647,6 +1647,9 @@ var AzulSummerPavilion = /** @class */ (function () {
         dojo.place("<div id=\"tile".concat(tile.id, "-scoring\" class=\"scoring-tile\"></div>"), "player-table-".concat(playerId, "-star-").concat(tile.star, "-space-").concat(tile.space));
         this.displayScoring("tile".concat(tile.id, "-scoring"), this.getPlayerColor(Number(playerId)), points, SCORE_MS);
     };
+    AzulSummerPavilion.prototype.displayScoringOnStar = function (star, playerId, points) {
+        this.displayScoring("player-table-".concat(playerId, "-star-").concat(star), this.getPlayerColor(Number(playerId)), points, SCORE_MS);
+    };
     ///////////////////////////////////////////////////
     //// Reaction to cometD notifications
     /*
@@ -1739,7 +1742,7 @@ var AzulSummerPavilion = /** @class */ (function () {
             var endScore = notif.args.scores[playerId];
             endScore.tiles.forEach(function (tile) { return dojo.addClass("tile".concat(tile.id), 'highlight'); });
             setTimeout(function () { return endScore.tiles.forEach(function (tile) { return dojo.removeClass("tile".concat(tile.id), 'highlight'); }); }, SCORE_MS - 50);
-            _this.displayScoringOnTile(endScore.tiles[2], playerId, endScore.points);
+            _this.displayScoringOnStar(endScore.star, playerId, endScore.points);
             _this.incScore(Number(playerId), endScore.points);
         });
     };

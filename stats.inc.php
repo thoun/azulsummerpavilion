@@ -69,7 +69,7 @@ $commonStats = [
         "name" => totranslate("Points gained with complete lines"),
         "type" => "int"
     ], 
-    "pointsCompleteColumn" => [
+    "pointsCompleteStar" => [
         "id" => 23,
         "name" => totranslate("Points gained with complete columns"),
         "type" => "int"

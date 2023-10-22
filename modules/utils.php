@@ -4,14 +4,14 @@ function getIdPredicate($tile) {
     return $tile->id;
 };
 
-function sortByLine($a, $b) {
+function sortByStar($a, $b) {
     if ($a->star == $b->star) {
         return 0;
     }
     return ($a->star < $b->star) ? -1 : 1;
 }
 
-function sortByColumn($a, $b) {
+function sortBySpace($a, $b) {
     if ($a->space == $b->space) {
         return 0;
     }
@@ -183,6 +183,7 @@ trait UtilTrait {
     function getColor(int $type) {
         $colorName = null;
         switch ($type) {
+            case 0: $colorName = clienttranslate('All colors'); break;
             case 1: $colorName = clienttranslate('Fuschia'); break;
             case 2: $colorName = clienttranslate('Green'); break;
             case 3: $colorName = clienttranslate('Orange'); break;
@@ -414,24 +415,32 @@ trait UtilTrait {
         ]);
     }
 
-    function notifCompleteColumns(array $playersIds, array $walls, int $column) {                
+    function notifCompleteStar(array $playersIds, array $walls, int $star, bool $variant) {                
         $scoresNotif = [];
         foreach ($playersIds as $playerId) {
-            $playerTiles = array_values(array_filter($walls[$playerId], fn($tile) => $tile->space == $column));
-            usort($playerTiles, 'sortByLine');
+            $playerTiles = array_values(array_filter($walls[$playerId], fn($tile) => $tile->star == $star));
             
-            if (count($playerTiles) == 5) {
+            if (count($playerTiles) == 6) {
+                $color = $this->STANDARD_FACE_STAR_COLORS[$star];
+                if ($variant) {
+                    if ($playerTiles[0]->type != $playerTiles[1]->type) {
+                        $color = 0;
+                    } else {
+                        $color = $playerTiles[0]->type;
+                    }
+                }
 
                 $obj = new stdClass();
+                $obj->star = $star;
                 $obj->tiles = $playerTiles;
-                $obj->points = 7;
+                $obj->points = $this->FULL_STAR_POINTS_BY_COLOR[$color];
 
                 $scoresNotif[$playerId] = $obj;
 
                 $this->incPlayerScore($playerId, $obj->points);
 
-                self::incStat($obj->points, 'pointsCompleteColumn');
-                self::incStat($obj->points, 'pointsCompleteColumn', $playerId);
+                self::incStat($obj->points, 'pointsCompleteStar');
+                self::incStat($obj->points, 'pointsCompleteStar', $playerId);
             }
         }
 
@@ -441,16 +450,17 @@ trait UtilTrait {
             ]);
 
             foreach ($scoresNotif as $playerId => $notif) {
-                self::notifyAllPlayers('completeColumnLogDetails', clienttranslate('${player_name} gains ${points} point(s) with complete column ${column}'), [
+                self::notifyAllPlayers('completeStarLogDetails', clienttranslate('${player_name} gains ${points} point(s) with complete star ${color}'), [
                     'player_name' => $this->getPlayerName($playerId),
-                    'column' => $notif->tiles[0]->space,
+                    'color' => $this->getColor($color),
+                    'i18n' => ['color'],
                     'points' => $notif->points,
                 ]);
             }
         }
     }
 
-    function notifCompleteColors(array $playersIds, array $walls, int $color) {                
+    function notifCompleteNumbers(array $playersIds, array $walls, int $color) {                
         $scoresNotif = [];
         foreach ($playersIds as $playerId) {
             $playerTiles = array_values(array_filter($walls[$playerId], fn($tile) => $tile->type == $color));

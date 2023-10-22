@@ -24,7 +24,7 @@ class PlayerTable {
             `;
 
         for (let star=0; star<=6; star++) {
-            html += `<div class="star star${star}">`;
+            html += `<div id="player-table-${this.playerId}-star-${star}" class="star star${star}">`;
             for (let space=1; space<=6; space++) {
                 html += `<div id="player-table-${this.playerId}-star-${star}-space-${space}" class="space space${space}"></div>`;
             }

@@ -161,6 +161,7 @@ interface NotifEmptyFloorLineArgs {
 interface EndScoreTiles {
     tiles: Tile[];
     points: number;
+    star: number;
 }
 
 interface NotifEndScoreArgs {

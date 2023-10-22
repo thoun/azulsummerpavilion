@@ -25,15 +25,6 @@
   4 => 9,
 ];
 
-
-$this->indexForDefaultWall = [ // TODO remove
-  1 => 3,
-  2 => 4,
-  3 => 0,
-  4 => 1,
-  5 => 2,
-];
-
 $this->STANDARD_FACE_STAR_COLORS = [
   0 => 0,
   1 => 1,
@@ -42,4 +33,15 @@ $this->STANDARD_FACE_STAR_COLORS = [
   4 => 5, 
   5 => 4, 
   6 => 2,
+];
+
+
+$this->FULL_STAR_POINTS_BY_COLOR = [
+  0 => 12,
+  1 => 20,
+  2 => 18,
+  3 => 17,
+  4 => 16, 
+  5 => 15, 
+  6 => 14,
 ];

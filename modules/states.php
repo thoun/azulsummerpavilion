@@ -111,18 +111,19 @@ trait StateTrait {
         }
     }
 
-    private function endScoreNotifs(array $playersIds, array $walls) {
-        // Gain 7 points for each complete vertical line of 5 consecutive tiles on your wall.
-        for ($column = 1; $column <= 5; $column++) {
-            $this->notifCompleteColumns($playersIds, $walls, $column);
+    private function endScoreNotifs(array $playersIds, array $walls, bool $variant) {
+        // Gain points for each complete star on your wall.
+        for ($star = 0; $star <= 6; $star++) {
+            $this->notifCompleteStar($playersIds, $walls, $star, $variant);
         }
-        // Gain 10 points for each color of which you have placed all 5 tiles on your wall.
-        for ($color = 1; $color <= 5; $color++) {
-            $this->notifCompleteColors($playersIds, $walls, $color);
+        // Gain 4/8/12/16 points for complete sets of 1/2/3/4.
+        for ($number = 1; $number <= 4; $number++) {
+            $this->notifCompleteNumbers($playersIds, $walls, $number);
         }
     }
 
     function stEndScore() {
+        $variant = $this->isVariant();
         $playersIds = $this->getPlayersIds();
 
         $walls = [];
@@ -132,10 +133,10 @@ trait StateTrait {
         
         $fastScoring = $this->isFastScoring();
         if ($fastScoring) {
-            $this->endScoreNotifs($playersIds, $walls);
+            $this->endScoreNotifs($playersIds, $walls, $variant);
         } else {
             foreach($playersIds as $playerId) {
-                $this->endScoreNotifs([$playerId], $walls);
+                $this->endScoreNotifs([$playerId], $walls, $variant);
             }
         }
 

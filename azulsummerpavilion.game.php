@@ -107,8 +107,8 @@ class AzulSummerPavilion extends Table {
         self::initStat('player', 'pointsLossFloorLine', 0);
         self::initStat('table', 'pointsCompleteLine', 0);
         self::initStat('player', 'pointsCompleteLine', 0);
-        self::initStat('table', 'pointsCompleteColumn', 0);
-        self::initStat('player', 'pointsCompleteColumn', 0);
+        self::initStat('table', 'pointsCompleteStar', 0);
+        self::initStat('player', 'pointsCompleteStar', 0);
         self::initStat('table', 'pointsCompleteColor', 0);
         self::initStat('player', 'pointsCompleteColor', 0);
         self::initStat('table', 'incompleteLinesAtEndRound', 0);
