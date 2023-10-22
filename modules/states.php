@@ -112,10 +112,6 @@ trait StateTrait {
     }
 
     private function endScoreNotifs(array $playersIds, array $walls) {
-        // Gain 2 points for each complete horizontal line of 5 consecutive tiles on your wall.
-        for ($line = 1; $line <= 5; $line++) {
-            $this->notifCompleteLines($playersIds, $walls, $line);
-        }
         // Gain 7 points for each complete vertical line of 5 consecutive tiles on your wall.
         for ($column = 1; $column <= 5; $column++) {
             $this->notifCompleteColumns($playersIds, $walls, $column);

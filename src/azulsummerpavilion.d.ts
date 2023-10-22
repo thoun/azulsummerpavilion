@@ -48,6 +48,7 @@ interface AzulSummerPavilionGame extends Game {
     isDefaultFont(): boolean;
     getZoom(): number;
     isVariant(): boolean;
+    getPlayerColor(playerId: number): string;
     takeTiles(id: number): void;
     playTile(line: number): void;
     selectPlace(star: number, space: number): void;
@@ -94,6 +95,7 @@ interface SelectedColumn {
 
 interface NotifFirstPlayerTokenArgs {
     playerId: number;
+    decScore: number;
 }
 
 interface NotifFactoriesFilledArgs {

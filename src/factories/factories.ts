@@ -393,4 +393,8 @@ class Factories {
     private setRemainingTiles(remainingTiles: number) {
         this.bagCounter.setValue(remainingTiles);
     }
+    
+    public displayScoringCenter(playerId: number, points: number) {
+        (this.game as any).displayScoring(`factory0`, this.game.getPlayerColor(playerId), points, SCORE_MS);
+    }
 }

@@ -78,8 +78,12 @@ trait ArgsTrait {
             $starTiles = array_values(array_filter($placedTiles, fn($placedTile) => $placedTile->star == $star));
             $starColors = array_map(fn($starTile) => $starTile->type, $starTiles);
             $colors = array_diff([1, 2, 3, 4, 5, 6], $starColors);
-            if ($variant && count($starColors) >= 2 && $starColors[0] == $starColors[1]) {
-                $colors = [$starColors[0]];
+            if ($variant) {
+                if (count($starColors) <= 1) {
+                    $colors = [1, 2, 3, 4, 5, 6];
+                } else if (count($starColors) >= 2 && $starColors[0] == $starColors[1]) {
+                    $colors = [$starColors[0]];
+                }
             }
 
             foreach ($colors as $possibleColor) {

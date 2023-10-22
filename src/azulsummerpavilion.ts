@@ -417,7 +417,7 @@ class AzulSummerPavilion implements AzulSummerPavilionGame {
         return Number((this as any).player_id);
     }
 
-    private getPlayerColor(playerId: number): string {
+    public getPlayerColor(playerId: number): string {
         return this.gamedatas.players[playerId].color;
     }
 
@@ -426,8 +426,8 @@ class AzulSummerPavilion implements AzulSummerPavilionGame {
     }
 
     private incScore(playerId: number, incScore: number) {
-        if ((this as any).scoreCtrl[playerId]?.getValue() + incScore < 0) {
-            (this as any).scoreCtrl[playerId]?.toValue(0);
+        if ((this as any).scoreCtrl[playerId]?.getValue() + incScore < 1) {
+            (this as any).scoreCtrl[playerId]?.toValue(1);
         } else {
             (this as any).scoreCtrl[playerId]?.incValue(incScore);
         }
@@ -775,7 +775,11 @@ class AzulSummerPavilion implements AzulSummerPavilionGame {
     }
 
     notif_firstPlayerToken(notif: Notif<NotifFirstPlayerTokenArgs>) {
-        this.placeFirstPlayerToken(notif.args.playerId);
+        const { playerId, decScore } = notif.args;
+        this.placeFirstPlayerToken(playerId);
+        this.incScore(playerId, -decScore);
+
+        this.factories.displayScoringCenter(playerId, -decScore);
     }
 
     notif_lastRound() {

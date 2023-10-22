@@ -63,11 +63,9 @@ trait ActionTrait {
             $firstPlayerTokens = array_values(array_filter($factoryTiles, fn($fpTile) => $fpTile->type == 0));
             $hasFirstPlayer = count($firstPlayerTokens) > 0;
 
-
-
             if ($hasFirstPlayer) {
                 $selectedTiles[] = $firstPlayerTokens[0];
-                $this->putFirstPlayerTile($playerId);
+                $this->putFirstPlayerTile($playerId, $selectedTiles);
             }
         } else {
             foreach($factoryTiles as $factoryTile) {
@@ -220,6 +218,7 @@ trait ActionTrait {
         $this->tiles->moveCards(array_map('getIdPredicate', $discardedTiles), 'discard');
 
         $scoredTiles = $this->getScoredTiles($playerId, $placedTile);
+        $points = count($scoredTiles);
 
         self::notifyAllPlayers('placeTileOnWall', clienttranslate('${player_name} places ${number} ${color} and gains ${points} point(s)'), [
             'placedTile' => $placedTile,
@@ -232,8 +231,13 @@ trait ActionTrait {
             'i18n' => ['color'],
             'type' => $placedTile->type,
             'preserve' => [ 2 => 'type' ],
-            'points' => count($scoredTiles),
+            'points' => $points,
         ]);
+
+        $this->incPlayerScore($playerId, $points);
+
+        self::incStat($points, 'pointsCompleteLine'); // TODO
+        self::incStat($points, 'pointsCompleteLine', $playerId); // TODO
 
         $this->setGlobalVariable(UNDO_PLACE, new Undo($tiles, null, null, false));
 
@@ -302,6 +306,7 @@ trait ActionTrait {
         $playerId = self::getActivePlayerId();
 
         // TODO keep $ids and discard the rest of the hand
+        $this->notifDiscardTiles($playerId);
 
         $this->gamestate->nextState('nextPlayer');
     }

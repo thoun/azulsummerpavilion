@@ -1028,6 +1028,9 @@ var Factories = /** @class */ (function () {
     Factories.prototype.setRemainingTiles = function (remainingTiles) {
         this.bagCounter.setValue(remainingTiles);
     };
+    Factories.prototype.displayScoringCenter = function (playerId, points) {
+        this.game.displayScoring("factory0", this.game.getPlayerColor(playerId), points, SCORE_MS);
+    };
     return Factories;
 }());
 var HAND_CENTER = 327;
@@ -1444,8 +1447,8 @@ var AzulSummerPavilion = /** @class */ (function () {
     };
     AzulSummerPavilion.prototype.incScore = function (playerId, incScore) {
         var _a, _b, _c;
-        if (((_a = this.scoreCtrl[playerId]) === null || _a === void 0 ? void 0 : _a.getValue()) + incScore < 0) {
-            (_b = this.scoreCtrl[playerId]) === null || _b === void 0 ? void 0 : _b.toValue(0);
+        if (((_a = this.scoreCtrl[playerId]) === null || _a === void 0 ? void 0 : _a.getValue()) + incScore < 1) {
+            (_b = this.scoreCtrl[playerId]) === null || _b === void 0 ? void 0 : _b.toValue(1);
         }
         else {
             (_c = this.scoreCtrl[playerId]) === null || _c === void 0 ? void 0 : _c.incValue(incScore);
@@ -1741,7 +1744,10 @@ var AzulSummerPavilion = /** @class */ (function () {
         });
     };
     AzulSummerPavilion.prototype.notif_firstPlayerToken = function (notif) {
-        this.placeFirstPlayerToken(notif.args.playerId);
+        var _a = notif.args, playerId = _a.playerId, decScore = _a.decScore;
+        this.placeFirstPlayerToken(playerId);
+        this.incScore(playerId, -decScore);
+        this.factories.displayScoringCenter(playerId, -decScore);
     };
     AzulSummerPavilion.prototype.notif_lastRound = function () {
         if (document.getElementById('last-round')) {
