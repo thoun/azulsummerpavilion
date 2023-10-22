@@ -1045,26 +1045,18 @@ var PlayerTable = /** @class */ (function () {
         dojo.place(html, 'centered-table');
         this.placeTilesOnHand(player.hand);
         var _loop_4 = function (star) {
-            var _loop_6 = function (space) {
+            var _loop_5 = function (space) {
                 document.getElementById("player-table-".concat(this_3.playerId, "-star-").concat(star, "-space-").concat(space)).addEventListener('click', function () {
                     _this.game.selectPlace(star, space);
                 });
             };
             for (var space = 1; space <= 5; space++) {
-                _loop_6(space);
+                _loop_5(space);
             }
         };
         var this_3 = this;
         for (var star = 0; star <= 6; star++) {
             _loop_4(star);
-        }
-        var _loop_5 = function (i) {
-            var tiles = player.lines.filter(function (tile) { return tile.line === i; });
-            this_4.placeTilesOnLine(tiles, i);
-        };
-        var this_4 = this;
-        for (var i = -1; i <= 5; i++) {
-            _loop_5(i);
         }
         this.placeTilesOnWall(player.wall);
     }
@@ -1073,16 +1065,9 @@ var PlayerTable = /** @class */ (function () {
         var startX = HAND_CENTER - tiles.length * (HALF_TILE_SIZE + 5);
         tiles.forEach(function (tile, index) { return _this.game.placeTile(tile, "player-hand-".concat(_this.playerId), startX + (tiles.length - index) * (HALF_TILE_SIZE + 5) * 2, 5); });
     };
-    PlayerTable.prototype.placeTilesOnLine = function (tiles, line) {
-        return Promise.all(tiles.map(function (tile) {
-            var left = line == -1 ? 9 : (line > 0 ? (line - tile.column) * 69 : 5 + (tile.column - 1) * 74);
-            var top = line == -1 ? 9 : 0;
-            return Promise.resolve(true); // this.game.placeTile(tile, `player-table-${this.playerId}-line${line}`, left, top); // TODO no lines anymore
-        }));
-    };
     PlayerTable.prototype.placeTilesOnWall = function (tiles) {
         var _this = this;
-        tiles.forEach(function (tile) { return _this.game.placeTile(tile, "player-table-".concat(_this.playerId, "-star-").concat(tile.line, "-space-").concat(tile.column)); });
+        tiles.forEach(function (tile) { return _this.game.placeTile(tile, "player-table-".concat(_this.playerId, "-star-").concat(tile.star, "-space-").concat(tile.space)); });
     };
     PlayerTable.prototype.setFont = function (prefValue) {
         var defaultFont = prefValue === 1;
@@ -1306,14 +1291,14 @@ var AzulSummerPavilion = /** @class */ (function () {
                     break;
                 case 'playTile':
                     var playTileArgs = args;
-                    var _loop_7 = function (i) {
-                        var label = this_5.format_string_recursive('${number} ${color}', { number: playTileArgs.number - i, type: playTileArgs.color });
-                        label += this_5.format_string_recursive('${number} ${color}', { number: i, type: playTileArgs.wildColor });
-                        this_5.addActionButton("playTile".concat(i, "_button"), label, function () { return _this.playTile(i); });
+                    var _loop_6 = function (i) {
+                        var label = this_4.format_string_recursive('${number} ${color}', { number: playTileArgs.number - i, type: playTileArgs.color });
+                        label += this_4.format_string_recursive('${number} ${color}', { number: i, type: playTileArgs.wildColor });
+                        this_4.addActionButton("playTile".concat(i, "_button"), label, function () { return _this.playTile(i); });
                     };
-                    var this_5 = this;
+                    var this_4 = this;
                     for (var i = 0; i <= playTileArgs.maxWildTiles; i++) {
-                        _loop_7(i);
+                        _loop_6(i);
                     }
                     this.addActionButton('undoPlayTile_button', _("Undo line selection"), function () { return _this.undoPlayTile(); }, null, null, 'gray');
                     break;
@@ -1646,7 +1631,7 @@ var AzulSummerPavilion = /** @class */ (function () {
     };
     AzulSummerPavilion.prototype.displayScoringOnTile = function (tile, playerId, points) {
         // create a div over tile, same position and width, but no overflow hidden (that must be kept on tile for glowing effect)
-        dojo.place("<div id=\"tile".concat(tile.id, "-scoring\" class=\"scoring-tile\"></div>"), "player-table-".concat(playerId, "-star-").concat(tile.line, "-space-").concat(tile.column));
+        dojo.place("<div id=\"tile".concat(tile.id, "-scoring\" class=\"scoring-tile\"></div>"), "player-table-".concat(playerId, "-star-").concat(tile.star, "-space-").concat(tile.space));
         this.displayScoring("tile".concat(tile.id, "-scoring"), this.getPlayerColor(Number(playerId)), points, SCORE_MS);
     };
     ///////////////////////////////////////////////////
@@ -1669,7 +1654,6 @@ var AzulSummerPavilion = /** @class */ (function () {
             ['factoriesCompleted', ANIMATION_MS],
             ['tilesSelected', ANIMATION_MS],
             ['undoTakeTiles', ANIMATION_MS],
-            ['tilesPlacedOnLine', ANIMATION_MS],
             ['undoPlayTile', ANIMATION_MS],
             ['placeTileOnWall', this.gamedatas.fastScoring ? SCORE_MS : SLOW_SCORE_MS],
             ['emptyFloorLine', this.gamedatas.fastScoring ? SCORE_MS : SLOW_SCORE_MS],
@@ -1706,10 +1690,6 @@ var AzulSummerPavilion = /** @class */ (function () {
         this.placeFirstPlayerToken(notif.args.undo.previousFirstPlayer);
         this.factories.undoTakeTiles(notif.args.undo.tiles, notif.args.undo.from, notif.args.factoryTilesBefore);
     };
-    AzulSummerPavilion.prototype.notif_tilesPlacedOnLine = function (notif) {
-        this.getPlayerTable(notif.args.playerId).placeTilesOnLine(notif.args.discardedTiles, 0);
-        this.getPlayerTable(notif.args.playerId).placeTilesOnLine(notif.args.placedTiles, notif.args.line);
-    };
     AzulSummerPavilion.prototype.notif_undoPlayTile = function (notif) {
         var table = this.getPlayerTable(notif.args.playerId);
         table.placeTilesOnHand(notif.args.undo.tiles);
@@ -1717,6 +1697,10 @@ var AzulSummerPavilion = /** @class */ (function () {
             dojo.destroy('last-round');
         }
     };
+    /*notif_tilesPlacedOnLine(notif: Notif<NotifTilesPlacedOnLineArgs>) {
+        this.getPlayerTable(notif.args.playerId).placeTilesOnLine(notif.args.discardedTiles, 0);
+        this.getPlayerTable(notif.args.playerId).placeTilesOnLine(notif.args.placedTiles, notif.args.line);
+    }*/
     AzulSummerPavilion.prototype.notif_placeTileOnWall = function (notif) {
         var _this = this;
         Object.keys(notif.args.completeLines).forEach(function (playerId) {

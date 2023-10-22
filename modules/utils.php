@@ -5,17 +5,17 @@ function getIdPredicate($tile) {
 };
 
 function sortByLine($a, $b) {
-    if ($a->line == $b->line) {
+    if ($a->star == $b->star) {
         return 0;
     }
-    return ($a->line < $b->line) ? -1 : 1;
+    return ($a->star < $b->star) ? -1 : 1;
 }
 
 function sortByColumn($a, $b) {
-    if ($a->column == $b->column) {
+    if ($a->space == $b->space) {
         return 0;
     }
-    return ($a->column < $b->column) ? -1 : 1;
+    return ($a->space < $b->space) ? -1 : 1;
 }
 
 trait UtilTrait {
@@ -127,7 +127,7 @@ trait UtilTrait {
     function putFirstPlayerTile(array $firstPlayerTokens, int $playerId) {
         self::setGameStateValue(FIRST_PLAYER_FOR_NEXT_TURN, $playerId);
 
-        $this->placeTilesOnLine($playerId, $firstPlayerTokens, 0, false);
+        // TODO place on hand? $this->placeTilesOnLine($playerId, $firstPlayerTokens, 0, false);
 
         self::notifyAllPlayers('firstPlayerToken', clienttranslate('${player_name} took First Player tile and will start next round'), [
             'playerId' => $playerId,
@@ -135,7 +135,7 @@ trait UtilTrait {
         ]);
     }
 
-    function placeTilesOnLine(int $playerId, array $tiles, int $line, bool $fromHand) {
+    /*function placeTilesOnLine(int $playerId, array $tiles, int $line, bool $fromHand) {
         $startIndex = count($this->getTilesFromLine($playerId, $line));
         $startIndexFloorLine = count($this->getTilesFromLine($playerId, 0));
 
@@ -145,16 +145,16 @@ trait UtilTrait {
         foreach ($tiles as $tile) {
             $aimColumn = ++$startIndex;
             if ($line > 0 && $aimColumn <= $line) {
-                $tile->line = $line;
-                $tile->column = $aimColumn;
+                $tile->star = $line;
+                $tile->space = $aimColumn;
                 $placedTiles[] = $tile;
             } else {
-                $tile->line = 0;
-                $tile->column = ++$startIndexFloorLine;
+                $tile->star = 0;
+                $tile->space = ++$startIndexFloorLine;
                 $discardedTiles[] = $tile;
             }
 
-            $this->tiles->moveCard($tile->id, 'line'.$playerId, $tile->line * 100 + $tile->column);
+            $this->tiles->moveCard($tile->id, 'line'.$playerId, $tile->star * 100 + $tile->space);
         }
 
         $message = $tiles[0]->type == 0 ? '' : 
@@ -176,7 +176,7 @@ trait UtilTrait {
             'discardedTiles' => $discardedTiles,
             'fromHand' => $fromHand,
         ]);
-    }
+    }*/
 
     function getColor(int $type) {
         $colorName = null;
@@ -192,7 +192,7 @@ trait UtilTrait {
 
     function getTilesFromLine(int $playerId, int $line) {
         $tiles = array_values(array_filter(
-            $this->getTilesFromDb($this->tiles->getCardsInLocation('line'.$playerId)), fn($tile) => $tile->line == $line)
+            $this->getTilesFromDb($this->tiles->getCardsInLocation('line'.$playerId)), fn($tile) => $tile->star == $line)
         );
         usort($tiles, 'sortByColumn');
 
@@ -221,7 +221,7 @@ trait UtilTrait {
         $lines = [0];
         for ($i=1; $i<=5; $i++) {
             $lineTiles = $this->getTilesFromLine($playerId, $i);
-            $playerWallTileLine = array_values(array_filter($playerWallTiles, fn($tile) => $tile->line == $i));
+            $playerWallTileLine = array_values(array_filter($playerWallTiles, fn($tile) => $tile->star == $i));
             $availableLine = count($lineTiles) == 0 || ($lineTiles[0]->type == $color && count($lineTiles) < $i);
             $availableWall = !$this->someOfColor($playerWallTileLine, $color);
             if ($availableLine && $availableWall) {
@@ -236,9 +236,9 @@ trait UtilTrait {
         return array_keys($this->loadPlayersBasicInfos());
     }
 
-    function getTileOnWallCoordinates(array $tiles, int $row, int $column) {
+    function getTileOnWallCoordinates(array $tiles, int $star, int $space) {
         foreach ($tiles as $tile) {
-            if ($tile->line == $row && $tile->column == $column) {
+            if ($tile->star == $star && $tile->space == $space) {
                 return $tile;
             }
         }
@@ -252,8 +252,8 @@ trait UtilTrait {
         $columnTiles = [$tile];
 
         // tiles above
-        for ($i = $tile->line - 1; $i >= 1; $i--) {
-            $iTile = $this->getTileOnWallCoordinates($tilesOnWall, $i, $tile->column);
+        for ($i = $tile->star - 1; $i >= 1; $i--) {
+            $iTile = $this->getTileOnWallCoordinates($tilesOnWall, $i, $tile->space);
             if ($iTile != null) {
                 $columnTiles[] = $iTile;
             } else {
@@ -261,8 +261,8 @@ trait UtilTrait {
             }
         }
         // tiles under
-        for ($i = $tile->line + 1; $i <= 5; $i++) {
-            $iTile = $this->getTileOnWallCoordinates($tilesOnWall, $i, $tile->column);
+        for ($i = $tile->star + 1; $i <= 5; $i++) {
+            $iTile = $this->getTileOnWallCoordinates($tilesOnWall, $i, $tile->space);
             if ($iTile != null) {
                 $columnTiles[] = $iTile;
             } else {
@@ -270,8 +270,8 @@ trait UtilTrait {
             }
         }
         // tiles left
-        for ($i = $tile->column - 1; $i >= 1; $i--) {
-            $iTile = $this->getTileOnWallCoordinates($tilesOnWall, $tile->line, $i);
+        for ($i = $tile->space - 1; $i >= 1; $i--) {
+            $iTile = $this->getTileOnWallCoordinates($tilesOnWall, $tile->star, $i);
             if ($iTile != null) {
                 $rowTiles[] = $iTile;
             } else {
@@ -279,8 +279,8 @@ trait UtilTrait {
             }
         }
         // tiles right
-        for ($i = $tile->column + 1; $i <= 5; $i++) {
-            $iTile = $this->getTileOnWallCoordinates($tilesOnWall, $tile->line, $i);
+        for ($i = $tile->space + 1; $i <= 5; $i++) {
+            $iTile = $this->getTileOnWallCoordinates($tilesOnWall, $tile->star, $i);
             if ($iTile != null) {
                 $rowTiles[] = $iTile;
             } else {
@@ -316,10 +316,6 @@ trait UtilTrait {
         }
     }
 
-    function getColumnForTile(int $row, int $type) {
-        return ($row + $this->indexForDefaultWall[$type] - 1) % 5 + 1;
-    }
-
     function notifPlaceLine(array $playersIds, int $line) {
         $completeLinesNotif = [];
         foreach ($playersIds as $playerId) {
@@ -327,31 +323,26 @@ trait UtilTrait {
             if (count($playerTiles) == $line) {
                 
                 $wallTile = $playerTiles[0];
-                $column = $this->getColumnForTile($line, $wallTile->type);
+                $column = $this->getColumnForTile($line, $wallTile->type); // TODO deleted method
 
-                if ($column == 0) {
-                    // variant : we place tiles on floor line, count will be done after
-                    $this->placeTilesOnLine($playerId, $playerTiles, 0, false);
-                } else {
-                    $wallTile->column = $column;
-                    $discardedTiles = array_slice($playerTiles, 1);
-                    $this->tiles->moveCard($wallTile->id, 'wall'.$playerId, $line*100 + $wallTile->column);
-                    $this->tiles->moveCards(array_map('getIdPredicate', $discardedTiles), 'discard');
-    
-                    $pointsDetail = $this->getPointsDetailForPlacedTile($playerId, $wallTile);
-    
-                    $obj = new stdClass();
-                    $obj->placedTile = $wallTile;
-                    $obj->discardedTiles = $discardedTiles;
-                    $obj->pointsDetail = $pointsDetail;
-    
-                    $completeLinesNotif[$playerId] = $obj;
-    
-                    $this->incPlayerScore($playerId, $pointsDetail->points);
-    
-                    self::incStat($pointsDetail->points, 'pointsWallTile');
-                    self::incStat($pointsDetail->points, 'pointsWallTile', $playerId);
-                }
+                $wallTile->space = $column;
+                $discardedTiles = array_slice($playerTiles, 1);
+                $this->tiles->moveCard($wallTile->id, 'wall'.$playerId, $line*100 + $wallTile->space);
+                $this->tiles->moveCards(array_map('getIdPredicate', $discardedTiles), 'discard');
+
+                $pointsDetail = $this->getPointsDetailForPlacedTile($playerId, $wallTile);
+
+                $obj = new stdClass();
+                $obj->placedTile = $wallTile;
+                $obj->discardedTiles = $discardedTiles;
+                $obj->pointsDetail = $pointsDetail;
+
+                $completeLinesNotif[$playerId] = $obj;
+
+                $this->incPlayerScore($playerId, $pointsDetail->points);
+
+                self::incStat($pointsDetail->points, 'pointsWallTile');
+                self::incStat($pointsDetail->points, 'pointsWallTile', $playerId);
             } else if (count($playerTiles) > 0) {
                 self::incStat(1, 'incompleteLinesAtEndRound');
                 self::incStat(1, 'incompleteLinesAtEndRound', $playerId);
@@ -433,7 +424,7 @@ trait UtilTrait {
     function notifCompleteLines(array $playersIds, array $walls, int $line) {        
         $scoresNotif = [];
         foreach ($playersIds as $playerId) {
-            $playerTiles = array_values(array_filter($walls[$playerId], fn($tile)=> $tile->line == $line));
+            $playerTiles = array_values(array_filter($walls[$playerId], fn($tile)=> $tile->star == $line));
             usort($playerTiles, 'sortByColumn');
 
             if (count($playerTiles) == 5) {
@@ -460,7 +451,7 @@ trait UtilTrait {
             foreach ($scoresNotif as $playerId => $notif) {
                 self::notifyAllPlayers('completeLineLogDetails', clienttranslate('${player_name} gains ${points} point(s) with complete line ${line}'), [
                     'player_name' => $this->getPlayerName($playerId),
-                    'line' => $notif->tiles[0]->line,
+                    'line' => $notif->tiles[0]->star,
                     'points' => $notif->points,
                 ]);
             }
@@ -470,7 +461,7 @@ trait UtilTrait {
     function notifCompleteColumns(array $playersIds, array $walls, int $column) {                
         $scoresNotif = [];
         foreach ($playersIds as $playerId) {
-            $playerTiles = array_values(array_filter($walls[$playerId], fn($tile) => $tile->column == $column));
+            $playerTiles = array_values(array_filter($walls[$playerId], fn($tile) => $tile->space == $column));
             usort($playerTiles, 'sortByLine');
             
             if (count($playerTiles) == 5) {
@@ -496,7 +487,7 @@ trait UtilTrait {
             foreach ($scoresNotif as $playerId => $notif) {
                 self::notifyAllPlayers('completeColumnLogDetails', clienttranslate('${player_name} gains ${points} point(s) with complete column ${column}'), [
                     'player_name' => $this->getPlayerName($playerId),
-                    'column' => $notif->tiles[0]->column,
+                    'column' => $notif->tiles[0]->space,
                     'points' => $notif->points,
                 ]);
             }
@@ -555,5 +546,13 @@ trait UtilTrait {
             'remainingTiles' => intval($this->tiles->countCardInLocation('deck')),
         ]);
         // TODO hanfle notif
+    }
+
+    function getSpaceNumber(int $star, int $space, bool $variant) {
+        if ($variant) {
+            return $star == 0 ? 3 : [null, 3, 2, 1, 4, 5, 6][$space];
+        } else {
+            return $space;
+        }
     }
 }

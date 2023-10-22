@@ -157,7 +157,6 @@ class AzulSummerPavilion extends Table {
 
         $endRound = false;
         foreach($result['players'] as $playerId => &$player) {
-            $player['lines'] = $this->getTilesFromDb($this->tiles->getCardsInLocation('line'.$playerId));
             $player['wall'] = $this->getTilesFromDb($this->tiles->getCardsInLocation('wall'.$playerId));
             $player['playerNo'] = intval($player['playerNo']);
             $player['hand'] = $this->getTilesFromDb($this->tiles->getCardsInLocation('hand', $playerId));

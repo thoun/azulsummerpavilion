@@ -2,12 +2,11 @@ interface Tile {
     id: number;
     type: number;
     location: string;
-    line: number;
-    column: number;
+    star: number;
+    space: number;
 }
 
 interface AzulSummerPavilionPlayer extends Player {
-    lines: Tile[];
     wall: Tile[];
     hand: Tile[];
     playerNo: number;

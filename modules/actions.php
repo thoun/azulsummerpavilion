@@ -30,7 +30,7 @@ trait ActionTrait {
             throw new BgaUserException("Tile is First Player token");
         }
 
-        $factory = $tile->column;
+        $factory = $tile->space;
         $factoryTiles = $this->getTilesFromDb($this->tiles->getCardsInLocation('factory', $factory));
 
         $wildColor = $this->getWildColor();
@@ -153,14 +153,11 @@ trait ActionTrait {
         
         $playerId = self::getActivePlayerId();
 
-        /*if (array_search($star, $this->availableLines($playerId)) === false) {
-            throw new BgaUserException('Line not available');
-        }*/
+        if (!in_array($star * 100 + $space, $args['possibleSpaces'])) {
+            throw new BgaUserException('Space not available');
+        }
 
-        /*$tiles = $this->getTilesFromDb($this->tiles->getCardsInLocation('hand', $playerId));
-        $this->placeTilesOnLine($playerId, $tiles, $star, true);
-
-        $this->setGlobalVariable(UNDO_PLACE, new Undo($tiles, null, null, false)); */
+        //$this->setGlobalVariable(UNDO_PLACE, new Undo($tiles, null, null, false));
         $this->setGlobalVariable(SELECTED_PLACE, [$star, $space]);
 
         $this->gamestate->nextState('next');
@@ -194,6 +191,7 @@ trait ActionTrait {
         }
         
         $playerId = self::getActivePlayerId();
+        $variant = $this->isVariant();
 
         $hand = $this->getTilesFromDb($this->tiles->getCardsInLocation('hand', $playerId));
 
@@ -202,7 +200,7 @@ trait ActionTrait {
         $space = $selectedPlace[1];
         $selectedColor = $this->getGlobalVariable(SELECTED_COLOR);
         $wildColor = $this->getWildColor();
-        $number = $space;
+        $number = $this->getSpaceNumber($star, $space, $variant);
 
         $colorTiles = array_values(array_filter($hand, fn($tile) => $tile->type == $selectedColor));
         $wildTiles = array_values(array_filter($hand, fn($tile) => $tile->type == $wildColor));

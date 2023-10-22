@@ -47,11 +47,6 @@ class PlayerTable {
             }
         }
 
-        for (let i=-1; i<=5; i++) {
-            const tiles = player.lines.filter(tile => tile.line === i);
-            this.placeTilesOnLine(tiles, i);
-        }
-
         this.placeTilesOnWall(player.wall);
     }
 
@@ -60,16 +55,8 @@ class PlayerTable {
         tiles.forEach((tile, index) => this.game.placeTile(tile, `player-hand-${this.playerId}`, startX + (tiles.length - index) * (HALF_TILE_SIZE + 5) * 2, 5));
     }
 
-    public placeTilesOnLine(tiles: Tile[], line: number): Promise<any> {
-        return Promise.all(tiles.map(tile => {
-            const left = line == -1 ? 9 : (line > 0 ? (line - tile.column) * 69 : 5 + (tile.column-1) * 74);
-            const top = line == -1 ? 9 : 0;
-            return Promise.resolve(true); // this.game.placeTile(tile, `player-table-${this.playerId}-line${line}`, left, top); // TODO no lines anymore
-        }));
-    }
-
     public placeTilesOnWall(tiles: Tile[]) {
-        tiles.forEach(tile => this.game.placeTile(tile, `player-table-${this.playerId}-star-${tile.line}-space-${tile.column}`));
+        tiles.forEach(tile => this.game.placeTile(tile, `player-table-${this.playerId}-star-${tile.star}-space-${tile.space}`));
     }
     
     public setFont(prefValue: number): void {

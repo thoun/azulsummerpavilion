@@ -652,7 +652,7 @@ class AzulSummerPavilion implements AzulSummerPavilionGame {
 
     private displayScoringOnTile(tile: Tile, playerId: string | number, points: number) {
         // create a div over tile, same position and width, but no overflow hidden (that must be kept on tile for glowing effect)
-        dojo.place(`<div id="tile${tile.id}-scoring" class="scoring-tile"></div>`, `player-table-${playerId}-star-${tile.line}-space-${tile.column}`);
+        dojo.place(`<div id="tile${tile.id}-scoring" class="scoring-tile"></div>`, `player-table-${playerId}-star-${tile.star}-space-${tile.space}`);
         (this as any).displayScoring(`tile${tile.id}-scoring`, this.getPlayerColor(Number(playerId)), points, SCORE_MS);
     }
 
@@ -677,7 +677,6 @@ class AzulSummerPavilion implements AzulSummerPavilionGame {
             ['factoriesCompleted', ANIMATION_MS],
             ['tilesSelected', ANIMATION_MS],
             ['undoTakeTiles', ANIMATION_MS],
-            ['tilesPlacedOnLine', ANIMATION_MS],
             ['undoPlayTile', ANIMATION_MS],
             ['placeTileOnWall', this.gamedatas.fastScoring ? SCORE_MS : SLOW_SCORE_MS],
             ['emptyFloorLine', this.gamedatas.fastScoring ? SCORE_MS : SLOW_SCORE_MS],
@@ -721,11 +720,6 @@ class AzulSummerPavilion implements AzulSummerPavilionGame {
         this.factories.undoTakeTiles(notif.args.undo.tiles, notif.args.undo.from, notif.args.factoryTilesBefore);
     }
 
-    notif_tilesPlacedOnLine(notif: Notif<NotifTilesPlacedOnLineArgs>) {
-        this.getPlayerTable(notif.args.playerId).placeTilesOnLine(notif.args.discardedTiles, 0);
-        this.getPlayerTable(notif.args.playerId).placeTilesOnLine(notif.args.placedTiles, notif.args.line);
-    }
-
     notif_undoPlayTile(notif: Notif<NotifUndoArgs>) {
         const table = this.getPlayerTable(notif.args.playerId);
         table.placeTilesOnHand(notif.args.undo.tiles);
@@ -735,6 +729,11 @@ class AzulSummerPavilion implements AzulSummerPavilionGame {
         }
     }
 
+
+    /*notif_tilesPlacedOnLine(notif: Notif<NotifTilesPlacedOnLineArgs>) {
+        this.getPlayerTable(notif.args.playerId).placeTilesOnLine(notif.args.discardedTiles, 0);
+        this.getPlayerTable(notif.args.playerId).placeTilesOnLine(notif.args.placedTiles, notif.args.line);
+    }*/
     notif_placeTileOnWall(notif: Notif<NotifPlaceTileOnWallArgs>) {
         Object.keys(notif.args.completeLines).forEach(playerId => {
             const completeLine: PlacedTileOnWall = notif.args.completeLines[playerId];
