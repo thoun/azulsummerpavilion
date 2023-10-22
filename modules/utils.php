@@ -450,7 +450,7 @@ trait UtilTrait {
             ]);
 
             foreach ($scoresNotif as $playerId => $notif) {
-                self::notifyAllPlayers('completeStarLogDetails', clienttranslate('${player_name} gains ${points} point(s) with complete star ${color}'), [
+                self::notifyAllPlayers('completeStarLogDetails', clienttranslate('${player_name} gains ${points} points with complete star ${color}'), [
                     'player_name' => $this->getPlayerName($playerId),
                     'color' => $this->getColor($color),
                     'i18n' => ['color'],
@@ -460,24 +460,35 @@ trait UtilTrait {
         }
     }
 
-    function notifCompleteNumbers(array $playersIds, array $walls, int $color) {                
+    function notifCompleteNumbers(array $playersIds, array $walls, int $number, bool $variant) {                
         $scoresNotif = [];
         foreach ($playersIds as $playerId) {
-            $playerTiles = array_values(array_filter($walls[$playerId], fn($tile) => $tile->type == $color));
-            usort($playerTiles, 'sortByLine');
+            $playerTiles = [];
+            if ($variant) {
+                if ($number == 3) {
+                    $playerTiles = array_values(array_filter($walls[$playerId], fn($tile) => $tile->star == 0 || $tile->space == 1));
+                } else {
+                    $space = [null, 3, 2, 1, 4][$number];
+                    $playerTiles = array_values(array_filter($walls[$playerId], fn($tile) => $tile->star > 0 && $tile->space == $space));
+                }
+            } else {
+                $playerTiles = array_values(array_filter($walls[$playerId], fn($tile) => $tile->space == $number));
+            }
             
-            if (count($playerTiles) == 5) {
+            $total = $variant ? ($number == 3 ? 12 : 6) : 7;
+            if (count($playerTiles) == $total) {
 
                 $obj = new stdClass();
+                $obj->star = 0;
                 $obj->tiles = $playerTiles;
-                $obj->points = 10;
+                $obj->points = $number * 4;
 
                 $scoresNotif[$playerId] = $obj;
 
                 $this->incPlayerScore($playerId, $obj->points);
 
-                self::incStat($obj->points, 'pointsCompleteColor');
-                self::incStat($obj->points, 'pointsCompleteColor', $playerId);
+                self::incStat($obj->points, 'pointsCompleteNumber');
+                self::incStat($obj->points, 'pointsCompleteNumber', $playerId);
             }
         }
 
@@ -487,13 +498,10 @@ trait UtilTrait {
             ]);
 
             foreach ($scoresNotif as $playerId => $notif) {
-                self::notifyAllPlayers('completeColorLogDetails', clienttranslate('${player_name} gains ${points} point(s) with complete color ${color}'), [
+                self::notifyAllPlayers('completeNumberLogDetails', clienttranslate('${player_name} gains ${points} points with complete number ${number}'), [
                     'player_name' => $this->getPlayerName($playerId),
-                    'color' => $this->getColor($notif->tiles[0]->type),
-                    'type' => $notif->tiles[0]->type,
-                    'i18n' => ['color'],
+                    'number' => $number,
                     'points' => $notif->points,
-                    'preserve' => [ 2 => 'type' ],
                 ]);
             }
         }

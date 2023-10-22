@@ -74,7 +74,7 @@ $commonStats = [
         "name" => totranslate("Points gained with complete columns"),
         "type" => "int"
     ], 
-    "pointsCompleteColor" => [
+    "pointsCompleteNumber" => [
         "id" => 24,
         "name" => totranslate("Points gained with complete color"),
         "type" => "int"

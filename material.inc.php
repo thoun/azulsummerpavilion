@@ -35,7 +35,6 @@ $this->STANDARD_FACE_STAR_COLORS = [
   6 => 2,
 ];
 
-
 $this->FULL_STAR_POINTS_BY_COLOR = [
   0 => 12,
   1 => 20,

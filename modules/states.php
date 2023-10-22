@@ -118,7 +118,7 @@ trait StateTrait {
         }
         // Gain 4/8/12/16 points for complete sets of 1/2/3/4.
         for ($number = 1; $number <= 4; $number++) {
-            $this->notifCompleteNumbers($playersIds, $walls, $number);
+            $this->notifCompleteNumbers($playersIds, $walls, $number, $variant);
         }
     }
 
