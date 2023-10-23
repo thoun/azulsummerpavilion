@@ -1217,7 +1217,7 @@ var AzulSummerPavilion = /** @class */ (function () {
                 this.onEnteringChooseKeptTiles(args.args);
                 break;
             case 'takeBonusTiles':
-                this.onEnteringTakeBonusTiles();
+                this.onEnteringTakeBonusTiles(args.args);
                 break;
             case 'gameEnd':
                 var lastTurnBar = document.getElementById('last-round');
@@ -1253,7 +1253,8 @@ var AzulSummerPavilion = /** @class */ (function () {
             document.getElementById("player-hand-".concat(this.getPlayerId())).classList.add('selectable');
         }
     };
-    AzulSummerPavilion.prototype.onEnteringTakeBonusTiles = function () {
+    AzulSummerPavilion.prototype.onEnteringTakeBonusTiles = function (args) {
+        args.highlightedTiles.forEach(function (tile) { return document.getElementById("tile".concat(tile.id)).classList.add('highlight', 'infinite'); });
         if (this.isCurrentPlayerActive()) {
             document.getElementById("supply").classList.add('selectable');
         }
@@ -1303,6 +1304,7 @@ var AzulSummerPavilion = /** @class */ (function () {
     AzulSummerPavilion.prototype.onLeavingTakeBonusTiles = function () {
         var _a;
         (_a = document.getElementById("supply")) === null || _a === void 0 ? void 0 : _a.classList.remove('selectable');
+        document.querySelectorAll('.tile.highlight').forEach(function (elem) { return elem.classList.remove('highlight', 'infinite'); });
     };
     AzulSummerPavilion.prototype.updateSelectKeptTilesButton = function () {
         var _this = this;

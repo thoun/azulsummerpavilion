@@ -64,6 +64,11 @@ interface EnteringChooseTileArgs {
     wildColor: number;
 }
 
+interface EnteringTakeBonusTileArgs {
+    count: number;
+    highlightedTiles: Tile[];
+}
+
 interface EnteringChoosePlaceArgs {
     possibleSpaces: number[];
     skipIsFree: boolean;

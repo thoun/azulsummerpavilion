@@ -120,7 +120,7 @@ class AzulSummerPavilion implements AzulSummerPavilionGame {
                 this.onEnteringChooseKeptTiles(args.args);
                 break;
             case 'takeBonusTiles':
-                this.onEnteringTakeBonusTiles();
+                this.onEnteringTakeBonusTiles(args.args);
                 break;
             case 'gameEnd':
                 const lastTurnBar = document.getElementById('last-round');
@@ -163,7 +163,8 @@ class AzulSummerPavilion implements AzulSummerPavilionGame {
         }
     }
 
-    private onEnteringTakeBonusTiles() {
+    private onEnteringTakeBonusTiles(args: EnteringTakeBonusTileArgs) {
+        args.highlightedTiles.forEach(tile => document.getElementById(`tile${tile.id}`).classList.add('highlight', 'infinite'));
         if ((this as any).isCurrentPlayerActive()) {
             document.getElementById(`supply`).classList.add('selectable');
         }
@@ -217,6 +218,7 @@ class AzulSummerPavilion implements AzulSummerPavilionGame {
 
     private onLeavingTakeBonusTiles() {
         document.getElementById(`supply`)?.classList.remove('selectable');
+        document.querySelectorAll('.tile.highlight').forEach(elem => elem.classList.remove('highlight', 'infinite'));
     }
 
     private updateSelectKeptTilesButton() {
