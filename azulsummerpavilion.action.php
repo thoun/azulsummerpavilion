@@ -131,6 +131,18 @@
       self::ajaxResponse();
     }
 
+    public function takeBonusTiles() {
+      self::setAjaxMode();
+
+      // Retrieve arguments
+      $idsStr = self::getArg( "ids", AT_numberlist, true );
+      $ids = strlen($idsStr) > 0 ? array_map(fn($str) => intval($str), explode(',', $idsStr)) : [];
+
+      $this->game->takeBonusTiles($ids);
+
+      self::ajaxResponse();
+    }
+
   }
   
 

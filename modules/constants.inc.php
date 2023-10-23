@@ -16,6 +16,8 @@ const ST_PLAYER_CHOOSE_PLACE = 40;
 const ST_PLAYER_CHOOSE_COLOR = 41;
 const ST_PLAYER_PLAY_TILE = 42;
 
+const ST_PLAYER_TAKE_BONUS_TILES = 50;
+
 const ST_PLAYER_CHOOSE_KEPT_TILES = 65;
 const ST_PLAYER_CONFIRM_PLAY = 70;
 
@@ -50,5 +52,6 @@ const UNDO_SELECT = 'UndoSelect';
 const UNDO_PLACE = 'UndoPlace';
 const SELECTED_PLACE = 'SelectedPlace';
 const SELECTED_COLOR = 'SelectedColor';
+const ADDITIONAL_TILES_DETAIL = 'AdditionalTilesDetail';
 
 ?>

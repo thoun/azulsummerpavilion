@@ -42,7 +42,8 @@ class Factories {
 
         dojo.place(html, 'factories');
 
-        this.fillFactories(factories, remainingTiles, false);
+        this.fillFactories(factories, false);
+        this.setRemainingTiles(remainingTiles);
     }
 
     public getWidth(): number {        
@@ -83,7 +84,7 @@ class Factories {
         };
     }
 
-    public fillFactories(factories: { [factoryId: number]: Tile[]; }, remainingTiles: number, animation: boolean = true) {
+    public fillFactories(factories: { [factoryId: number]: Tile[]; }, animation: boolean = true) {
         let tileIndex = 0;
         for (let factoryIndex=0; factoryIndex<=this.factoryNumber; factoryIndex++) {
             this.tilesInFactories[factoryIndex] = [[], [], [], [], [], [], []]; // color, tiles
@@ -123,7 +124,6 @@ class Factories {
         }
 
         this.updateDiscardedTilesNumbers();
-        this.setRemainingTiles(remainingTiles);
     }
 
     public factoriesChanged(args: NotifFactoriesChangedArgs) {
@@ -390,7 +390,7 @@ class Factories {
         return promise;
     }
 
-    private setRemainingTiles(remainingTiles: number) {
+    public setRemainingTiles(remainingTiles: number) {
         this.bagCounter.setValue(remainingTiles);
     }
     

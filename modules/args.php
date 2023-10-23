@@ -136,4 +136,16 @@ trait ArgsTrait {
             'maxWildTiles' => $maxWildTiles,
         ];
     }
+
+    function argTakeBonusTiles() {
+        $additionalTiles = $this->getGlobalVariable(ADDITIONAL_TILES_DETAIL);
+        $number = $additionalTiles->count;
+        $highlightedTiles = $additionalTiles->highlightedTiles;
+
+        return [
+            'number' => $number, // for title
+            'count' => $number,
+            'highlightedTiles' => $highlightedTiles,
+        ];
+    }
 }

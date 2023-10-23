@@ -81,6 +81,8 @@ trait StateTrait {
         self::incStat(1, 'turnsNumber');
         self::incStat(1, 'turnsNumber', $playerId);
 
+        $this->fillSupply();
+
         if ($allPassed) {
             $this->gamestate->nextState('endRound');
         } else {

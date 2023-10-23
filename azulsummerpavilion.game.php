@@ -121,7 +121,7 @@ class AzulSummerPavilion extends Table {
         $this->activeNextPlayer();
 
         // TODO TEMP to test
-        //$this->debugSetup();
+        $this->debugSetup();
 
         /************ End of the game initialization *****/
     }
@@ -169,7 +169,7 @@ class AzulSummerPavilion extends Table {
         $result['fastScoring'] = $this->isFastScoring();
         $result['remainingTiles'] = intval($this->tiles->countCardInLocation('deck'));
         $result['round'] = $this->getRound();
-        $result['center'] = $this->getTilesFromDb($this->tiles->getCardsInLocation('center'));
+        $result['supply'] = $this->getTilesFromDb($this->tiles->getCardsInLocation('supply'));
   
         return $result;
     }

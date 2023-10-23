@@ -72,7 +72,7 @@ class AzulSummerPavilion implements AzulSummerPavilionGame {
 
         this.createPlayerPanels(gamedatas);
         this.factories = new Factories(this, gamedatas.factoryNumber, gamedatas.factories, gamedatas.remainingTiles);
-        this.scoringBoard = new ScoringBoard(this, gamedatas.round, gamedatas.center);
+        this.scoringBoard = new ScoringBoard(this, gamedatas.round, gamedatas.supply);
         this.createPlayerTables(gamedatas);
 
         // before set
@@ -119,6 +119,9 @@ class AzulSummerPavilion implements AzulSummerPavilionGame {
             case 'chooseKeptTiles':
                 this.onEnteringChooseKeptTiles(args.args);
                 break;
+            case 'takeBonusTiles':
+                this.onEnteringTakeBonusTiles();
+                break;
             case 'gameEnd':
                 const lastTurnBar = document.getElementById('last-round');
                 if (lastTurnBar) {
@@ -128,14 +131,14 @@ class AzulSummerPavilion implements AzulSummerPavilionGame {
         }
     }
 
-    onEnteringChooseTile(args: EnteringChooseTileArgs) {
+    private onEnteringChooseTile(args: EnteringChooseTileArgs) {
         if ((this as any).isCurrentPlayerActive()) {
             this.factories.wildColor = args.wildColor;
             dojo.addClass('factories', 'selectable');
         }
     }
 
-    onEnteringChoosePlace(args: EnteringChoosePlaceArgs) {
+    private onEnteringChoosePlace(args: EnteringChoosePlaceArgs) {
         if ((this as any).isCurrentPlayerActive()) {
             const playerId = this.getPlayerId();
             for (let star = 0; star <= 6; star++) {
@@ -148,15 +151,21 @@ class AzulSummerPavilion implements AzulSummerPavilionGame {
         }
     }
 
-    onEnteringPlayTile(args: EnteringPlayTileArgs) {
+    private onEnteringPlayTile(args: EnteringPlayTileArgs) {
         if ((this as any).isCurrentPlayerActive()) {
             // TODO place ghost
         }
     }
 
-    onEnteringChooseKeptTiles(args: EnteringChooseTileArgs) {
+    private onEnteringChooseKeptTiles(args: EnteringChooseTileArgs) {
         if ((this as any).isCurrentPlayerActive()) {
             document.getElementById(`player-hand-${this.getPlayerId()}`).classList.add('selectable');
+        }
+    }
+
+    private onEnteringTakeBonusTiles() {
+        if ((this as any).isCurrentPlayerActive()) {
+            document.getElementById(`supply`).classList.add('selectable');
         }
     }
 
@@ -179,14 +188,17 @@ class AzulSummerPavilion implements AzulSummerPavilionGame {
             case 'chooseKeptTiles':
                 this.onLeavingChooseKeptTiles();
                 break;
+            case 'takeBonusTiles':
+                this.onLeavingTakeBonusTiles();
+                break;
         }
     }
 
-    onLeavingChooseTile() {
+    private onLeavingChooseTile() {
         dojo.removeClass('factories', 'selectable');
     }
 
-    onLeavingChoosePlace() {
+    private onLeavingChoosePlace() {
         const playerId = this.getPlayerId();
         for (let star = 0; star <= 6; star++) {
             for (let space = 1; space <= 6; space++) {
@@ -195,12 +207,16 @@ class AzulSummerPavilion implements AzulSummerPavilionGame {
         }
     }
 
-    onLeavingPlayTile() {
+    private onLeavingPlayTile() {
         // TODO remove ghost
     }
 
-    onLeavingChooseKeptTiles() {
+    private onLeavingChooseKeptTiles() {
         document.getElementById(`player-hand-${this.getPlayerId()}`)?.classList.remove('selectable');
+    }
+
+    private onLeavingTakeBonusTiles() {
+        document.getElementById(`supply`)?.classList.remove('selectable');
     }
 
     private updateSelectKeptTilesButton() {
@@ -229,6 +245,21 @@ class AzulSummerPavilion implements AzulSummerPavilionGame {
         button.classList.toggle('bgabutton_blue', !warning);
         button.classList.toggle('bgabutton_red', warning);
         button.classList.toggle('disabled', selectedTileDivs.length > 4);
+    }
+
+    private updateTakeBonusTilesButton() {
+        const button = document.getElementById(`takeBonusTiles_button`);
+
+        const supplyDiv = document.getElementById(`supply`);
+        const selectedTileDivs = Array.from(supplyDiv.querySelectorAll('.tile.selected'));
+
+        let label = '-';
+        if (selectedTileDivs.length > 0) {
+            label = selectedTileDivs.map((div: HTMLElement) => this.format_string_recursive('${number} ${color}', { number: 1, type: Number(div.dataset.type) })).join('');
+        }
+
+        button.innerHTML = _("Take ${tiles}").replace('${tiles}', label);
+        button.classList.toggle('disabled', selectedTileDivs.length != this.gamedatas.gamestate.args.count);
     }
 
     // onUpdateActionButtons: in this method you can manage "action buttons" that are displayed in the
@@ -276,6 +307,10 @@ class AzulSummerPavilion implements AzulSummerPavilionGame {
                 case 'chooseKeptTiles':
                     (this as any).addActionButton('selectKeptTiles_button', '', () => this.selectKeptTiles());
                     this.updateSelectKeptTilesButton();
+                    break;
+                case 'takeBonusTiles':
+                    (this as any).addActionButton('takeBonusTiles_button', '', () => this.takeBonusTiles());
+                    this.updateTakeBonusTilesButton();
                     break;
             }
         }
@@ -529,6 +564,12 @@ class AzulSummerPavilion implements AzulSummerPavilionGame {
                 divElement.classList.toggle('selected');
                 this.updateSelectKeptTilesButton();
             }
+        } else if (this.gamedatas.gamestate.name == 'takeBonusTiles') {
+            const divElement = document.getElementById(`tile${tile.id}`);
+            if (divElement?.closest(`#supply`)) {
+                divElement.classList.toggle('selected');
+                this.updateTakeBonusTilesButton();
+            }
         }
     }
 
@@ -639,6 +680,19 @@ class AzulSummerPavilion implements AzulSummerPavilionGame {
         }
     }
 
+    public takeBonusTiles() {
+        if(!(this as any).checkAction('takeBonusTiles')) {
+            return;
+        }
+
+        const supplyDiv = document.getElementById(`supply`);
+        const selectedTileDivs = supplyDiv.querySelectorAll('.tile.selected');
+
+        this.takeAction('takeBonusTiles', {
+            ids: Array.from(selectedTileDivs).map((tile: HTMLElement) => Number(tile.dataset.id)).sort().join(','),
+        });
+    }
+
     public takeAction(action: string, data?: any) {
         data = data || {};
         data.lock = true;
@@ -688,6 +742,7 @@ class AzulSummerPavilion implements AzulSummerPavilionGame {
 
         const notifs = [
             ['factoriesFilled', ANIMATION_MS + REFILL_DELAY[this.gamedatas.factoryNumber]],
+            ['supplyFilled', ANIMATION_MS],
             ['factoriesChanged', ANIMATION_MS],
             ['factoriesCompleted', ANIMATION_MS],
             ['tilesSelected', ANIMATION_MS],
@@ -710,9 +765,15 @@ class AzulSummerPavilion implements AzulSummerPavilionGame {
     }
 
     notif_factoriesFilled(notif: Notif<NotifFactoriesFilledArgs>) {
-        this.factories.fillFactories(notif.args.factories, notif.args.remainingTiles);
+        this.factories.fillFactories(notif.args.factories);
+        this.factories.setRemainingTiles(notif.args.remainingTiles);
         this.scoringBoard.setRoundNumber(notif.args.roundNumber);
         Object.keys(this.gamedatas.players).forEach(playerId => document.getElementById(`overall_player_board_${playerId}`).classList.remove('passed'));
+    }
+
+    notif_supplyFilled(notif: Notif<NotifSupplyFilledArgs>) {
+        this.factories.setRemainingTiles(notif.args.remainingTiles);
+        this.scoringBoard.placeTiles(notif.args.newTiles, true);
     }
 
     notif_factoriesChanged(notif: Notif<NotifFactoriesChangedArgs>) {
@@ -724,14 +785,18 @@ class AzulSummerPavilion implements AzulSummerPavilionGame {
     }
 
     notif_tilesSelected(notif: Notif<NotifTilesSelectedArgs>) {
-        if (notif.args.fromFactory == 0) {
-            this.factories.centerColorRemoved(notif.args.selectedTiles[0].type);
-        } else {
-            this.factories.factoryTilesRemoved(notif.args.fromFactory);
+        if (!notif.args.fromSupply) {
+            if (notif.args.fromFactory == 0) {
+                this.factories.centerColorRemoved(notif.args.selectedTiles[0].type);
+            } else {
+                this.factories.factoryTilesRemoved(notif.args.fromFactory);
+            }
         }
         const table = this.getPlayerTable(notif.args.playerId);
         table.placeTilesOnHand(notif.args.selectedTiles);
-        this.factories.discardTiles(notif.args.discardedTiles);
+        if (!notif.args.fromSupply) {
+            this.factories.discardTiles(notif.args.discardedTiles);
+        }
     }
 
     notif_undoTakeTiles(notif: Notif<NotifUndoArgs>) {

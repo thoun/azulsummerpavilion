@@ -696,7 +696,8 @@ var Factories = /** @class */ (function () {
         }
         html += "</div>";
         dojo.place(html, 'factories');
-        this.fillFactories(factories, remainingTiles, false);
+        this.fillFactories(factories, false);
+        this.setRemainingTiles(remainingTiles);
     }
     Factories.prototype.getWidth = function () {
         var radius = 175 + this.factoryNumber * 25;
@@ -729,7 +730,7 @@ var Factories = /** @class */ (function () {
             top: centerFactoryDiv.clientHeight / 2,
         };
     };
-    Factories.prototype.fillFactories = function (factories, remainingTiles, animation) {
+    Factories.prototype.fillFactories = function (factories, animation) {
         var _this = this;
         if (animation === void 0) { animation = true; }
         var tileIndex = 0;
@@ -776,7 +777,6 @@ var Factories = /** @class */ (function () {
             _loop_2(factoryIndex);
         }
         this.updateDiscardedTilesNumbers();
-        this.setRemainingTiles(remainingTiles);
     };
     Factories.prototype.factoriesChanged = function (args) {
         var _this = this;
@@ -1034,24 +1034,32 @@ var Factories = /** @class */ (function () {
     return Factories;
 }());
 var ScoringBoard = /** @class */ (function () {
-    function ScoringBoard(game, roundNumber, centerTiles) {
+    function ScoringBoard(game, roundNumber, supplyTiles) {
         this.game = game;
         var scoringBoardDiv = document.getElementById('scoring-board');
         var html = "<div id=\"round-counter\">";
         for (var i = 1; i <= 6; i++) {
             html += "<div id=\"round-space-".concat(i, "\" class=\"round-space\">").concat(roundNumber == i ? "<div id=\"round-marker\"></div>" : '', "</div>");
         }
-        html += "</div>\n        <div class=\"supply\">";
+        html += "</div>\n        <div id=\"supply\">";
         for (var i = 1; i <= 10; i++) {
             html += "<div id=\"supply-space-".concat(i, "\" class=\"supply-space space").concat(i, "\"></div>");
         }
         html += "</div>";
         scoringBoardDiv.insertAdjacentHTML('beforeend', html);
-        this.placeTiles(centerTiles);
+        this.placeTiles(supplyTiles, false);
     }
-    ScoringBoard.prototype.placeTiles = function (tiles) {
+    ScoringBoard.prototype.placeTiles = function (tiles, animation) {
         var _this = this;
-        tiles.forEach(function (tile) { return _this.game.placeTile(tile, "supply-space-".concat(tile.space)); });
+        tiles.forEach(function (tile) {
+            if (animation) {
+                _this.game.placeTile(tile, "bag", 20, 20, 0);
+                slideToObjectAndAttach(_this.game, document.getElementById("tile".concat(tile.id)), "supply-space-".concat(tile.space));
+            }
+            else {
+                _this.game.placeTile(tile, "supply-space-".concat(tile.space));
+            }
+        });
     };
     ScoringBoard.prototype.setRoundNumber = function (roundNumber) {
         this.game.animationManager.attachWithAnimation(new BgaSlideAnimation({
@@ -1168,7 +1176,7 @@ var AzulSummerPavilion = /** @class */ (function () {
         this.animationManager = new AnimationManager(this);
         this.createPlayerPanels(gamedatas);
         this.factories = new Factories(this, gamedatas.factoryNumber, gamedatas.factories, gamedatas.remainingTiles);
-        this.scoringBoard = new ScoringBoard(this, gamedatas.round, gamedatas.center);
+        this.scoringBoard = new ScoringBoard(this, gamedatas.round, gamedatas.supply);
         this.createPlayerTables(gamedatas);
         // before set
         this.zoomManager = new ZoomManager({
@@ -1208,6 +1216,9 @@ var AzulSummerPavilion = /** @class */ (function () {
             case 'chooseKeptTiles':
                 this.onEnteringChooseKeptTiles(args.args);
                 break;
+            case 'takeBonusTiles':
+                this.onEnteringTakeBonusTiles();
+                break;
             case 'gameEnd':
                 var lastTurnBar = document.getElementById('last-round');
                 if (lastTurnBar) {
@@ -1242,6 +1253,11 @@ var AzulSummerPavilion = /** @class */ (function () {
             document.getElementById("player-hand-".concat(this.getPlayerId())).classList.add('selectable');
         }
     };
+    AzulSummerPavilion.prototype.onEnteringTakeBonusTiles = function () {
+        if (this.isCurrentPlayerActive()) {
+            document.getElementById("supply").classList.add('selectable');
+        }
+    };
     // onLeavingState: this method is called each time we are leaving a game state.
     //                 You can use this method to perform some user interface changes at this moment.
     //
@@ -1259,6 +1275,9 @@ var AzulSummerPavilion = /** @class */ (function () {
                 break;
             case 'chooseKeptTiles':
                 this.onLeavingChooseKeptTiles();
+                break;
+            case 'takeBonusTiles':
+                this.onLeavingTakeBonusTiles();
                 break;
         }
     };
@@ -1280,6 +1299,10 @@ var AzulSummerPavilion = /** @class */ (function () {
     AzulSummerPavilion.prototype.onLeavingChooseKeptTiles = function () {
         var _a;
         (_a = document.getElementById("player-hand-".concat(this.getPlayerId()))) === null || _a === void 0 ? void 0 : _a.classList.remove('selectable');
+    };
+    AzulSummerPavilion.prototype.onLeavingTakeBonusTiles = function () {
+        var _a;
+        (_a = document.getElementById("supply")) === null || _a === void 0 ? void 0 : _a.classList.remove('selectable');
     };
     AzulSummerPavilion.prototype.updateSelectKeptTilesButton = function () {
         var _this = this;
@@ -1307,6 +1330,18 @@ var AzulSummerPavilion = /** @class */ (function () {
         button.classList.toggle('bgabutton_blue', !warning);
         button.classList.toggle('bgabutton_red', warning);
         button.classList.toggle('disabled', selectedTileDivs.length > 4);
+    };
+    AzulSummerPavilion.prototype.updateTakeBonusTilesButton = function () {
+        var _this = this;
+        var button = document.getElementById("takeBonusTiles_button");
+        var supplyDiv = document.getElementById("supply");
+        var selectedTileDivs = Array.from(supplyDiv.querySelectorAll('.tile.selected'));
+        var label = '-';
+        if (selectedTileDivs.length > 0) {
+            label = selectedTileDivs.map(function (div) { return _this.format_string_recursive('${number} ${color}', { number: 1, type: Number(div.dataset.type) }); }).join('');
+        }
+        button.innerHTML = _("Take ${tiles}").replace('${tiles}', label);
+        button.classList.toggle('disabled', selectedTileDivs.length != this.gamedatas.gamestate.args.count);
     };
     // onUpdateActionButtons: in this method you can manage "action buttons" that are displayed in the
     //                        action status bar (ie: the HTML links in the status bar).
@@ -1357,6 +1392,10 @@ var AzulSummerPavilion = /** @class */ (function () {
                 case 'chooseKeptTiles':
                     this.addActionButton('selectKeptTiles_button', '', function () { return _this.selectKeptTiles(); });
                     this.updateSelectKeptTilesButton();
+                    break;
+                case 'takeBonusTiles':
+                    this.addActionButton('takeBonusTiles_button', '', function () { return _this.takeBonusTiles(); });
+                    this.updateTakeBonusTilesButton();
                     break;
             }
         }
@@ -1577,6 +1616,13 @@ var AzulSummerPavilion = /** @class */ (function () {
                 this.updateSelectKeptTilesButton();
             }
         }
+        else if (this.gamedatas.gamestate.name == 'takeBonusTiles') {
+            var divElement = document.getElementById("tile".concat(tile.id));
+            if (divElement === null || divElement === void 0 ? void 0 : divElement.closest("#supply")) {
+                divElement.classList.toggle('selected');
+                this.updateTakeBonusTilesButton();
+            }
+        }
     };
     AzulSummerPavilion.prototype.takeTiles = function (id) {
         if (!this.checkAction('takeTiles')) {
@@ -1663,6 +1709,16 @@ var AzulSummerPavilion = /** @class */ (function () {
             });
         }
     };
+    AzulSummerPavilion.prototype.takeBonusTiles = function () {
+        if (!this.checkAction('takeBonusTiles')) {
+            return;
+        }
+        var supplyDiv = document.getElementById("supply");
+        var selectedTileDivs = supplyDiv.querySelectorAll('.tile.selected');
+        this.takeAction('takeBonusTiles', {
+            ids: Array.from(selectedTileDivs).map(function (tile) { return Number(tile.dataset.id); }).sort().join(','),
+        });
+    };
     AzulSummerPavilion.prototype.takeAction = function (action, data) {
         data = data || {};
         data.lock = true;
@@ -1704,6 +1760,7 @@ var AzulSummerPavilion = /** @class */ (function () {
         var _this = this;
         var notifs = [
             ['factoriesFilled', ANIMATION_MS + REFILL_DELAY[this.gamedatas.factoryNumber]],
+            ['supplyFilled', ANIMATION_MS],
             ['factoriesChanged', ANIMATION_MS],
             ['factoriesCompleted', ANIMATION_MS],
             ['tilesSelected', ANIMATION_MS],
@@ -1724,9 +1781,14 @@ var AzulSummerPavilion = /** @class */ (function () {
         });
     };
     AzulSummerPavilion.prototype.notif_factoriesFilled = function (notif) {
-        this.factories.fillFactories(notif.args.factories, notif.args.remainingTiles);
+        this.factories.fillFactories(notif.args.factories);
+        this.factories.setRemainingTiles(notif.args.remainingTiles);
         this.scoringBoard.setRoundNumber(notif.args.roundNumber);
         Object.keys(this.gamedatas.players).forEach(function (playerId) { return document.getElementById("overall_player_board_".concat(playerId)).classList.remove('passed'); });
+    };
+    AzulSummerPavilion.prototype.notif_supplyFilled = function (notif) {
+        this.factories.setRemainingTiles(notif.args.remainingTiles);
+        this.scoringBoard.placeTiles(notif.args.newTiles, true);
     };
     AzulSummerPavilion.prototype.notif_factoriesChanged = function (notif) {
         this.factories.factoriesChanged(notif.args);
@@ -1735,15 +1797,19 @@ var AzulSummerPavilion = /** @class */ (function () {
         this.factories.factoriesCompleted(notif.args);
     };
     AzulSummerPavilion.prototype.notif_tilesSelected = function (notif) {
-        if (notif.args.fromFactory == 0) {
-            this.factories.centerColorRemoved(notif.args.selectedTiles[0].type);
-        }
-        else {
-            this.factories.factoryTilesRemoved(notif.args.fromFactory);
+        if (!notif.args.fromSupply) {
+            if (notif.args.fromFactory == 0) {
+                this.factories.centerColorRemoved(notif.args.selectedTiles[0].type);
+            }
+            else {
+                this.factories.factoryTilesRemoved(notif.args.fromFactory);
+            }
         }
         var table = this.getPlayerTable(notif.args.playerId);
         table.placeTilesOnHand(notif.args.selectedTiles);
-        this.factories.discardTiles(notif.args.discardedTiles);
+        if (!notif.args.fromSupply) {
+            this.factories.discardTiles(notif.args.discardedTiles);
+        }
     };
     AzulSummerPavilion.prototype.notif_undoTakeTiles = function (notif) {
         this.placeFirstPlayerToken(notif.args.undo.previousFirstPlayer);

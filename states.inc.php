@@ -191,7 +191,25 @@ $playerActionsGameStates = [
         "args" => "argPlayTile",
         "possibleactions" => [ 
             "playTile",
-            "undoTakeTiles",
+            "undoPlayTile",
+         ],
+        "transitions" => [
+            "takeBonusTiles" => ST_PLAYER_TAKE_BONUS_TILES,
+            "confirm" => ST_PLAYER_CONFIRM_PLAY,
+            "nextPlayer" => ST_NEXT_PLAYER_PLAY,
+            "undo" => ST_PLAYER_CHOOSE_PLACE,
+        ],
+    ],
+
+    ST_PLAYER_TAKE_BONUS_TILES => [
+        "name" => "takeBonusTiles",
+        "description" => clienttranslate('${actplayer} must take ${number} bonus tiles'),
+        "descriptionmyturn" => clienttranslate('${you} must take ${number} bonus tiles'),
+        "type" => "activeplayer",
+        "args" => "argTakeBonusTiles",
+        "possibleactions" => [ 
+            "takeBonusTiles",
+            "undoPlayTile",
          ],
         "transitions" => [
             "confirm" => ST_PLAYER_CONFIRM_PLAY,

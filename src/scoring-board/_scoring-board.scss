@@ -23,10 +23,17 @@
         }
     }
 
-    .supply {
+    #supply {
         position: absolute;
         top: 370px; 
         left: 370px;
+
+        &.selectable {
+            .tile {
+                cursor: pointer;
+                pointer-events: all;
+            }
+        }
 
         .supply-space {
             display: inline-block;

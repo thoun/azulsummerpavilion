@@ -241,12 +241,14 @@ trait ActionTrait {
 
         $this->setGlobalVariable(UNDO_PLACE, new Undo($tiles, null, null, false));
 
-        $additionalTiles = $this->countAdditionalTiles($playerId, $placedTile);
-        if ($additionalTiles > 0) {
-            $this->debug("additionalTiles $additionalTiles");
+        $additionalTiles = $this->additionalTilesDetail($playerId, $placedTile);
+        if ($additionalTiles['count'] > 0) {        
+            $this->setGlobalVariable(ADDITIONAL_TILES_DETAIL, $additionalTiles);
         }
 
-        if ($this->allowUndo()) {
+        if ($additionalTiles['count'] > 0) {
+            $this->gamestate->nextState('takeBonusTiles');
+        } else if ($this->allowUndo()) {
             $this->gamestate->nextState('confirm');
         } else {
             $this->gamestate->nextState('nextPlayer');
@@ -351,6 +353,47 @@ trait ActionTrait {
         }
 
         $this->gamestate->nextState('nextPlayer');
+    }
+
+    function takeBonusTiles(array $ids, $skipActionCheck = false) {
+        if (!$skipActionCheck) {
+            $this->checkAction('takeBonusTiles');
+        }
+
+        $args = $this->argTakeBonusTiles();
+
+        if (count($ids) != $args['count']) {
+            throw new BgaUserException("You must select ".$args['count']." tiles");
+        }
+        
+        $playerId = intval(self::getActivePlayerId());
+        $supply = $this->getTilesFromDb($this->tiles->getCardsInLocation('supply'));
+        $selectedTiles = [];
+        foreach ($supply as $tile) {
+            if (in_array($tile->id, $ids)) {
+                $selectedTiles[] = $tile;
+            }
+        }
+
+        if (count($ids) != count($selectedTiles)) {
+            throw new BgaUserException("You must select supply tiles");
+        }
+
+        $this->tiles->moveCards(array_map('getIdPredicate', $selectedTiles), 'hand', $playerId);
+
+        self::notifyAllPlayers('tilesSelected', clienttranslate('${player_name} takes ${number} tiles from supply'), [
+            'playerId' => $playerId,
+            'player_name' => self::getActivePlayerName(),
+            'number' => count($selectedTiles),
+            'selectedTiles' => $selectedTiles,
+            'fromSupply' => true,
+        ]);
+
+        if ($this->allowUndo()) {
+            $this->gamestate->nextState('confirm');
+        } else {
+            $this->gamestate->nextState('nextPlayer');
+        }
     }
 
 }

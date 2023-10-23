@@ -197,12 +197,16 @@
   box-shadow: 1px 1px 2px 2px black;
   pointer-events: none;
 }
-#scoring-board .supply {
+#scoring-board #supply {
   position: absolute;
   top: 370px;
   left: 370px;
 }
-#scoring-board .supply .supply-space {
+#scoring-board #supply.selectable .tile {
+  cursor: pointer;
+  pointer-events: all;
+}
+#scoring-board #supply .supply-space {
   display: inline-block;
   position: absolute;
   top: -31px;
@@ -212,34 +216,34 @@
   width: 63px;
   pointer-events: none;
 }
-#scoring-board .supply .supply-space.space1 {
+#scoring-board #supply .supply-space.space1 {
   transform: rotate(90deg) translate(90px) rotate(90deg);
 }
-#scoring-board .supply .supply-space.space2 {
+#scoring-board #supply .supply-space.space2 {
   transform: rotate(126deg) translate(90px) rotate(90deg);
 }
-#scoring-board .supply .supply-space.space3 {
+#scoring-board #supply .supply-space.space3 {
   transform: rotate(162deg) translate(90px) rotate(90deg);
 }
-#scoring-board .supply .supply-space.space4 {
+#scoring-board #supply .supply-space.space4 {
   transform: rotate(198deg) translate(90px) rotate(90deg);
 }
-#scoring-board .supply .supply-space.space5 {
+#scoring-board #supply .supply-space.space5 {
   transform: rotate(234deg) translate(90px) rotate(90deg);
 }
-#scoring-board .supply .supply-space.space6 {
+#scoring-board #supply .supply-space.space6 {
   transform: rotate(270deg) translate(90px) rotate(90deg);
 }
-#scoring-board .supply .supply-space.space7 {
+#scoring-board #supply .supply-space.space7 {
   transform: rotate(306deg) translate(90px) rotate(90deg);
 }
-#scoring-board .supply .supply-space.space8 {
+#scoring-board #supply .supply-space.space8 {
   transform: rotate(342deg) translate(90px) rotate(90deg);
 }
-#scoring-board .supply .supply-space.space9 {
+#scoring-board #supply .supply-space.space9 {
   transform: rotate(378deg) translate(90px) rotate(90deg);
 }
-#scoring-board .supply .supply-space.space10 {
+#scoring-board #supply .supply-space.space10 {
   transform: rotate(414deg) translate(90px) rotate(90deg);
 }
 

@@ -41,7 +41,7 @@ interface AzulSummerPavilionGamedatas {
     fastScoring: boolean;
     remainingTiles: number;
     round: number; // 1..6
-    center: Tile[];
+    supply: Tile[];
 }
 
 interface AzulSummerPavilionGame extends Game {
@@ -117,6 +117,7 @@ interface NotifTilesSelectedArgs {
     selectedTiles: Tile[];
     discardedTiles: Tile[];
     fromFactory: number;
+    fromSupply: boolean;
 }
 
 interface UndoSelect {
@@ -167,6 +168,11 @@ interface NotifPutToCornerArgs {
 interface NotifCornerToHandArgs {
     playerId: number;
     tiles: Tile[];
+}
+
+interface NotifSupplyFilledArgs {
+    newTiles: Tile[];
+    remainingTiles: number;
 }
 
 interface EndScoreTiles {
