@@ -1,21 +1,23 @@
 #scoring-board {
     position: relative;
     background: url('img/scoring-board.jpg') #FFFFFF66;
-    width: 740px;
-    height: 740px;
+    width: 620px;
+    height: 620px;
     float: left;
 
     #round-counter {
         position: absolute;
-        top: 240px;
-        left: 240px;
-        right: 240px;
+        top: 58px;
+        left: 92px;
+        right: 124px;
+        height: 42px;
+        gap: 29px;
         display: grid;
         grid-template-columns: repeat(6, 1fr);
 
         #round-marker {
-            width: 20px;
-            height: 20px;
+            width: 42px;
+            height: 42px;
             background: rgb(231, 159, 77);
             border-radius: 50%;
             box-shadow: 1px 1px 2px 2px black;
@@ -25,8 +27,8 @@
 
     #supply {
         position: absolute;
-        top: 370px; 
-        left: 370px;
+        top: 310px; 
+        left: 310px;
 
         &.selectable {
             .tile {
@@ -43,7 +45,7 @@
 
             @for $type from 1 through 10 {
             &.space#{$type} {
-                transform: rotate(#{($type - 1) * 36deg + 90deg}) translate(90px) rotate(90deg);
+                transform: rotate(#{($type - 1) * 36deg + 90deg + 18deg}) translate(140px) rotate(90deg);
             }
             }
 

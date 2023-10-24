@@ -177,21 +177,23 @@
 #scoring-board {
   position: relative;
   background: url("img/scoring-board.jpg") rgba(255, 255, 255, 0.4);
-  width: 740px;
-  height: 740px;
+  width: 620px;
+  height: 620px;
   float: left;
 }
 #scoring-board #round-counter {
   position: absolute;
-  top: 240px;
-  left: 240px;
-  right: 240px;
+  top: 58px;
+  left: 92px;
+  right: 124px;
+  height: 42px;
+  gap: 29px;
   display: grid;
   grid-template-columns: repeat(6, 1fr);
 }
 #scoring-board #round-counter #round-marker {
-  width: 20px;
-  height: 20px;
+  width: 42px;
+  height: 42px;
   background: rgb(231, 159, 77);
   border-radius: 50%;
   box-shadow: 1px 1px 2px 2px black;
@@ -199,8 +201,8 @@
 }
 #scoring-board #supply {
   position: absolute;
-  top: 370px;
-  left: 370px;
+  top: 310px;
+  left: 310px;
 }
 #scoring-board #supply.selectable .tile {
   cursor: pointer;
@@ -217,34 +219,34 @@
   pointer-events: none;
 }
 #scoring-board #supply .supply-space.space1 {
-  transform: rotate(90deg) translate(90px) rotate(90deg);
+  transform: rotate(108deg) translate(140px) rotate(90deg);
 }
 #scoring-board #supply .supply-space.space2 {
-  transform: rotate(126deg) translate(90px) rotate(90deg);
+  transform: rotate(144deg) translate(140px) rotate(90deg);
 }
 #scoring-board #supply .supply-space.space3 {
-  transform: rotate(162deg) translate(90px) rotate(90deg);
+  transform: rotate(180deg) translate(140px) rotate(90deg);
 }
 #scoring-board #supply .supply-space.space4 {
-  transform: rotate(198deg) translate(90px) rotate(90deg);
+  transform: rotate(216deg) translate(140px) rotate(90deg);
 }
 #scoring-board #supply .supply-space.space5 {
-  transform: rotate(234deg) translate(90px) rotate(90deg);
+  transform: rotate(252deg) translate(140px) rotate(90deg);
 }
 #scoring-board #supply .supply-space.space6 {
-  transform: rotate(270deg) translate(90px) rotate(90deg);
+  transform: rotate(288deg) translate(140px) rotate(90deg);
 }
 #scoring-board #supply .supply-space.space7 {
-  transform: rotate(306deg) translate(90px) rotate(90deg);
+  transform: rotate(324deg) translate(140px) rotate(90deg);
 }
 #scoring-board #supply .supply-space.space8 {
-  transform: rotate(342deg) translate(90px) rotate(90deg);
+  transform: rotate(360deg) translate(140px) rotate(90deg);
 }
 #scoring-board #supply .supply-space.space9 {
-  transform: rotate(378deg) translate(90px) rotate(90deg);
+  transform: rotate(396deg) translate(140px) rotate(90deg);
 }
 #scoring-board #supply .supply-space.space10 {
-  transform: rotate(414deg) translate(90px) rotate(90deg);
+  transform: rotate(432deg) translate(140px) rotate(90deg);
 }
 
 #table {
