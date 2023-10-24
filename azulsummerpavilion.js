@@ -1238,7 +1238,7 @@ var AzulSummerPavilion = /** @class */ (function () {
             var playerId = this.getPlayerId();
             for (var star = 0; star <= 6; star++) {
                 for (var space = 1; space <= 6; space++) {
-                    document.getElementById("player-table-".concat(playerId, "-star-").concat(star, "-space-").concat(space)).classList.toggle('selectable', args.possibleSpaces.includes(star * 100 + space));
+                    document.getElementById("player-table-".concat(playerId, "-star-").concat(star, "-space-").concat(space)).classList.toggle('selectable', args === null || args === void 0 ? void 0 : args.possibleSpaces.includes(star * 100 + space));
                 }
             }
         }
@@ -1360,7 +1360,7 @@ var AzulSummerPavilion = /** @class */ (function () {
                     break;
                 case 'choosePlace':
                     var choosePlaceArgs = args;
-                    this.addActionButton('pass_button', _("Pass (end round)"), function () { return _this.pass(); }, null, null, choosePlaceArgs.skipIsFree ? undefined : 'red');
+                    this.addActionButton('pass_button', _("Pass (end round)"), function () { return _this.pass(); }, null, null, (choosePlaceArgs === null || choosePlaceArgs === void 0 ? void 0 : choosePlaceArgs.skipIsFree) ? undefined : 'red');
                     break;
                 case 'chooseColor':
                     var chooseColorArgs = args;

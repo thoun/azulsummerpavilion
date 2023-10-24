@@ -74,6 +74,15 @@ trait StateTrait {
         }
     }
 
+    function stChoosePlace() {
+        $playerId = self::getActivePlayerId();
+
+        $hand = $this->getTilesFromDb($this->tiles->getCardsInLocation('hand', $playerId));
+        if (count(array_filter($hand, fn($tile) => $tile->type > 0)) == 0) {
+            $this->pass(true);
+        }
+    }
+
     function stNextPlayerPlay() {
         $allPassed = intval(self::getUniqueValueFromDB("SELECT count(*) FROM player WHERE passed = FALSE")) == 0;
         $playerId = self::getActivePlayerId();
@@ -139,7 +148,6 @@ trait StateTrait {
             }
         }
 
-        //$this->gamestate->jumpToState(ST_FILL_FACTORIES);
         $this->gamestate->nextState('endGame');
     }
     

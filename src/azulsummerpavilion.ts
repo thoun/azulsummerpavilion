@@ -144,7 +144,7 @@ class AzulSummerPavilion implements AzulSummerPavilionGame {
             for (let star = 0; star <= 6; star++) {
                 for (let space = 1; space <= 6; space++) {
                     document.getElementById(`player-table-${playerId}-star-${star}-space-${space}`).classList.toggle('selectable',
-                        args.possibleSpaces.includes(star * 100 + space)
+                        args?.possibleSpaces.includes(star * 100 + space)
                     );
                 }
             }
@@ -279,7 +279,7 @@ class AzulSummerPavilion implements AzulSummerPavilionGame {
                     break;
                 case 'choosePlace':
                     const choosePlaceArgs = args as EnteringChoosePlaceArgs;
-                    (this as any).addActionButton('pass_button', _("Pass (end round)"), () => this.pass(), null, null, choosePlaceArgs.skipIsFree ? undefined : 'red');
+                    (this as any).addActionButton('pass_button', _("Pass (end round)"), () => this.pass(), null, null, choosePlaceArgs?.skipIsFree ? undefined : 'red');
                     break;
                 case 'chooseColor':
                     const chooseColorArgs = args as EnteringChooseColorArgs;
