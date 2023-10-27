@@ -387,7 +387,6 @@
   position: absolute;
   top: -31px;
   left: -31px;
-  border: 3px dashed transparent;
   height: 63px;
   width: 63px;
   pointer-events: none;
@@ -410,10 +409,18 @@
 .player-table-wrapper .player-table .space.space6 {
   transform: rotate(390deg) translate(63px) rotate(90deg);
 }
-.player-table-wrapper .player-table .space.selectable {
+.player-table-wrapper .player-table .space.selectable::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  border: 3px dashed transparent;
   animation: selectable-space 1s alternate-reverse infinite ease-in-out;
   pointer-events: all;
   cursor: pointer;
+  transform: rotate(45deg) skew(15deg, 15deg);
 }
 .player-table-wrapper .player-table .space .ghost {
   opacity: 0.5;
@@ -492,6 +499,9 @@
   background: url("img/red.svg") red;
   border-color: red;
 }
+.tile.selected {
+  outline: 6px solid gold;
+}
 .tile::after {
   position: absolute;
   top: 0;
@@ -512,6 +522,14 @@
   }
 }
 
+@keyframes selected {
+  0% {
+    outline: 6px solid white;
+  }
+  100% {
+    outline: 6px solid darkgreen;
+  }
+}
 .disabled-shimmer .tile::after {
   opacity: 0;
   animation: none;

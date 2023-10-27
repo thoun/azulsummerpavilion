@@ -43,6 +43,11 @@
         border-color: red;
     }
 
+    &.selected {
+        //animation: selected 1s ease-in-out infinite alternate-reverse;
+        outline: 6px solid gold;
+    }
+
     overflow: hidden;
     // shimmer animation
     &::after {
@@ -64,6 +69,15 @@
         100% {
             transform: translateX(200%);
         }
+    }
+}
+
+@keyframes selected {
+    0% {
+        outline: 6px solid white;
+    }
+    100% {
+        outline: 6px solid darkgreen;
     }
 }
 

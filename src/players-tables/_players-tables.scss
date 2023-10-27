@@ -143,15 +143,24 @@
               }
             }
 
-            border: 3px dashed transparent;
             height: 63px;
             width: 63px;
             pointer-events: none;
 
             &.selectable {
-                animation: selectable-space 1s alternate-reverse infinite ease-in-out;
-                pointer-events: all;
-                cursor: pointer;
+                &::after {
+                    content: '';
+                    position: absolute;
+                    top: 0;
+                    bottom: 0;
+                    left: 0;
+                    right: 0;
+                    border: 3px dashed transparent;
+                    animation: selectable-space 1s alternate-reverse infinite ease-in-out;
+                    pointer-events: all;
+                    cursor: pointer;
+                    transform: rotate(45deg) skew(15deg, 15deg);
+                }
             }
 
             .ghost {
