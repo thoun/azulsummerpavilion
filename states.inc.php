@@ -165,7 +165,7 @@ $playerActionsGameStates = [
          ],
         "transitions" => [
             "nextPlayer" => ST_NEXT_PLAYER_PLAY,
-            "undo" => ST_PLAYER_CHOOSE_PLACE,
+            "cancel" => ST_PLAYER_CHOOSE_PLACE,
         ],
     ],
 

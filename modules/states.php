@@ -58,18 +58,16 @@ trait StateTrait {
     function stNextPlayerAcquire() {
         $factoriesAllEmpty = $this->tiles->countCardInLocation('factory') == 0;
         $playerId = self::getActivePlayerId();
+        self::giveExtraTime($playerId);
 
         self::incStat(1, 'turnsNumber');
         self::incStat(1, 'turnsNumber', $playerId);
 
         if ($factoriesAllEmpty) {
+            $this->gamestate->changeActivePlayer(self::getGameStateValue(FIRST_PLAYER_FOR_NEXT_TURN));
             $this->gamestate->nextState('endAcquire');
         } else {
             $this->activeNextPlayer();
-        
-            $playerId = self::getActivePlayerId();
-            self::giveExtraTime($playerId);
-
             $this->gamestate->nextState('nextPlayer');
         }
     }

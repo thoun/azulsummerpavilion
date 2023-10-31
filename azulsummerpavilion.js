@@ -1393,6 +1393,7 @@ var AzulSummerPavilion = /** @class */ (function () {
                     break;
                 case 'chooseKeptTiles':
                     this.addActionButton('selectKeptTiles_button', '', function () { return _this.selectKeptTiles(); });
+                    this.addActionButton('cancel_button', _("Cancel"), function () { return _this.cancel(); }, null, null, 'gray');
                     this.updateSelectKeptTilesButton();
                     break;
                 case 'takeBonusTiles':
@@ -1710,6 +1711,13 @@ var AzulSummerPavilion = /** @class */ (function () {
                 ids: Array.from(selectedTileDivs).map(function (tile) { return Number(tile.dataset.id); }).sort().join(','),
             });
         }
+    };
+    AzulSummerPavilion.prototype.cancel = function (askConfirmation) {
+        if (askConfirmation === void 0) { askConfirmation = true; }
+        if (!this.checkAction('cancel')) {
+            return;
+        }
+        this.takeAction('cancel');
     };
     AzulSummerPavilion.prototype.takeBonusTiles = function () {
         if (!this.checkAction('takeBonusTiles')) {

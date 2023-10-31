@@ -355,6 +355,14 @@ trait ActionTrait {
         $this->gamestate->nextState('nextPlayer');
     }
 
+    function cancel($skipActionCheck = false) {
+        if (!$skipActionCheck) {
+            $this->checkAction('cancel');
+        }
+        
+        $this->gamestate->nextState('cancel');
+    }
+
     function takeBonusTiles(array $ids, $skipActionCheck = false) {
         if (!$skipActionCheck) {
             $this->checkAction('takeBonusTiles');
