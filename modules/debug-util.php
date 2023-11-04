@@ -12,8 +12,8 @@ trait DebugUtilTrait {
             return;
         } 
 
-        $this->setStat(6, 'roundsNumber');
-        $this->debugEmptyFactories();
+        //$this->setStat(6, 'roundsNumber');
+        //$this->debugEmptyFactories();
         //$this->debugRemoveFp();
         //$this->stFillFactories();
     }
@@ -36,7 +36,7 @@ trait DebugUtilTrait {
         $this->debugSetWallTile(2343492, 6, 2, 3);
         $this->debugSetWallTile(2343492, 3, 2, 3);
 
-        $this->setStat(5, 'roundsNumber');
+        //$this->setStat(5, 'roundsNumber');
     }
 
     function debugSetWallTile(int $playerId, int $star, int $space, int $color) {

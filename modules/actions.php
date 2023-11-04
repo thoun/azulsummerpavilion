@@ -20,6 +20,7 @@ trait ActionTrait {
 
         // for undo
         $previousFirstPlayer = intval(self::getGameStateValue(FIRST_PLAYER_FOR_NEXT_TURN));
+        $previousScore = $this->getPlayerScore($playerId);
 
         $tile = $this->getTileFromDb($this->tiles->getCard($id));
 
@@ -97,12 +98,11 @@ trait ActionTrait {
             'fromFactory' => $factory,
         ]);
 
-        $this->setGlobalVariable(UNDO_SELECT, new Undo(
+        $this->setGlobalVariable(UNDO_SELECT, new UndoSelect(
             array_merge($selectedTiles, $discardedTiles, $firstPlayerTokens),
             $factory, 
             $previousFirstPlayer,
-            null,
-            false
+            $previousScore,
         ));
 
         if ($this->allowUndo()) {
@@ -130,7 +130,7 @@ trait ActionTrait {
         $playerId = intval(self::getActivePlayerId());
 
         $undo = $this->getGlobalVariable(UNDO_SELECT);
-
+        $this->setPlayerScore($playerId, $undo->previousScore);
         $factoryTilesBefore = $this->getTilesFromDb($this->tiles->getCardsInLocation('factory', $undo->from));
         $this->tiles->moveCards(array_map('getIdPredicate', $undo->tiles), 'factory', $undo->from);
         self::setGameStateValue(FIRST_PLAYER_FOR_NEXT_TURN, $undo->previousFirstPlayer);
@@ -155,8 +155,8 @@ trait ActionTrait {
             throw new BgaUserException('Space not available');
         }
 
-        //$this->setGlobalVariable(UNDO_PLACE, new Undo($tiles, null, null, false));
         $this->setGlobalVariable(SELECTED_PLACE, [$star, $space]);
+        $this->setGlobalVariable(UNDO_PLACE, null);
 
         $this->gamestate->nextState('next');
 
@@ -192,6 +192,9 @@ trait ActionTrait {
         
         $playerId = intval(self::getActivePlayerId());
         $variant = $this->isVariant();
+
+        // for undo
+        $previousScore = $this->getPlayerScore($playerId);
 
         $hand = $this->getTilesFromDb($this->tiles->getCardsInLocation('hand', $playerId));
 
@@ -239,7 +242,7 @@ trait ActionTrait {
         self::incStat($points, 'pointsCompleteLine'); // TODO
         self::incStat($points, 'pointsCompleteLine', $playerId); // TODO
 
-        $this->setGlobalVariable(UNDO_PLACE, new Undo($tiles, null, null, false));
+        $this->setGlobalVariable(UNDO_PLACE, new UndoPlace($tiles, $previousScore));
 
         $additionalTiles = $this->additionalTilesDetail($playerId, $placedTile);
         if ($additionalTiles['count'] > 0) {        
@@ -274,13 +277,24 @@ trait ActionTrait {
 
         $undo = $this->getGlobalVariable(UNDO_PLACE);
 
-        $this->tiles->moveCards(array_map('getIdPredicate', $undo->tiles), 'hand', $playerId);
+        if ($undo) {
+            $this->tiles->moveCards(array_map('getIdPredicate', $undo->tiles), 'hand', $playerId);
+
+            foreach ($undo->supplyTiles as $tile) {
+                $this->tiles->moveCard($tile->id, $tile->location, $tile->space);
+            }
+        }
 
         self::notifyAllPlayers('undoPlayTile', clienttranslate('${player_name} cancels tile placement'), [
             'playerId' => $playerId,
             'player_name' => self::getActivePlayerName(),
             'undo' => $undo,
         ]);
+
+        $this->setGlobalVariable(UNDO_PLACE, null);
+        $this->setGlobalVariable(SELECTED_PLACE, null);
+        $this->setGlobalVariable(SELECTED_COLOR, null);
+        $this->setGlobalVariable(ADDITIONAL_TILES_DETAIL, null);
         
         $this->gamestate->nextState('undo');
     }
@@ -385,7 +399,11 @@ trait ActionTrait {
 
         if (count($ids) != count($selectedTiles)) {
             throw new BgaUserException("You must select supply tiles");
-        }
+        }   
+
+        $undo = $this->getGlobalVariable(UNDO_PLACE);
+        $undo->supplyTiles = $selectedTiles;
+        $this->setGlobalVariable(UNDO_PLACE, $undo);
 
         $this->tiles->moveCards(array_map('getIdPredicate', $selectedTiles), 'hand', $playerId);
 

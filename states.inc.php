@@ -143,7 +143,7 @@ $playerActionsGameStates = [
         "descriptionmyturn" => clienttranslate('${you} must choose a space to place a tile'),
         "type" => "activeplayer",
         "args" => "argChoosePlace",
-        "args" => "stChoosePlace",
+        "action" => "stChoosePlace",
         "possibleactions" => [ 
             "selectPlace",
             "pass",
@@ -162,7 +162,8 @@ $playerActionsGameStates = [
         "type" => "activeplayer",
         "possibleactions" => [ 
             "selectKeptTiles",
-         ],
+            "cancel",
+        ],
         "transitions" => [
             "nextPlayer" => ST_NEXT_PLAYER_PLAY,
             "cancel" => ST_PLAYER_CHOOSE_PLACE,
@@ -177,6 +178,7 @@ $playerActionsGameStates = [
         "args" => "argChooseColor",
         "possibleactions" => [ 
             "selectColor",
+            "undoPlayTile",
             "pass",
          ],
         "transitions" => [
@@ -231,7 +233,7 @@ $playerActionsGameStates = [
          ],
         "transitions" => [
             "nextPlayer" => ST_NEXT_PLAYER_PLAY,
-            "undo" => ST_PLAYER_PLAY_TILE,
+            "undo" => ST_PLAYER_CHOOSE_PLACE,
         ],
     ],
 

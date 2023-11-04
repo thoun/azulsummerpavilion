@@ -106,6 +106,10 @@ trait UtilTrait {
         return intval(self::getUniqueValueFromDB("SELECT player_score FROM player where `player_id` = $playerId"));
     }
 
+    function setPlayerScore(int $playerId, int $score) {
+        self::DbQuery("UPDATE player SET player_score = $score WHERE player_id = $playerId");
+    }
+
     function incPlayerScore(int $playerId, int $incScore) {
         self::DbQuery("UPDATE player SET player_score = player_score + $incScore WHERE player_id = $playerId");
     }

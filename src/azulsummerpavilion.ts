@@ -214,10 +214,12 @@ class AzulSummerPavilion implements AzulSummerPavilionGame {
 
     private onLeavingChooseKeptTiles() {
         document.getElementById(`player-hand-${this.getPlayerId()}`)?.classList.remove('selectable');
+        document.querySelectorAll('.tile.selected').forEach(elem => elem.classList.remove('selected'));
     }
 
     private onLeavingTakeBonusTiles() {
-        document.getElementById(`supply`)?.classList.remove('selectable');
+        document.getElementById(`supply`).classList.remove('selectable');
+        document.querySelectorAll('.tile.selected').forEach(elem => elem.classList.remove('selected'));
         document.querySelectorAll('.tile.highlight').forEach(elem => elem.classList.remove('highlight', 'infinite'));
     }
 
@@ -287,7 +289,7 @@ class AzulSummerPavilion implements AzulSummerPavilionGame {
                         const label = this.format_string_recursive('${number} ${color}', { number: 1, type: color });
                         (this as any).addActionButton(`chooseColor${color}_button`, label, () => this.selectColor(color));
                     });
-                    (this as any).addActionButton('undoPlayTile_button', _("Undo line selection"), () => this.undoPlayTile(), null, null, 'gray');
+                    (this as any).addActionButton('undoPlayTile_button', _("Undo played tile"), () => this.undoPlayTile(), null, null, 'gray');
                     break;
                 case 'playTile':
                     const playTileArgs = args as EnteringPlayTileArgs;
@@ -299,11 +301,11 @@ class AzulSummerPavilion implements AzulSummerPavilionGame {
                             (this as any).addActionButton(`playTile${i}_button`, label, () => this.playTile(i));
                         }
                     }
-                    (this as any).addActionButton('undoPlayTile_button', _("Undo line selection"), () => this.undoPlayTile(), null, null, 'gray');
+                    (this as any).addActionButton('undoPlayTile_button', _("Undo played tile"), () => this.undoPlayTile(), null, null, 'gray');
                     break;
                 case 'confirmPlay':
                     (this as any).addActionButton('confirmLine_button', _("Confirm"), () => this.confirmPlay());
-                    (this as any).addActionButton('undoPlayTile_button', _("Undo line selection"), () => this.undoPlayTile(), null, null, 'gray');
+                    (this as any).addActionButton('undoPlayTile_button', _("Undo played tile"), () => this.undoPlayTile(), null, null, 'gray');
                     this.startActionTimer('confirmLine_button', 5);
                     break;
                 case 'chooseKeptTiles':
@@ -313,6 +315,7 @@ class AzulSummerPavilion implements AzulSummerPavilionGame {
                     break;
                 case 'takeBonusTiles':
                     (this as any).addActionButton('takeBonusTiles_button', '', () => this.takeBonusTiles());
+                    (this as any).addActionButton('undoPlayTile_button', _("Undo played tile"), () => this.undoPlayTile(), null, null, 'gray');
                     this.updateTakeBonusTilesButton();
                     break;
             }
@@ -471,6 +474,10 @@ class AzulSummerPavilion implements AzulSummerPavilionGame {
         } else {
             (this as any).scoreCtrl[playerId]?.incValue(incScore);
         }
+    }
+
+    private setScore(playerId: number, score: number) {
+         (this as any).scoreCtrl[playerId]?.toValue(score);
     }
 
     public placeTile(tile: Tile, destinationId: string, left?: number, top?: number, rotation?: number): Promise<boolean> {
@@ -683,7 +690,7 @@ class AzulSummerPavilion implements AzulSummerPavilionGame {
         }
     }
 
-    public cancel(askConfirmation = true) {
+    public cancel() {
         if(!(this as any).checkAction('cancel')) {
             return;
         }
@@ -810,19 +817,22 @@ class AzulSummerPavilion implements AzulSummerPavilionGame {
         }
     }
 
-    notif_undoTakeTiles(notif: Notif<NotifUndoArgs>) {
+    notif_undoTakeTiles(notif: Notif<NotifUndoSelectArgs>) {
         this.placeFirstPlayerToken(notif.args.undo.previousFirstPlayer);
 
         this.factories.undoTakeTiles(notif.args.undo.tiles, notif.args.undo.from, notif.args.factoryTilesBefore);
+
+        this.setScore(notif.args.playerId, notif.args.undo.previousScore);
     }
 
-    notif_undoPlayTile(notif: Notif<NotifUndoArgs>) {
+    notif_undoPlayTile(notif: Notif<NotifUndoPlaceArgs>) {
         const table = this.getPlayerTable(notif.args.playerId);
-        table.placeTilesOnHand(notif.args.undo.tiles);
-
-        if (document.getElementById('last-round') && !notif.args.undo.lastRoundBefore) {
-            dojo.destroy('last-round');
+        if (notif.args.undo) {
+            table.placeTilesOnHand(notif.args.undo.tiles);
+            this.setScore(notif.args.playerId, notif.args.undo.previousScore);
+            this.scoringBoard.placeTiles(notif.args.undo.supplyTiles, true);
         }
+        // TODO remove ghost
     }
 
 

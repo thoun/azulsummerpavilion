@@ -1,16 +1,27 @@
 <?php
 
-class Undo {
-    public ?int $from;
+class UndoSelect {
+    public int $from;
     public array/*Tile[]*/ $tiles;
-    public ?int $previousFirstPlayer;
-    public ?bool $lastRoundBefore;
+    public int $previousFirstPlayer;
+    public int $previousScore;
 
-    public function __construct(array $tiles, ?int $from = null, ?int $previousFirstPlayer = null, ?bool $lastRoundBefore = null) {
+    public function __construct(array $tiles, int $from, int $previousFirstPlayer, int $previousScore) {
         $this->from = $from;
         $this->tiles = $tiles;
         $this->previousFirstPlayer = $previousFirstPlayer;
-        $this->lastRoundBefore = $lastRoundBefore;
+        $this->previousScore = $previousScore;
+    }
+}
+
+class UndoPlace {
+    public array/*Tile[]*/ $tiles;
+    public int $previousScore;
+    public array $supplyTiles = [];
+
+    public function __construct(array $tiles, int $previousScore) {
+        $this->tiles = $tiles;
+        $this->previousScore = $previousScore;
     }
 }
 ?>

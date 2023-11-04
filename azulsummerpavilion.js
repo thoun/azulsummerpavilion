@@ -1300,10 +1300,11 @@ var AzulSummerPavilion = /** @class */ (function () {
     AzulSummerPavilion.prototype.onLeavingChooseKeptTiles = function () {
         var _a;
         (_a = document.getElementById("player-hand-".concat(this.getPlayerId()))) === null || _a === void 0 ? void 0 : _a.classList.remove('selectable');
+        document.querySelectorAll('.tile.selected').forEach(function (elem) { return elem.classList.remove('selected'); });
     };
     AzulSummerPavilion.prototype.onLeavingTakeBonusTiles = function () {
-        var _a;
-        (_a = document.getElementById("supply")) === null || _a === void 0 ? void 0 : _a.classList.remove('selectable');
+        document.getElementById("supply").classList.remove('selectable');
+        document.querySelectorAll('.tile.selected').forEach(function (elem) { return elem.classList.remove('selected'); });
         document.querySelectorAll('.tile.highlight').forEach(function (elem) { return elem.classList.remove('highlight', 'infinite'); });
     };
     AzulSummerPavilion.prototype.updateSelectKeptTilesButton = function () {
@@ -1368,7 +1369,7 @@ var AzulSummerPavilion = /** @class */ (function () {
                         var label = _this.format_string_recursive('${number} ${color}', { number: 1, type: color });
                         _this.addActionButton("chooseColor".concat(color, "_button"), label, function () { return _this.selectColor(color); });
                     });
-                    this.addActionButton('undoPlayTile_button', _("Undo line selection"), function () { return _this.undoPlayTile(); }, null, null, 'gray');
+                    this.addActionButton('undoPlayTile_button', _("Undo played tile"), function () { return _this.undoPlayTile(); }, null, null, 'gray');
                     break;
                 case 'playTile':
                     var playTileArgs = args;
@@ -1384,11 +1385,11 @@ var AzulSummerPavilion = /** @class */ (function () {
                     for (var i = 0; i <= playTileArgs.maxWildTiles; i++) {
                         _loop_6(i);
                     }
-                    this.addActionButton('undoPlayTile_button', _("Undo line selection"), function () { return _this.undoPlayTile(); }, null, null, 'gray');
+                    this.addActionButton('undoPlayTile_button', _("Undo played tile"), function () { return _this.undoPlayTile(); }, null, null, 'gray');
                     break;
                 case 'confirmPlay':
                     this.addActionButton('confirmLine_button', _("Confirm"), function () { return _this.confirmPlay(); });
-                    this.addActionButton('undoPlayTile_button', _("Undo line selection"), function () { return _this.undoPlayTile(); }, null, null, 'gray');
+                    this.addActionButton('undoPlayTile_button', _("Undo played tile"), function () { return _this.undoPlayTile(); }, null, null, 'gray');
                     this.startActionTimer('confirmLine_button', 5);
                     break;
                 case 'chooseKeptTiles':
@@ -1398,6 +1399,7 @@ var AzulSummerPavilion = /** @class */ (function () {
                     break;
                 case 'takeBonusTiles':
                     this.addActionButton('takeBonusTiles_button', '', function () { return _this.takeBonusTiles(); });
+                    this.addActionButton('undoPlayTile_button', _("Undo played tile"), function () { return _this.undoPlayTile(); }, null, null, 'gray');
                     this.updateTakeBonusTilesButton();
                     break;
             }
@@ -1530,6 +1532,10 @@ var AzulSummerPavilion = /** @class */ (function () {
         else {
             (_c = this.scoreCtrl[playerId]) === null || _c === void 0 ? void 0 : _c.incValue(incScore);
         }
+    };
+    AzulSummerPavilion.prototype.setScore = function (playerId, score) {
+        var _a;
+        (_a = this.scoreCtrl[playerId]) === null || _a === void 0 ? void 0 : _a.toValue(score);
     };
     AzulSummerPavilion.prototype.placeTile = function (tile, destinationId, left, top, rotation) {
         var _this = this;
@@ -1712,8 +1718,7 @@ var AzulSummerPavilion = /** @class */ (function () {
             });
         }
     };
-    AzulSummerPavilion.prototype.cancel = function (askConfirmation) {
-        if (askConfirmation === void 0) { askConfirmation = true; }
+    AzulSummerPavilion.prototype.cancel = function () {
         if (!this.checkAction('cancel')) {
             return;
         }
@@ -1824,13 +1829,16 @@ var AzulSummerPavilion = /** @class */ (function () {
     AzulSummerPavilion.prototype.notif_undoTakeTiles = function (notif) {
         this.placeFirstPlayerToken(notif.args.undo.previousFirstPlayer);
         this.factories.undoTakeTiles(notif.args.undo.tiles, notif.args.undo.from, notif.args.factoryTilesBefore);
+        this.setScore(notif.args.playerId, notif.args.undo.previousScore);
     };
     AzulSummerPavilion.prototype.notif_undoPlayTile = function (notif) {
         var table = this.getPlayerTable(notif.args.playerId);
-        table.placeTilesOnHand(notif.args.undo.tiles);
-        if (document.getElementById('last-round') && !notif.args.undo.lastRoundBefore) {
-            dojo.destroy('last-round');
+        if (notif.args.undo) {
+            table.placeTilesOnHand(notif.args.undo.tiles);
+            this.setScore(notif.args.playerId, notif.args.undo.previousScore);
+            this.scoringBoard.placeTiles(notif.args.undo.supplyTiles, true);
         }
+        // TODO remove ghost
     };
     /*notif_tilesPlacedOnLine(notif: Notif<NotifTilesPlacedOnLineArgs>) {
         this.getPlayerTable(notif.args.playerId).placeTilesOnLine(notif.args.discardedTiles, 0);

@@ -129,13 +129,24 @@ interface UndoSelect {
     from: number;
     tiles: Tile[];
     previousFirstPlayer: number;
-    lastRoundBefore: boolean;
+    previousScore: number;
 }
 
-interface NotifUndoArgs {
+interface UndoPlace {
+    tiles: Tile[];    
+    supplyTiles: Tile[];
+    previousScore: number;
+}
+
+interface NotifUndoSelectArgs {
     playerId: number;
-    undo: UndoSelect;
-    factoryTilesBefore: Tile[],
+    undo?: UndoSelect;
+    factoryTilesBefore: Tile[];
+}
+
+interface NotifUndoPlaceArgs {
+    playerId: number;
+    undo?: UndoPlace;
 }
 
 interface NotifTilesPlacedOnLineArgs {
