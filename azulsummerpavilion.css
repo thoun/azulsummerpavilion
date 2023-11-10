@@ -176,9 +176,9 @@
 
 #scoring-board {
   position: relative;
-  background: url("img/scoring-board.jpg") rgba(255, 255, 255, 0.4);
-  width: 620px;
-  height: 620px;
+  background: url("img/supply.jpg");
+  width: 623px;
+  height: 623px;
   float: left;
 }
 #scoring-board #round-counter {
@@ -471,36 +471,63 @@
   overflow: hidden;
 }
 .tile.tile0 {
-  background: url("img/first-player.svg") white;
+  background: white;
   border-color: white;
   z-index: 8;
 }
 .tile.tile1 {
-  background: url("img/fuchsia.svg") fuchsia;
-  border-color: fuchsia;
+  background: #c5299b;
+  border-color: #c5299b;
 }
 .tile.tile2 {
-  background: url("img/green.svg") lime;
-  border-color: lime;
+  background: #b7dd79;
+  border-color: #b7dd79;
 }
 .tile.tile3 {
-  background: url("img/orange.svg") orange;
-  border-color: orange;
+  background: #ff8200;
+  border-color: #ff8200;
 }
 .tile.tile4 {
-  background: url("img/yelloww.svg") yellow;
-  border-color: yellow;
+  background: #f8e08e;
+  border-color: #f8e08e;
 }
 .tile.tile5 {
-  background: url("img/blue.svg") blue;
-  border-color: blue;
+  background: #009cde;
+  border-color: #009cde;
 }
 .tile.tile6 {
-  background: url("img/red.svg") red;
-  border-color: red;
+  background: #ef3340;
+  border-color: #ef3340;
 }
 .tile.selected {
   outline: 6px solid gold;
+}
+.tile::before {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  content: "";
+  transform: skew(-15deg, -15deg) rotate(-45deg);
+  background-position: center;
+  background-repeat: no-repeat;
+}
+.tile.tile0::before {
+  background-image: url("img/first-player.svg");
+  background-size: 100%;
+}
+.tile.tile2::before {
+  background-image: url("img/green.svg");
+  background-size: 70%;
+}
+.tile.tile3::before {
+  background-image: url("img/orange.svg");
+  background-size: 90%;
+}
+.tile.tile5::before {
+  background-image: url("img/blue.svg");
+  background-size: 90%;
 }
 .tile::after {
   position: absolute;
