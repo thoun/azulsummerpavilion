@@ -9,38 +9,40 @@
     border-radius: 5px;
     box-shadow: 1px 1px 2px 2px black;
     pointer-events: none;
+    //margin-top: 29px;
+    //margin-bottom: 29px;
 
     //clip-path: polygon(50% 0%, 75% 50%, 50% 100%, 25% 50%);
     transform: rotate(calc(45deg + var(--rotation))) skew(15deg, 15deg);
 
     &.tile0 {
-        background: /*url('img/first-player.svg')*/ white;
-        border-color: white;
+        background: $tile0-color;
+        border-color: $tile0-color;
         z-index: 8;
     }
     &.tile1 {
-        background: /*url('img/fuchsia.svg')*/ #c5299b;
-        border-color: #c5299b;
+        background: $tile1-color;
+        border-color: $tile1-color;
     }
     &.tile2 {
-        background: /*url('img/green.svg')*/ #b7dd79;
-        border-color: #b7dd79;
+        background: $tile2-color;
+        border-color: $tile2-color;
     }
     &.tile3 {
-        background: /*url('img/orange.svg')*/ #ff8200;
-        border-color: #ff8200;
+        background: $tile3-color;
+        border-color: $tile3-color;
     }
     &.tile4 {
-        background: /*url('img/yelloww.svg')*/ #f8e08e;
-        border-color: #f8e08e;
+        background: $tile4-color;
+        border-color: $tile4-color;
     }
     &.tile5 {
-        background: /*url('img/blue.svg')*/ #009cde;
-        border-color: #009cde;
+        background: $tile5-color;
+        border-color: $tile5-color;
     }
     &.tile6 {
-        background: /*url('img/red.svg')*/ #ef3340;
-        border-color: #ef3340;
+        background: $tile6-color;
+        border-color: $tile6-color;
     }
 
     &.selected {

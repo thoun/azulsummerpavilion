@@ -304,14 +304,19 @@ class AzulSummerPavilion implements AzulSummerPavilionGame {
                     (this as any).addActionButton('undoPlayTile_button', _("Undo played tile"), () => this.undoPlayTile(), null, null, 'gray');
                     break;
                 case 'confirmPlay':
-                    (this as any).addActionButton('confirmLine_button', _("Confirm"), () => this.confirmPlay());
+                    (this as any).addActionButton('confirmPlay_button', _("Confirm"), () => this.confirmPlay());
                     (this as any).addActionButton('undoPlayTile_button', _("Undo played tile"), () => this.undoPlayTile(), null, null, 'gray');
-                    this.startActionTimer('confirmLine_button', 5);
+                    this.startActionTimer('confirmPlay_button', 5);
                     break;
                 case 'chooseKeptTiles':
                     (this as any).addActionButton('selectKeptTiles_button', '', () => this.selectKeptTiles());
                     (this as any).addActionButton('cancel_button', _("Cancel"), () => this.cancel(), null, null, 'gray');
                     this.updateSelectKeptTilesButton();
+                    break;
+                case 'confirmPass':
+                    (this as any).addActionButton('confirmPass_button', _("Confirm"), () => this.confirmPass());
+                    (this as any).addActionButton('cancel_button', _("Cancel"), () => this.undoPass(), null, null, 'gray');
+                    this.startActionTimer('confirmPass_button', 5);
                     break;
                 case 'takeBonusTiles':
                     (this as any).addActionButton('takeBonusTiles_button', '', () => this.takeBonusTiles());
@@ -645,12 +650,28 @@ class AzulSummerPavilion implements AzulSummerPavilionGame {
         this.takeAction('confirmPlay');
     }
 
+    public confirmPass() {
+        if(!(this as any).checkAction('confirmPass')) {
+            return;
+        }
+
+        this.takeAction('confirmPass');
+    }
+
     public undoPlayTile() {
         if(!(this as any).checkAction('undoPlayTile')) {
             return;
         }
 
         this.takeAction('undoPlayTile');
+    }
+
+    public undoPass() {
+        if(!(this as any).checkAction('undoPass')) {
+            return;
+        }
+
+        this.takeAction('undoPass');
     }
 
     public selectPlace(star: number, space: number) {
@@ -826,12 +847,15 @@ class AzulSummerPavilion implements AzulSummerPavilionGame {
     }
 
     notif_undoPlayTile(notif: Notif<NotifUndoPlaceArgs>) {
-        const table = this.getPlayerTable(notif.args.playerId);
-        if (notif.args.undo) {
-            table.placeTilesOnHand(notif.args.undo.tiles);
-            this.setScore(notif.args.playerId, notif.args.undo.previousScore);
-            this.scoringBoard.placeTiles(notif.args.undo.supplyTiles, true);
+        const { playerId, undo } = notif.args;
+        const table = this.getPlayerTable(playerId);
+        if (undo) {
+            table.placeTilesOnHand(undo.tiles);
+            this.setScore(playerId, undo.previousScore);
+            this.scoringBoard.placeTiles(undo.supplyTiles, true);
+            document.getElementById(`overall_player_board_${playerId}`).classList.remove('passed');
         }
+        
         // TODO remove ghost
     }
 
@@ -842,7 +866,6 @@ class AzulSummerPavilion implements AzulSummerPavilionGame {
     }*/
     notif_placeTileOnWall(notif: Notif<NotifPlaceTileOnWallArgs>) {
         const { playerId, placedTile, discardedTiles, scoredTiles } = notif.args;
-        console.log(notif.args, playerId);
         this.getPlayerTable(playerId).placeTilesOnWall([placedTile]);
         this.removeTiles(discardedTiles, true);
 

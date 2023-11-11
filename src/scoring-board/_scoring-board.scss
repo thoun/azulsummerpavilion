@@ -9,7 +9,7 @@
         position: absolute;
         top: 58px;
         left: 92px;
-        right: 124px;
+        right: 121px;
         height: 42px;
         gap: 29px;
         display: grid;
@@ -27,8 +27,8 @@
 
     #supply {
         position: absolute;
-        top: 310px; 
-        left: 310px;
+        top: 332px;
+        left: 302px;
 
         &.selectable {
             .tile {
@@ -45,7 +45,7 @@
 
             @for $type from 1 through 10 {
             &.space#{$type} {
-                transform: rotate(#{($type - 1) * 36deg + 90deg + 18deg}) translate(140px) rotate(90deg);
+                transform: rotate(#{($type - 1) * 36deg + 90deg + 18deg}) translate(136px) rotate(90deg);
             }
             }
 

@@ -265,6 +265,14 @@ trait ActionTrait {
         
         $this->gamestate->nextState('nextPlayer');
     }
+
+    function confirmPass($skipActionCheck = false) {
+        if (!$skipActionCheck) {
+            $this->checkAction('confirmPass');
+        }
+        
+        $this->gamestate->nextState('nextPlayer');
+    }
     
     function undoPlayTile() {
         self::checkAction('undoPlayTile'); 
@@ -299,6 +307,38 @@ trait ActionTrait {
         $this->gamestate->nextState('undo');
     }
 
+    function undoPass($skipActionCheck = false) {
+        if (!$skipActionCheck) {
+            $this->checkAction('undoPass');
+        }
+
+        if (!$this->allowUndo()) {
+            throw new BgaUserException('Undo is disabled');
+        }
+        
+        $playerId = intval(self::getActivePlayerId());       
+
+        $undo = $this->getGlobalVariable(UNDO_PLACE);
+
+        if ($undo) {
+            $this->tiles->moveCards(array_map('getIdPredicate', $undo->tiles), 'hand', $playerId);
+
+            foreach ($undo->supplyTiles as $tile) {
+                $this->tiles->moveCard($tile->id, $tile->location, $tile->space);
+            }
+        }
+
+        self::notifyAllPlayers('undoPlayTile', clienttranslate('${player_name} cancels ending the round'), [
+            'playerId' => $playerId,
+            'player_name' => self::getActivePlayerName(),
+            'undo' => $undo,
+        ]);
+
+        $this->setGlobalVariable(UNDO_PLACE, null);
+        
+        $this->gamestate->nextState('undo');
+    }
+
     function pass($skipActionCheck = false) {
         if (!$skipActionCheck) {
             $this->checkAction('pass');
@@ -318,7 +358,8 @@ trait ActionTrait {
         }/* else if ($this->allowUndo()) { // TODO confirm pass?
             $this->gamestate->nextState('confirm');
         }*/ else {
-            $this->gamestate->nextState('nextPlayer');
+            $this->gamestate->nextState('chooseKeptTiles');
+            $this->selectKeptTiles(array_map('getIdPredicate', $tiles)); // handles navigation to next player
         }
     }
 
@@ -332,6 +373,10 @@ trait ActionTrait {
         }
         
         $playerId = intval(self::getActivePlayerId());
+
+        // for undo
+        $previousScore = $this->getPlayerScore($playerId);
+
         $hand = $this->getTilesFromDb($this->tiles->getCardsInLocation('hand', $playerId));
         $keptTiles = [];
         $discardedTiles = [];
@@ -365,8 +410,14 @@ trait ActionTrait {
                 'discardedNumber' => $discardedNumber,
             ]);
         }
+        if ($this->allowUndo()) {
 
-        $this->gamestate->nextState('nextPlayer');
+            $this->setGlobalVariable(UNDO_PLACE, new UndoPlace($hand, $previousScore));
+
+            $this->gamestate->nextState('confirm');
+        } else {
+            $this->gamestate->nextState('nextPlayer');
+        }
     }
 
     function cancel($skipActionCheck = false) {

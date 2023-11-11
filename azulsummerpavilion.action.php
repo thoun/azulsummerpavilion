@@ -103,6 +103,22 @@
       self::ajaxResponse();
     }
 
+    public function confirmPass() {
+      self::setAjaxMode();
+
+      $this->game->confirmPass();
+
+      self::ajaxResponse();
+    }
+
+    public function undoPass() {
+      self::setAjaxMode();
+
+      $this->game->undoPass();
+
+      self::ajaxResponse();
+    }
+
     public function undoPlayTile() {
       self::setAjaxMode();
 

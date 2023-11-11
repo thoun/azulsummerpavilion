@@ -231,6 +231,9 @@ class AzulSummerPavilion extends Table {
                     case 'confirmPlay':
                         $this->confirmPlay(true);
                         break;
+                    case 'confirmPass':
+                        $this->confirmPass(true);
+                        break;
                     default:
                         $this->gamestate->nextState("nextPlayer"); // all player actions got nextPlayer action as a "zombiePass"
                         break;

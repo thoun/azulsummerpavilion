@@ -165,8 +165,24 @@ $playerActionsGameStates = [
             "cancel",
         ],
         "transitions" => [
-            "nextPlayer" => ST_NEXT_PLAYER_PLAY,
+            "confirm" => ST_PLAYER_CONFIRM_PASS,
+            "next" => ST_NEXT_PLAYER_PLAY,
             "cancel" => ST_PLAYER_CHOOSE_PLACE,
+        ],
+    ],
+
+    ST_PLAYER_CONFIRM_PASS => [
+        "name" => "confirmPass",
+        "description" => clienttranslate('${actplayer} must confirm ending the round'),
+        "descriptionmyturn" => clienttranslate('${you} must confirm ending the round'),
+        "type" => "activeplayer",
+        "possibleactions" => [ 
+            "confirmPass",
+            "undoPass",
+         ],
+        "transitions" => [
+            "nextPlayer" => ST_NEXT_PLAYER_PLAY,
+            "undo" => ST_PLAYER_CHOOSE_PLACE,
         ],
     ],
 

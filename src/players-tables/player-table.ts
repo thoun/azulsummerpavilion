@@ -54,16 +54,27 @@ class PlayerTable {
         this.placeTilesOnWall(player.wall);
     }
 
+    public handCountChanged() {
+        const handDiv = document.getElementById(`player-hand-${this.playerId}`);
+        const tileCount = handDiv.querySelectorAll('.tile').length;
+        handDiv.style.setProperty('--hand-overlap', `-${
+            tileCount < 12 ? 0 : (tileCount - 12) * 8
+        }px`);
+    }
+
     public placeTilesOnHand(tiles: Tile[]) {
         tiles.forEach(tile => this.game.placeTile(tile, `player-hand-${this.playerId}`));
+        this.handCountChanged();
     }
 
     public placeTilesOnCorner(tiles: Tile[]) {
         tiles.forEach((tile, index) => this.game.placeTile(tile, `player-table-${this.playerId}-corner-${index}`));
+        this.handCountChanged();
     }
 
     public placeTilesOnWall(tiles: Tile[]) {
         tiles.forEach(tile => this.game.placeTile(tile, `player-table-${this.playerId}-star-${tile.star}-space-${tile.space}`));
+        this.handCountChanged();
     }
     
     public setFont(prefValue: number): void {
