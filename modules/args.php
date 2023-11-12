@@ -96,7 +96,10 @@ trait ArgsTrait {
             $possibleColors = [$selectedColor];
         }
         return [
+            'playerId' => $playerId,
             'possibleColors' => $possibleColors,
+            'star' => $star,
+            'space' => $space,
         ];
     }
 
@@ -119,7 +122,7 @@ trait ArgsTrait {
         $hand = $this->getTilesFromDb($this->tiles->getCardsInLocation('hand', $playerId));
 
         $selectedPlace = $this->getGlobalVariable(SELECTED_PLACE);
-        $star = $selectedPlace[1];
+        $star = $selectedPlace[0];
         $space = $selectedPlace[1];
         $selectedColor = $this->getGlobalVariable(SELECTED_COLOR);
         $wildColor = $this->getWildColor();

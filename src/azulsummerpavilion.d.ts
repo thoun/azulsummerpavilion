@@ -75,7 +75,10 @@ interface EnteringChoosePlaceArgs {
 }
 
 interface EnteringChooseColorArgs {
+    playerId: number;
     possibleColors: number[];
+    star: number;
+    space: number;
 }
 
 

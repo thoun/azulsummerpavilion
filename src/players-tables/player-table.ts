@@ -15,11 +15,13 @@ class PlayerTable {
         <div id="player-hand-${this.playerId}" class="player-hand">
         </div>
         <div id="player-table-${this.playerId}" class="player-table ${this.game.isVariant() ? 'variant' : ''}" style="--player-color: #${player.color};">
-            <div class="player-name-wrapper shift">
-                <div id="player-name-shift-${this.playerId}" class="player-name color ${game.isDefaultFont() ? 'standard' : 'azul'} ${nameClass}">${player.name}</div>
-            </div>
-            <div class="player-name-wrapper">
-                <div id="player-name-${this.playerId}" class="player-name dark ${game.isDefaultFont() ? 'standard' : 'azul'} ${nameClass}">${player.name}</div>
+            <div class="player-name-box">
+                <div class="player-name-wrapper shift">
+                    <div id="player-name-shift-${this.playerId}" class="player-name color ${game.isDefaultFont() ? 'standard' : 'azul'} ${nameClass}">${player.name}</div>
+                </div>
+                <div class="player-name-wrapper">
+                    <div id="player-name-${this.playerId}" class="player-name dark ${game.isDefaultFont() ? 'standard' : 'azul'} ${nameClass}">${player.name}</div>
+                </div>
             </div>
             `;
 
