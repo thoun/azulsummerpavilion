@@ -94,6 +94,7 @@ trait DebugUtilTrait {
 			// tables specific to your schema that use player_ids
 			self::DbQuery("UPDATE tile SET card_location='line$sid' WHERE card_location = 'line$id'" );
 			self::DbQuery("UPDATE tile SET card_location='wall$sid' WHERE card_location = 'wall$id'" );
+			self::DbQuery("UPDATE tile SET card_location_arg=$sid WHERE card_location_arg = $id" );
 			
 			++$sid;
 		}

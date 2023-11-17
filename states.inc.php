@@ -151,6 +151,7 @@ $playerActionsGameStates = [
         "transitions" => [
             "next" => ST_PLAYER_CHOOSE_COLOR,
             "chooseKeptTiles" => ST_PLAYER_CHOOSE_KEPT_TILES,
+            "pass" => ST_NEXT_PLAYER_PLAY,
             "nextPlayer" => ST_NEXT_PLAYER_PLAY,
         ],
     ],

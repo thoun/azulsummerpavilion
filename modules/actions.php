@@ -346,21 +346,25 @@ trait ActionTrait {
         
         $playerId = self::getActivePlayerId();
 
+        $this->applyPass($playerId);
+
+        $hand = $this->getTilesFromDb($this->tiles->getCardsInLocation('hand', $playerId));
+        $colorTiles = array_values(array_filter($hand, fn($tile) => $tile->type > 0));
+
+        if (count($colorTiles) > 4) {
+            $this->gamestate->nextState('chooseKeptTiles');
+        } else {
+            $this->gamestate->nextState('chooseKeptTiles');
+            $this->selectKeptTiles(array_map('getIdPredicate', $colorTiles)); // handles navigation to next player
+        }
+    }
+
+    function applyPass(int $playerId) {
         self::DbQuery("UPDATE player SET passed = TRUE WHERE player_id = $playerId" );
         self::notifyAllPlayers('pass', clienttranslate('${player_name} passes'), [
             'playerId' => $playerId,
             'player_name' => self::getActivePlayerName(),
         ]);
-
-        $tiles = $this->getTilesFromDb($this->tiles->getCardsInLocation('hand', $playerId));
-        if (count($tiles) > 4) { // TODO always ask ?
-            $this->gamestate->nextState('chooseKeptTiles');
-        }/* else if ($this->allowUndo()) { // TODO confirm pass?
-            $this->gamestate->nextState('confirm');
-        }*/ else {
-            $this->gamestate->nextState('chooseKeptTiles');
-            $this->selectKeptTiles(array_map('getIdPredicate', $tiles)); // handles navigation to next player
-        }
     }
 
     function selectKeptTiles(array $ids, $skipActionCheck = false) {
@@ -374,6 +378,16 @@ trait ActionTrait {
         
         $playerId = intval(self::getActivePlayerId());
 
+        $this->applySelectKeptTiles($playerId, $ids);
+
+        if ($this->allowUndo() && count($ids) > 0) {
+            $this->gamestate->nextState('confirm');
+        } else {
+            $this->gamestate->nextState('nextPlayer');
+        }
+    }
+
+    function applySelectKeptTiles(int $playerId, array $ids) {
         // for undo
         $previousScore = $this->getPlayerScore($playerId);
 
@@ -410,13 +424,9 @@ trait ActionTrait {
                 'discardedNumber' => $discardedNumber,
             ]);
         }
-        if ($this->allowUndo()) {
 
+        if (count($ids) > 0) {
             $this->setGlobalVariable(UNDO_PLACE, new UndoPlace($hand, $previousScore));
-
-            $this->gamestate->nextState('confirm');
-        } else {
-            $this->gamestate->nextState('nextPlayer');
         }
     }
 

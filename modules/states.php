@@ -74,16 +74,17 @@ trait StateTrait {
 
     function stChoosePlace() {
         $playerId = self::getActivePlayerId();
-
+        
         $hand = $this->getTilesFromDb($this->tiles->getCardsInLocation('hand', $playerId));
         if (count(array_filter($hand, fn($tile) => $tile->type > 0)) == 0) {
-            $this->pass(true);
+            $this->applyPass($playerId);
+            $this->gamestate->nextState('pass');
         }
     }
 
     function stNextPlayerPlay() {
         $allPassed = intval(self::getUniqueValueFromDB("SELECT count(*) FROM player WHERE passed = FALSE")) == 0;
-        $playerId = self::getActivePlayerId();
+        $playerId = intval(self::getActivePlayerId());
 
         self::incStat(1, 'turnsNumber');
         self::incStat(1, 'turnsNumber', $playerId);
@@ -93,21 +94,16 @@ trait StateTrait {
         if ($allPassed) {
             $this->gamestate->nextState('endRound');
         } else {
-            $this->activeNextPlayer();
+            $playerId = intval($this->activeNextPlayer());
         
-            $playerId = self::getActivePlayerId();
             while (boolval(self::getUniqueValueFromDB("SELECT passed FROM player WHERE player_id = $playerId"))) {
-                $this->activeNextPlayer();
-            
-                $playerId = self::getActivePlayerId();
-
+                $playerId = intval($this->activeNextPlayer());
             }
             self::giveExtraTime($playerId);
 
             $this->gamestate->nextState('nextPlayer');
         }
     }
-
 
     function stEndRound() {    
         $firstPlayerTile = $this->getTilesFromDb($this->tiles->getCardsOfType(0))[0];
