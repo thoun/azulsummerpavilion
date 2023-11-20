@@ -46,7 +46,7 @@ class PlayerTable {
         this.placeTilesOnCorner(player.corner);
 
         for (let star=0; star<=6; star++) {
-            for (let space=1; space<=5; space++) {
+            for (let space=1; space<=6; space++) {
                 document.getElementById(`player-table-${this.playerId}-star-${star}-space-${space}`).addEventListener('click', () => {
                     this.game.selectPlace(star, space);
                 });

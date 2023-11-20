@@ -1097,7 +1097,7 @@ var PlayerTable = /** @class */ (function () {
                     _this.game.selectPlace(star, space);
                 });
             };
-            for (var space = 1; space <= 5; space++) {
+            for (var space = 1; space <= 6; space++) {
                 _loop_5(space);
             }
         };
