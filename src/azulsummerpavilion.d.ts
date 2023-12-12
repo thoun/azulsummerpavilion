@@ -124,6 +124,7 @@ interface NotifTilesSelectedArgs {
     playerId: number;
     selectedTiles: Tile[];
     discardedTiles: Tile[];
+    typeWild: number;
     fromFactory: number;
     fromSupply: boolean;
 }

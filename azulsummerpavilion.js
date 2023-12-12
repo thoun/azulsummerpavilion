@@ -704,9 +704,13 @@ var Factories = /** @class */ (function () {
         var halfSize = radius + FACTORY_RADIUS;
         return halfSize * 2;
     };
-    Factories.prototype.centerColorRemoved = function (color) {
+    Factories.prototype.centerColorRemoved = function (color, typeWild) {
         this.tilesInFactories[0][color] = [];
         this.tilesPositionsInCenter[color] = [];
+        if (typeWild) {
+            this.tilesInFactories[0][typeWild].shift();
+            this.tilesPositionsInCenter[typeWild].shift();
+        }
         this.updateDiscardedTilesNumbers();
     };
     Factories.prototype.factoryTilesRemoved = function (factory) {
@@ -930,7 +934,7 @@ var Factories = /** @class */ (function () {
             }
         };
         var this_2 = this;
-        for (var type = 1; type <= 5; type++) {
+        for (var type = 1; type <= 6; type++) {
             _loop_3(type);
         }
     };
@@ -1853,7 +1857,7 @@ var AzulSummerPavilion = /** @class */ (function () {
     AzulSummerPavilion.prototype.notif_tilesSelected = function (notif) {
         if (!notif.args.fromSupply) {
             if (notif.args.fromFactory == 0) {
-                this.factories.centerColorRemoved(notif.args.selectedTiles[0].type);
+                this.factories.centerColorRemoved(notif.args.selectedTiles[0].type, notif.args.typeWild);
             }
             else {
                 this.factories.factoryTilesRemoved(notif.args.fromFactory);
@@ -1900,6 +1904,7 @@ var AzulSummerPavilion = /** @class */ (function () {
         var _a = notif.args, playerId = _a.playerId, keptTiles = _a.keptTiles, discardedTiles = _a.discardedTiles;
         this.getPlayerTable(playerId).placeTilesOnCorner(keptTiles);
         this.removeTiles(discardedTiles, true);
+        // TODO updateScoring -discardedTiles
     };
     AzulSummerPavilion.prototype.notif_cornerToHand = function (notif) {
         var _a = notif.args, playerId = _a.playerId, tiles = _a.tiles;
@@ -1950,6 +1955,10 @@ var AzulSummerPavilion = /** @class */ (function () {
                 else if (log.indexOf('${color}') !== -1 && typeof args.type === 'number') {
                     var html = "<div class=\"tile tile".concat(args.type, "\"></div>");
                     log = _(log).replace('${color}', html);
+                }
+                if (log.indexOf('${wild}') !== -1 && typeof args.typeWild === 'number') {
+                    var html = "<div class=\"tile tile".concat(args.typeWild, "\"></div>");
+                    log = _(log).replace('${wild}', html);
                 }
             }
         }

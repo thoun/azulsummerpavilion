@@ -52,9 +52,14 @@ class Factories {
         return halfSize*2;
     }
 
-    public centerColorRemoved(color: number) {
+    public centerColorRemoved(color: number, typeWild: number) {
         this.tilesInFactories[0][color] = [];
         this.tilesPositionsInCenter[color] = [];
+
+        if (typeWild) {
+            this.tilesInFactories[0][typeWild].shift();
+            this.tilesPositionsInCenter[typeWild].shift();
+        }
 
         this.updateDiscardedTilesNumbers();
     }
@@ -266,7 +271,7 @@ class Factories {
     }
 
     private updateDiscardedTilesNumbers() {
-        for (let type=1; type<=5; type++) {
+        for (let type=1; type<=6; type++) {
             const number = this.tilesPositionsInCenter[type].length;
 
             const numberDiv = document.getElementById(`tileCount${type}`);

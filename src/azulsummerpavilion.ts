@@ -840,7 +840,7 @@ class AzulSummerPavilion implements AzulSummerPavilionGame {
     notif_tilesSelected(notif: Notif<NotifTilesSelectedArgs>) {
         if (!notif.args.fromSupply) {
             if (notif.args.fromFactory == 0) {
-                this.factories.centerColorRemoved(notif.args.selectedTiles[0].type);
+                this.factories.centerColorRemoved(notif.args.selectedTiles[0].type, notif.args.typeWild);
             } else {
                 this.factories.factoryTilesRemoved(notif.args.fromFactory);
             }
@@ -897,6 +897,8 @@ class AzulSummerPavilion implements AzulSummerPavilionGame {
         const { playerId, keptTiles, discardedTiles } = notif.args;
         this.getPlayerTable(playerId).placeTilesOnCorner(keptTiles);
         this.removeTiles(discardedTiles, true);
+
+        // TODO updateScoring -discardedTiles
     }
 
     notif_cornerToHand(notif: Notif<NotifCornerToHandArgs>) {
@@ -958,6 +960,11 @@ class AzulSummerPavilion implements AzulSummerPavilionGame {
                 } else if (log.indexOf('${color}') !== -1 && typeof args.type === 'number') {
                     let html = `<div class="tile tile${args.type}"></div>`;
                     log = _(log).replace('${color}', html);
+                }
+
+                if (log.indexOf('${wild}') !== -1 && typeof args.typeWild === 'number') {
+                    let html = `<div class="tile tile${args.typeWild}"></div>`;
+                    log = _(log).replace('${wild}', html);
                 }
             }
         } catch (e) {

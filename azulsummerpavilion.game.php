@@ -220,7 +220,7 @@ class AzulSummerPavilion extends Table {
                         $this->confirmAcquire(true);
                         break;
                     case 'choosePlace':
-                        $this->pass(true);
+                        $this->applyPass($active_player);
                         break;
                     case 'chooseColor':
                         $this->selectColor(0);
@@ -230,6 +230,9 @@ class AzulSummerPavilion extends Table {
                         break;
                     case 'confirmPlay':
                         $this->confirmPlay(true);
+                        break;
+                    case 'chooseKeptTiles':
+                        $this->applySelectKeptTiles($active_player, []);
                         break;
                     case 'confirmPass':
                         $this->confirmPass(true);

@@ -78,7 +78,6 @@ trait StateTrait {
         $hand = $this->getTilesFromDb($this->tiles->getCardsInLocation('hand', $playerId));
         if (count(array_filter($hand, fn($tile) => $tile->type > 0)) == 0) {
             $this->applyPass($playerId);
-            $this->gamestate->nextState('pass');
         }
     }
 

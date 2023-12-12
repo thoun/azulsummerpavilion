@@ -148,26 +148,19 @@ $playerActionsGameStates = [
             "selectPlace",
             "pass",
          ],
-        "transitions" => [
-            "next" => ST_PLAYER_CHOOSE_COLOR,
-            "chooseKeptTiles" => ST_PLAYER_CHOOSE_KEPT_TILES,
-            "pass" => ST_NEXT_PLAYER_PLAY,
-            "nextPlayer" => ST_NEXT_PLAYER_PLAY,
-        ],
+        "transitions" => [],
     ],
 
     ST_PLAYER_CHOOSE_KEPT_TILES => [
         "name" => "chooseKeptTiles",
-        "description" => clienttranslate('${actplayer} must choose up to 4 tiles to keep'),
-        "descriptionmyturn" => clienttranslate('${you} must choose up to 4 tiles to keep'),
+        "description" => clienttranslate('${actplayer} may choose up to 4 tiles to keep'),
+        "descriptionmyturn" => clienttranslate('${you} may choose up to 4 tiles to keep'),
         "type" => "activeplayer",
         "possibleactions" => [ 
             "selectKeptTiles",
             "cancel",
         ],
         "transitions" => [
-            "confirm" => ST_PLAYER_CONFIRM_PASS,
-            "next" => ST_NEXT_PLAYER_PLAY,
             "cancel" => ST_PLAYER_CHOOSE_PLACE,
         ],
     ],
@@ -182,7 +175,6 @@ $playerActionsGameStates = [
             "undoPass",
          ],
         "transitions" => [
-            "nextPlayer" => ST_NEXT_PLAYER_PLAY,
             "undo" => ST_PLAYER_CHOOSE_PLACE,
         ],
     ],
@@ -199,7 +191,6 @@ $playerActionsGameStates = [
             "pass",
          ],
         "transitions" => [
-            "next" => ST_PLAYER_PLAY_TILE,
             "undo" => ST_PLAYER_CHOOSE_PLACE,
         ],
     ],
@@ -215,9 +206,6 @@ $playerActionsGameStates = [
             "undoPlayTile",
          ],
         "transitions" => [
-            "takeBonusTiles" => ST_PLAYER_TAKE_BONUS_TILES,
-            "confirm" => ST_PLAYER_CONFIRM_PLAY,
-            "nextPlayer" => ST_NEXT_PLAYER_PLAY,
             "undo" => ST_PLAYER_CHOOSE_PLACE,
         ],
     ],
@@ -233,8 +221,6 @@ $playerActionsGameStates = [
             "undoPlayTile",
          ],
         "transitions" => [
-            "confirm" => ST_PLAYER_CONFIRM_PLAY,
-            "nextPlayer" => ST_NEXT_PLAYER_PLAY,
             "undo" => ST_PLAYER_CHOOSE_PLACE,
         ],
     ],
@@ -249,7 +235,6 @@ $playerActionsGameStates = [
             "undoPlayTile",
          ],
         "transitions" => [
-            "nextPlayer" => ST_NEXT_PLAYER_PLAY,
             "undo" => ST_PLAYER_CHOOSE_PLACE,
         ],
     ],

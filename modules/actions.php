@@ -43,7 +43,8 @@ trait ActionTrait {
         }
 
         $wildTiles = array_values(array_filter($factoryTiles, fn($factoryTile) => $factoryTile->type == $wildColor));
-        
+
+        $additionalWildTile = null;        
         $firstPlayerTokens = [];
         $selectedTiles = [];
         $discardedTiles = [];
@@ -58,6 +59,10 @@ trait ActionTrait {
         }
         if (count($wildTiles) > 0) {
             $selectedTiles[] = $wildTiles[0];
+
+            if (!$isWild) {
+                $additionalWildTile = $wildTiles[0];
+            }
         }
 
         if ($factory == 0) {
@@ -80,9 +85,9 @@ trait ActionTrait {
 
         
         if ($hasFirstPlayer) {
-            $message = clienttranslate('${player_name} takes ${number} ${color} and First Player tile');
+            $message = clienttranslate('${player_name} takes ${number} ${color} ${wild} and First Player tile');
         } else {
-            $message = clienttranslate('${player_name} takes ${number} ${color}');
+            $message = clienttranslate('${player_name} takes ${number} ${color} ${wild}');
         }
 
         self::notifyAllPlayers('tilesSelected', $message, [
@@ -90,9 +95,11 @@ trait ActionTrait {
             'player_name' => self::getActivePlayerName(),
             'number' => count($selectedTiles),
             'color' => $this->getColor($tile->type),   
+            'wild' => $additionalWildTile != null ? $this->getColor($additionalWildTile->type) : '',   
             'i18n' => ['color'],           
-            'type' => $tile->type,
-            'preserve' => [ 2 => 'type' ],
+            'type' => $tile->type,    
+            'typeWild' => $additionalWildTile != null ? $additionalWildTile->type : null,
+            'preserve' => [ 'type', 'typeWild' ],
             'selectedTiles' => $selectedTiles,
             'discardedTiles' => $discardedTiles,
             'fromFactory' => $factory,
@@ -155,15 +162,19 @@ trait ActionTrait {
             throw new BgaUserException('Space not available');
         }
 
+        $this->applySelectPlace($star, $space);
+    }
+
+    function applySelectPlace(int $star, int $space) {
         $this->setGlobalVariable(SELECTED_PLACE, [$star, $space]);
         $this->setGlobalVariable(UNDO_PLACE, null);
 
-        $this->gamestate->nextState('next');
-
         // if only one option (no use of wilds), auto-play it
         $args = $this->argChooseColor();
-        if (count($args['possibleColors']) == 1) {
-            $this->selectColor($args['possibleColors'][0], true);
+        if (count($args['possibleColors']) > 1) {
+            $this->gamestate->jumpToState(ST_PLAYER_CHOOSE_COLOR);
+        } else {
+            $this->applySelectColor($args['possibleColors'][0]);
         }
     }
 
@@ -172,16 +183,22 @@ trait ActionTrait {
             $this->checkAction('selectColor');
         }
         
+        $this->applySelectColor($color);
+    }
+
+    function applySelectColor(int $color) {
         $this->setGlobalVariable(SELECTED_COLOR, $color);
 
-        $this->gamestate->nextState('next');
+        $playerId = intval(self::getActivePlayerId());
 
         // if only one option (no wild, or exact count of color+wilds), auto-play it
         $args = $this->argPlayTile();
         if ($args['maxWildTiles'] === 0) {
-            $this->playTile(0, true);
+            $this->applyPlayTile($playerId, 0);
         } else if ($args['maxWildTiles'] + $args['maxColor'] == $args['number']) {
-            $this->playTile($args['maxWildTiles'], true);
+            $this->applyPlayTile($playerId, $args['maxWildTiles']);
+        } else {
+            $this->gamestate->jumpToState(ST_PLAYER_PLAY_TILE);
         }
     }
 
@@ -191,6 +208,11 @@ trait ActionTrait {
         }
         
         $playerId = intval(self::getActivePlayerId());
+        $this->applyPlayTile($playerId, $wilds);
+    }
+
+    function applyPlayTile(int $playerId, int $wilds) {
+
         $variant = $this->isVariant();
 
         // for undo
@@ -250,11 +272,11 @@ trait ActionTrait {
         }
 
         if ($additionalTiles['count'] > 0) {
-            $this->gamestate->nextState('takeBonusTiles');
+            $this->gamestate->jumpToState(ST_PLAYER_TAKE_BONUS_TILES);
         } else if ($this->allowUndo()) {
-            $this->gamestate->nextState('confirm');
+            $this->gamestate->jumpToState(ST_PLAYER_CONFIRM_PLAY);
         } else {
-            $this->gamestate->nextState('nextPlayer');
+            $this->gamestate->jumpToState(ST_NEXT_PLAYER_PLAY);
         }
     }
 
@@ -263,7 +285,7 @@ trait ActionTrait {
             $this->checkAction('confirmPlay');
         }
         
-        $this->gamestate->nextState('nextPlayer');
+        $this->gamestate->jumpToState(ST_NEXT_PLAYER_PLAY);
     }
 
     function confirmPass($skipActionCheck = false) {
@@ -271,7 +293,7 @@ trait ActionTrait {
             $this->checkAction('confirmPass');
         }
         
-        $this->gamestate->nextState('nextPlayer');
+        $this->gamestate->jumpToState(ST_NEXT_PLAYER_PLAY);
     }
     
     function undoPlayTile() {
@@ -347,16 +369,6 @@ trait ActionTrait {
         $playerId = self::getActivePlayerId();
 
         $this->applyPass($playerId);
-
-        $hand = $this->getTilesFromDb($this->tiles->getCardsInLocation('hand', $playerId));
-        $colorTiles = array_values(array_filter($hand, fn($tile) => $tile->type > 0));
-
-        if (count($colorTiles) > 4) {
-            $this->gamestate->nextState('chooseKeptTiles');
-        } else {
-            $this->gamestate->nextState('chooseKeptTiles');
-            $this->selectKeptTiles(array_map('getIdPredicate', $colorTiles)); // handles navigation to next player
-        }
     }
 
     function applyPass(int $playerId) {
@@ -365,6 +377,18 @@ trait ActionTrait {
             'playerId' => $playerId,
             'player_name' => self::getActivePlayerName(),
         ]);
+
+        $hand = $this->getTilesFromDb($this->tiles->getCardsInLocation('hand', $playerId));
+        $colorTiles = array_values(array_filter($hand, fn($tile) => $tile->type > 0));
+
+        $lastRound = $this->getRound() >= 6;
+
+        if (!$lastRound && count($colorTiles) > 4) {
+            $this->gamestate->jumpToState(ST_PLAYER_CHOOSE_KEPT_TILES);
+        } else {
+            $this->applySelectKeptTiles($playerId, $lastRound ? [] : array_map('getIdPredicate', $colorTiles));
+        }
+
     }
 
     function selectKeptTiles(array $ids, $skipActionCheck = false) {
@@ -379,12 +403,6 @@ trait ActionTrait {
         $playerId = intval(self::getActivePlayerId());
 
         $this->applySelectKeptTiles($playerId, $ids);
-
-        if ($this->allowUndo() && count($ids) > 0) {
-            $this->gamestate->nextState('confirm');
-        } else {
-            $this->gamestate->nextState('nextPlayer');
-        }
     }
 
     function applySelectKeptTiles(int $playerId, array $ids) {
@@ -425,8 +443,11 @@ trait ActionTrait {
             ]);
         }
 
-        if (count($ids) > 0) {
+        if ($this->allowUndo() && count($ids) > 0) {
             $this->setGlobalVariable(UNDO_PLACE, new UndoPlace($hand, $previousScore));
+            $this->gamestate->jumpToState(ST_PLAYER_CONFIRM_PASS);
+        } else {
+            $this->gamestate->jumpToState(ST_NEXT_PLAYER_PLAY);
         }
     }
 
@@ -477,9 +498,9 @@ trait ActionTrait {
         ]);
 
         if ($this->allowUndo()) {
-            $this->gamestate->nextState('confirm');
+            $this->gamestate->jumpToState(ST_PLAYER_CONFIRM_PLAY);
         } else {
-            $this->gamestate->nextState('nextPlayer');
+            $this->gamestate->jumpToState(ST_NEXT_PLAYER_PLAY);
         }
     }
 
