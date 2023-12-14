@@ -20,11 +20,9 @@ class Factories {
         const halfSize = radius + FACTORY_RADIUS;
         const size = `${halfSize*2}px`;
         factoriesDiv.style.width = size;
-        factoriesDiv.style.height = '1135px';
-        const heightShift = (1135 - halfSize*2) / 2 + 35;
+        factoriesDiv.style.height = size;
 
         const bagDiv = document.getElementById('bag');
-        factoriesDiv.style.setProperty('--top', `${heightShift}px`);
         this.bagCounter = new ebg.counter();
         this.bagCounter.create('bag-counter');
         bagDiv.addEventListener('click', () => dojo.toggleClass('bag-counter', 'visible'));
@@ -36,7 +34,7 @@ class Factories {
             const left = radius*Math.sin(angle);
             const top = radius*Math.cos(angle);
             
-            html += `<div id="factory${i}" class="factory" style="left: ${halfSize-FACTORY_RADIUS+left}px; top: ${heightShift + halfSize-FACTORY_RADIUS-top}px;"></div>`;
+            html += `<div id="factory${i}" class="factory" style="left: ${halfSize-FACTORY_RADIUS+left}px; top: ${halfSize-FACTORY_RADIUS-top}px;"></div>`;
         }
         html += `</div>`;
 

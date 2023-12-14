@@ -68,10 +68,19 @@
   pointer-events: none;
 }
 
+#factories-and-scoring-board {
+  float: left;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+}
+#factories-and-scoring-board.play {
+  flex-direction: column-reverse;
+}
+
 #factories {
   position: relative;
-  --top: 0;
-  float: left;
 }
 #factories .factory {
   position: absolute;
@@ -94,7 +103,6 @@
 }
 #factories #bag {
   position: absolute;
-  top: var(--top);
   left: 24px;
   width: 128px;
   height: 128px;
@@ -650,6 +658,55 @@ html.background2 {
   height: 24px;
   position: relative;
   box-shadow: 1px 1px 1px 1px rgba(0, 0, 0, 0.6);
+}
+#page-title #summary {
+  position: absolute;
+  left: calc(50% - 150px);
+  width: 300px;
+  bottom: -32px;
+  height: 32px;
+  background: #f0f0f0;
+  display: flex;
+  justify-content: space-evenly;
+  align-items: center;
+  font-size: 16px;
+}
+#page-title #summary::before {
+  content: "";
+  position: absolute;
+  display: inline-block;
+  height: 0;
+  width: 0;
+  left: -64px;
+  border-top: 32px solid #f0f0f0;
+  border-left: 64px solid transparent;
+}
+#page-title #summary::after {
+  content: "";
+  position: absolute;
+  display: inline-block;
+  height: 0;
+  width: 0;
+  right: -64px;
+  border-top: 32px solid #f0f0f0;
+  border-right: 64px solid transparent;
+}
+#page-title #summary .wild-zone {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+#page-title #summary .wild-zone .wild-container {
+  transform: rotate(-90deg);
+  display: inline-flex;
+  margin: 10px;
+}
+#page-title #summary .wild-zone .wild-container .tile {
+  box-shadow: unset;
+}
+
+#bga-zoom-wrapper {
+  margin-top: 36px;
 }
 
 .log .tile {

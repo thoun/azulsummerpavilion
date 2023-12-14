@@ -93,6 +93,15 @@ class AzulSummerPavilion implements AzulSummerPavilionGame {
         if (gamedatas.endRound) {
             this.notif_lastRound();
         }
+        if (!['chooseTile', 'confirmAcquire'].includes(this.gamedatas.gamestate.name)) {
+            document.getElementById('factories-and-scoring-board').classList.add('play');
+        }
+        document.getElementById(`page-title`).insertAdjacentHTML('beforeend', `
+            <div id="summary">
+                <div class="round-zone">${_('Round')} <span id="round">${this.gamedatas.round}</span>/6</div>
+                <div class="wild-zone">${_('Wild color:')} <div class="wild-container"><div id="wildToken" class="tile tile${this.gamedatas.round}"></div></div></div>
+            </div>    
+        `)
 
         log("Ending game setup");
     }
@@ -135,6 +144,8 @@ class AzulSummerPavilion implements AzulSummerPavilionGame {
     }
 
     private onEnteringChooseTile(args: EnteringChooseTileArgs) {
+        document.getElementById('factories-and-scoring-board').classList.remove('play');
+
         if ((this as any).isCurrentPlayerActive()) {
             this.factories.wildColor = args.wildColor;
             dojo.addClass('factories', 'selectable');
@@ -142,6 +153,8 @@ class AzulSummerPavilion implements AzulSummerPavilionGame {
     }
 
     private onEnteringChoosePlace(args: EnteringChoosePlaceArgs) {
+        document.getElementById('factories-and-scoring-board').classList.add('play');
+
         if ((this as any).isCurrentPlayerActive()) {
             const playerId = this.getPlayerId();
             for (let star = 0; star <= 6; star++) {
@@ -472,7 +485,7 @@ class AzulSummerPavilion implements AzulSummerPavilionGame {
         this.zoom = newZoom;
 
         const maxWidth = document.getElementById('table').clientWidth;
-        const factoriesWidth = document.getElementById('factories').clientWidth;
+        const factoriesWidth = document.getElementById('factories-and-scoring-board').clientWidth;
         const playerTableWidth = 780;
         const tablesMaxWidth = maxWidth - factoriesWidth;
      
@@ -821,6 +834,11 @@ class AzulSummerPavilion implements AzulSummerPavilionGame {
         this.factories.fillFactories(notif.args.factories);
         this.factories.setRemainingTiles(notif.args.remainingTiles);
         this.scoringBoard.setRoundNumber(notif.args.roundNumber);
+        document.getElementById('round').innerText = `${notif.args.roundNumber}`;
+        const wildToken = document.getElementById(`wildToken`);
+        wildToken.classList.remove(`tile${notif.args.roundNumber - 1}`);
+        wildToken.classList.add(`tile${notif.args.roundNumber}`);
+
         Object.keys(this.gamedatas.players).forEach(playerId => document.getElementById(`overall_player_board_${playerId}`).classList.remove('passed'));
     }
 
@@ -936,7 +954,7 @@ class AzulSummerPavilion implements AzulSummerPavilionGame {
             return;
         }
         
-        dojo.place(`<div id="last-round">${_("This is the last round of the game!")}</div>`, 'page-title');
+        // TODO useful ? dojo.place(`<div id="last-round">${_("This is the last round of the game!")}</div>`, 'page-title');
     }
 
     /* This enable to inject translatable styled things to logs or action bar */

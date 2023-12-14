@@ -679,10 +679,8 @@ var Factories = /** @class */ (function () {
         var halfSize = radius + FACTORY_RADIUS;
         var size = "".concat(halfSize * 2, "px");
         factoriesDiv.style.width = size;
-        factoriesDiv.style.height = '1135px';
-        var heightShift = (1135 - halfSize * 2) / 2 + 35;
+        factoriesDiv.style.height = size;
         var bagDiv = document.getElementById('bag');
-        factoriesDiv.style.setProperty('--top', "".concat(heightShift, "px"));
         this.bagCounter = new ebg.counter();
         this.bagCounter.create('bag-counter');
         bagDiv.addEventListener('click', function () { return dojo.toggleClass('bag-counter', 'visible'); });
@@ -692,7 +690,7 @@ var Factories = /** @class */ (function () {
             var angle = (i - 1) * Math.PI * 2 / factoryNumber; // in radians
             var left = radius * Math.sin(angle);
             var top_1 = radius * Math.cos(angle);
-            html += "<div id=\"factory".concat(i, "\" class=\"factory\" style=\"left: ").concat(halfSize - FACTORY_RADIUS + left, "px; top: ").concat(heightShift + halfSize - FACTORY_RADIUS - top_1, "px;\"></div>");
+            html += "<div id=\"factory".concat(i, "\" class=\"factory\" style=\"left: ").concat(halfSize - FACTORY_RADIUS + left, "px; top: ").concat(halfSize - FACTORY_RADIUS - top_1, "px;\"></div>");
         }
         html += "</div>";
         dojo.place(html, 'factories');
@@ -1206,6 +1204,10 @@ var AzulSummerPavilion = /** @class */ (function () {
         if (gamedatas.endRound) {
             this.notif_lastRound();
         }
+        if (!['chooseTile', 'confirmAcquire'].includes(this.gamedatas.gamestate.name)) {
+            document.getElementById('factories-and-scoring-board').classList.add('play');
+        }
+        document.getElementById("page-title").insertAdjacentHTML('beforeend', "\n            <div id=\"summary\">\n                <div class=\"round-zone\">".concat(_('Round'), " <span id=\"round\">").concat(this.gamedatas.round, "</span>/6</div>\n                <div class=\"wild-zone\">").concat(_('Wild color:'), " <div class=\"wild-container\"><div id=\"wildToken\" class=\"tile tile").concat(this.gamedatas.round, "\"></div></div></div>\n            </div>    \n        "));
         log("Ending game setup");
     };
     ///////////////////////////////////////////////////
@@ -1243,12 +1245,14 @@ var AzulSummerPavilion = /** @class */ (function () {
         }
     };
     AzulSummerPavilion.prototype.onEnteringChooseTile = function (args) {
+        document.getElementById('factories-and-scoring-board').classList.remove('play');
         if (this.isCurrentPlayerActive()) {
             this.factories.wildColor = args.wildColor;
             dojo.addClass('factories', 'selectable');
         }
     };
     AzulSummerPavilion.prototype.onEnteringChoosePlace = function (args) {
+        document.getElementById('factories-and-scoring-board').classList.add('play');
         if (this.isCurrentPlayerActive()) {
             var playerId = this.getPlayerId();
             for (var star = 0; star <= 6; star++) {
@@ -1543,7 +1547,7 @@ var AzulSummerPavilion = /** @class */ (function () {
     AzulSummerPavilion.prototype.onTableCenterSizeChange = function (newZoom) {
         this.zoom = newZoom;
         var maxWidth = document.getElementById('table').clientWidth;
-        var factoriesWidth = document.getElementById('factories').clientWidth;
+        var factoriesWidth = document.getElementById('factories-and-scoring-board').clientWidth;
         var playerTableWidth = 780;
         var tablesMaxWidth = maxWidth - factoriesWidth;
         document.getElementById('centered-table').style.width = tablesMaxWidth < playerTableWidth * this.gamedatas.playerorder.length ?
@@ -1842,6 +1846,10 @@ var AzulSummerPavilion = /** @class */ (function () {
         this.factories.fillFactories(notif.args.factories);
         this.factories.setRemainingTiles(notif.args.remainingTiles);
         this.scoringBoard.setRoundNumber(notif.args.roundNumber);
+        document.getElementById('round').innerText = "".concat(notif.args.roundNumber);
+        var wildToken = document.getElementById("wildToken");
+        wildToken.classList.remove("tile".concat(notif.args.roundNumber - 1));
+        wildToken.classList.add("tile".concat(notif.args.roundNumber));
         Object.keys(this.gamedatas.players).forEach(function (playerId) { return document.getElementById("overall_player_board_".concat(playerId)).classList.remove('passed'); });
     };
     AzulSummerPavilion.prototype.notif_supplyFilled = function (notif) {
@@ -1934,7 +1942,7 @@ var AzulSummerPavilion = /** @class */ (function () {
         if (document.getElementById('last-round')) {
             return;
         }
-        dojo.place("<div id=\"last-round\">".concat(_("This is the last round of the game!"), "</div>"), 'page-title');
+        // TODO useful ? dojo.place(`<div id="last-round">${_("This is the last round of the game!")}</div>`, 'page-title');
     };
     /* This enable to inject translatable styled things to logs or action bar */
     /* @Override */
