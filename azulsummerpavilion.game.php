@@ -209,10 +209,16 @@ class AzulSummerPavilion extends Table {
                     case 'chooseTile':
                         $factoryTiles = $this->getTilesFromDb($this->tiles->getCardsInLocation('factory'));
                         $tiles = array_values(array_filter($factoryTiles, fn($tile) => $tile->type > 0));
-                        $this->takeTiles($tiles[bga_rand(1, count($tiles)) - 1]->id, true);
+                        $round = $this->getRound();
+                        $normalTiles = array_values(array_filter($factoryTiles, fn($tile) => $tile->type != $round));
+                        if (count($normalTiles) > 0) {
+                            $this->takeTiles($normalTiles[bga_rand(1, count($normalTiles)) - 1]->id, true);
+                        } else {
+                            $this->takeTiles($tiles[bga_rand(1, count($tiles)) - 1]->id, true);
+                        }
                         break;
                     case 'confirmAcquire':
-                        $this->applyConfirmTiles(active_player);
+                        $this->applyConfirmTiles($active_player);
                         break;
                     case 'choosePlace':
                         $this->applyPass($active_player);
@@ -224,7 +230,7 @@ class AzulSummerPavilion extends Table {
                         $this->playTile(0, true);
                         break;
                     case 'confirmPlay':
-                        $this->confirmPlay(true);
+                        $this->applyConfirmPlay($active_player);
                         break;
                     case 'chooseKeptTiles':
                         $this->applySelectKeptTiles($active_player, []);

@@ -299,10 +299,8 @@ trait ActionTrait {
         }
     }
 
-    function confirmPlay($skipActionCheck = false) {
-        if (!$skipActionCheck) {
-            $this->checkAction('confirmPlay');
-        }
+    function confirmPlay() {
+        $this->checkAction('confirmPlay');
 
         $playerId = intval(self::getActivePlayerId());   
      
