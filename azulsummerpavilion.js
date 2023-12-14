@@ -1084,7 +1084,7 @@ var PlayerTable = /** @class */ (function () {
         for (var star = 0; star <= 6; star++) {
             html += "<div id=\"player-table-".concat(this.playerId, "-star-").concat(star, "\" class=\"star star").concat(star, "\">");
             for (var space = 1; space <= 6; space++) {
-                html += "<div id=\"player-table-".concat(this.playerId, "-star-").concat(star, "-space-").concat(space, "\" class=\"space space").concat(space, "\"></div>");
+                html += "<div id=\"player-table-".concat(this.playerId, "-star-").concat(star, "-space-").concat(space, "\" class=\"space space").concat(space, "\" style=\"--number: '").concat(space, "'; --rotation: ").concat(240 - space * 60 - (star == 0 ? 3 : star - 4) * 60, "deg;\"></div>");
             }
             html += "</div>";
         }

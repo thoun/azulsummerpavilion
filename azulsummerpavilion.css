@@ -430,6 +430,19 @@
   /*.ghost {
       opacity: 0.5;
   }*/
+  /*&::after {
+      content: var(--number);
+      position: absolute;
+      transform: rotate(var(--rotation));
+      transform-origin: center center;
+      top: 20px;
+      bottom: 20px;
+      left: 20px;
+      right: 20px;
+      text-align: center;
+      border-radius: 50%;
+      background: #FFFFFF66;
+  }*/
 }
 .player-table-wrapper .player-table .space.space1 {
   transform: rotate(90deg) translate(63px) rotate(90deg);
@@ -449,7 +462,7 @@
 .player-table-wrapper .player-table .space.space6 {
   transform: rotate(390deg) translate(63px) rotate(90deg);
 }
-.player-table-wrapper .player-table .space.selectable::after {
+.player-table-wrapper .player-table .space.selectable::before {
   content: "";
   position: absolute;
   top: 0;
@@ -462,7 +475,7 @@
   cursor: pointer;
   transform: rotate(45deg) skew(15deg, 15deg);
 }
-.player-table-wrapper .player-table .space.selected::after {
+.player-table-wrapper .player-table .space.selected::before {
   content: "";
   position: absolute;
   top: 0;
@@ -472,6 +485,11 @@
   border: 3px solid transparent;
   animation: selectable-space 1s alternate-reverse infinite ease-in-out;
   transform: rotate(45deg) skew(15deg, 15deg);
+}
+.player-table-wrapper .player-table .space .scoring-tile {
+  transform: rotate(var(--rotation));
+  z-index: 30;
+  pointer-events: none;
 }
 .player-table-wrapper .player-table .tile.highlight {
   animation: highlight-animation 0.7s alternate 2;

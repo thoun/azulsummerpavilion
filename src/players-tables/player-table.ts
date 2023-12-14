@@ -31,7 +31,7 @@ class PlayerTable {
         for (let star=0; star<=6; star++) {
             html += `<div id="player-table-${this.playerId}-star-${star}" class="star star${star}">`;
             for (let space=1; space<=6; space++) {
-                html += `<div id="player-table-${this.playerId}-star-${star}-space-${space}" class="space space${space}"></div>`;
+                html += `<div id="player-table-${this.playerId}-star-${star}-space-${space}" class="space space${space}" style="--number: '${space}'; --rotation: ${240 - space * 60 - (star == 0 ? 3 : star - 4) * 60}deg;"></div>`;
             }
             html += `</div>`;
         }
