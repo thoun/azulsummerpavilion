@@ -98,22 +98,19 @@ class AzulSummerPavilion extends Table {
         
         // Init game statistics
         // (note: statistics used in this file must be defined in your stats.inc.php file)
-        self::initStat('table', 'roundsNumber', 0);
-        self::initStat('table', 'turnsNumber', 0);
-        self::initStat('player', 'turnsNumber', 0);
-        self::initStat('table', 'pointsWallTile', 0);
-        self::initStat('player', 'pointsWallTile', 0);
-        self::initStat('table', 'pointsLossFloorLine', 0);
-        self::initStat('player', 'pointsLossFloorLine', 0);
-        self::initStat('table', 'pointsCompleteLine', 0);
-        self::initStat('player', 'pointsCompleteLine', 0);
-        self::initStat('table', 'pointsCompleteStar', 0);
-        self::initStat('player', 'pointsCompleteStar', 0);
-        self::initStat('table', 'pointsCompleteNumber', 0);
-        self::initStat('player', 'pointsCompleteNumber', 0);
-        self::initStat('table', 'incompleteLinesAtEndRound', 0);
-        self::initStat('player', 'incompleteLinesAtEndRound', 0);
+        self::initStat('table', 'roundsNumber', 0);        
         self::initStat('player', 'firstPlayer', 0);
+
+        foreach(['table', 'player'] as $statType) {
+            foreach(['turnsNumber', 'normalTilesCollected', 'wildTilesCollected',
+            'bonusTilesCollected', 'bonusTile1', 'bonusTile2', 'bonusTile3',
+            'pointsWallTile', 'pointsLossDiscardedTiles', 'pointsLossFirstTile',
+            'pointsCompleteStars', 'pointsCompleteStars0', 'pointsCompleteStars1', 'pointsCompleteStars2', 'pointsCompleteStars3', 'pointsCompleteStars4', 'pointsCompleteStars5', 'pointsCompleteStars6',
+            'pointsCompleteNumbers', 'pointsCompleteNumbers1', 'pointsCompleteNumbers2', 'pointsCompleteNumbers3', 'pointsCompleteNumbers4',
+            ] as $statName) {
+                $this->initStat($statType, $statName, 0);
+            }
+        }
 
         $this->setupTiles();
 
@@ -155,7 +152,6 @@ class AzulSummerPavilion extends Table {
         }
         $result['factories'] = $factories;
 
-        $endRound = false;
         foreach($result['players'] as $playerId => &$player) {
             $player['wall'] = $this->getTilesFromDb($this->tiles->getCardsInLocation('wall'.$playerId));
             $player['playerNo'] = intval($player['playerNo']);
@@ -164,7 +160,6 @@ class AzulSummerPavilion extends Table {
             $player['passed'] = boolval(self::getUniqueValueFromDB("SELECT passed FROM player WHERE player_id = $playerId"));
         }
 
-        $result['endRound'] = $endRound;
         $result['undo'] = $this->allowUndo();
         $result['fastScoring'] = $this->isFastScoring();
         $result['remainingTiles'] = intval($this->tiles->countCardInLocation('deck'));
@@ -217,7 +212,7 @@ class AzulSummerPavilion extends Table {
                         $this->takeTiles($tiles[bga_rand(1, count($tiles)) - 1]->id, true);
                         break;
                     case 'confirmAcquire':
-                        $this->confirmAcquire(true);
+                        $this->applyConfirmTiles(active_player);
                         break;
                     case 'choosePlace':
                         $this->applyPass($active_player);
@@ -235,7 +230,7 @@ class AzulSummerPavilion extends Table {
                         $this->applySelectKeptTiles($active_player, []);
                         break;
                     case 'confirmPass':
-                        $this->confirmPass(true);
+                        $this->applyConfirmPass($active_player);
                         break;
                     default:
                         $this->gamestate->nextState("nextPlayer"); // all player actions got nextPlayer action as a "zombiePass"

@@ -54,36 +54,119 @@ $commonStats = [
         "name" => totranslate("Number of turns"),
         "type" => "int"
     ], 
+    "normalTilesCollected" => [
+        "id" => 12,
+        "name" => totranslate("Normal tiles collected"),
+        "type" => "int"
+    ],
+    "wildTilesCollected" => [
+        "id" => 13,
+        "name" => totranslate("Wild tiles collected"),
+        "type" => "int"
+    ],
+    "bonusTilesCollected" => [
+        "id" => 14,
+        "name" => totranslate("Bonus tiles collected"),
+        "type" => "int"
+    ],
+    "bonusTile1" => [
+        "id" => 16,
+        "name" => totranslate("Bonus tiles with pillars"),
+        "type" => "int"
+    ],
+    "bonusTile2" => [
+        "id" => 17,
+        "name" => totranslate("Bonus tiles with statues"),
+        "type" => "int"
+    ],
+    "bonusTile3" => [
+        "id" => 18,
+        "name" => totranslate("Bonus tiles with windows"),
+        "type" => "int"
+    ],
+
     "pointsWallTile" => [
         "id" => 20,
         "name" => totranslate("Points gained with placed tiles"),
         "type" => "int"
     ], 
-    "pointsLossFloorLine" => [
-        "id" => 21,
-        "name" => totranslate("Points lost with floor line"),
-        "type" => "int"
-    ], 
-    "pointsCompleteLine" => [
-        "id" => 22,
-        "name" => totranslate("Points gained with complete lines"),
-        "type" => "int"
-    ], 
-    "pointsCompleteStar" => [
-        "id" => 23,
-        "name" => totranslate("Points gained with complete columns"),
-        "type" => "int"
-    ], 
-    "pointsCompleteNumber" => [
-        "id" => 24,
-        "name" => totranslate("Points gained with complete color"),
-        "type" => "int"
-    ],
-    "incompleteLinesAtEndRound" => [
+    "pointsLossDiscardedTiles" => [
         "id" => 25,
-        "name" => totranslate("Incomplete lines at the end of rounds"),
+        "name" => totranslate("Points lost with discarded tiles"),
         "type" => "int"
-    ],
+    ], 
+    "pointsLossFirstTile" => [
+        "id" => 26,
+        "name" => totranslate("Points lost with taken First Player tile"),
+        "type" => "int"
+    ], 
+
+    "pointsCompleteStars" => [
+        "id" => 29,
+        "name" => totranslate("Points gained with complete stars"),
+        "type" => "int"
+    ],  
+    "pointsCompleteStars0" => [
+        "id" => 30,
+        "name" => totranslate("Points gained with complete multicolor stars"),
+        "type" => "int"
+    ], 
+    "pointsCompleteStars1" => [
+        "id" => 31,
+        "name" => totranslate("Points gained with complete Fuschia stars"),
+        "type" => "int"
+    ], 
+    "pointsCompleteStars2" => [
+        "id" => 32,
+        "name" => totranslate("Points gained with complete Green stars"),
+        "type" => "int"
+    ], 
+    "pointsCompleteStars3" => [
+        "id" => 33,
+        "name" => totranslate("Points gained with complete Orange stars"),
+        "type" => "int"
+    ], 
+    "pointsCompleteStars4" => [
+        "id" => 34,
+        "name" => totranslate("Points gained with complete Yellow stars"),
+        "type" => "int"
+    ], 
+    "pointsCompleteStars5" => [
+        "id" => 35,
+        "name" => totranslate("Points gained with complete Blue stars"),
+        "type" => "int"
+    ], 
+    "pointsCompleteStars6" => [
+        "id" => 36,
+        "name" => totranslate("Points gained with complete Red stars"),
+        "type" => "int"
+    ], 
+
+    "pointsCompleteNumbers" => [
+        "id" => 40,
+        "name" => totranslate("Points gained with complete numbers"),
+        "type" => "int"
+    ],  
+    "pointsCompleteNumbers1" => [
+        "id" => 41,
+        "name" => totranslate("Points gained with complete numbers 1"),
+        "type" => "int"
+    ], 
+    "pointsCompleteNumbers2" => [
+        "id" => 42,
+        "name" => totranslate("Points gained with complete numbers 2"),
+        "type" => "int"
+    ], 
+    "pointsCompleteNumbers3" => [
+        "id" => 43,
+        "name" => totranslate("Points gained with complete numbers 3"),
+        "type" => "int"
+    ], 
+    "pointsCompleteNumbers4" => [
+        "id" => 44,
+        "name" => totranslate("Points gained with complete numbers 4"),
+        "type" => "int"
+    ], 
 ];
 
 $stats_type = [
@@ -100,7 +183,7 @@ $stats_type = [
     // Statistics existing for each player
     "player" => $commonStats + [
         "firstPlayer" => [
-            "id" => 30,
+            "id" => 60,
             "name" => totranslate("Number of rounds as first player"),
             "type" => "int"   
         ],

@@ -12,7 +12,7 @@ trait DebugUtilTrait {
             return;
         } 
 
-        //$this->setStat(6, 'roundsNumber');
+        $this->setStat(6, 'roundsNumber');
         //$this->debugEmptyFactories();
         //$this->debugRemoveFp();
         //$this->stFillFactories();

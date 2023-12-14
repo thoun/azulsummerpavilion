@@ -17,7 +17,7 @@ function slideToObjectAndAttach(game: AzulSummerPavilionGame, object: HTMLElemen
         const attachToNewParent = () => {
             object.style.top = posY !== undefined ? `${posY}px` : 'unset';
             object.style.left = posX !== undefined ? `${posX}px` : 'unset';
-            object.style.position = (posX !== undefined || posY !== undefined) ? 'absolute' : 'relative';
+            object.style.position = (posX !== undefined || posY !== undefined) ? 'absolute' : 'unset';
             object.style.zIndex = originalZIndex ? ''+originalZIndex : 'unset';
             object.style.transform = '';
             object.style.setProperty('--rotation', `${rotation ?? 0}deg`);

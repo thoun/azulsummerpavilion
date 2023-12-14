@@ -916,7 +916,9 @@ class AzulSummerPavilion implements AzulSummerPavilionGame {
         this.getPlayerTable(playerId).placeTilesOnCorner(keptTiles);
         this.removeTiles(discardedTiles, true);
 
-        // TODO updateScoring -discardedTiles
+        if (discardedTiles.length > 0) {
+            (this as any).displayScoring(`player-hand-${playerId}`, this.getPlayerColor(Number(playerId)), -discardedTiles.length, SCORE_MS);
+        }
     }
 
     notif_cornerToHand(notif: Notif<NotifCornerToHandArgs>) {

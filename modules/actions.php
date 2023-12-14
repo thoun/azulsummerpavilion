@@ -46,14 +46,17 @@ trait ActionTrait {
 
         $additionalWildTile = null;        
         $firstPlayerTokens = [];
+        $selectedNormalTiles = 0;
         $selectedTiles = [];
         $discardedTiles = [];
         $hasFirstPlayer = false;
+        $pointsLossFirstTile = 0;
 
         if (!$isWild) {
             foreach($factoryTiles as $factoryTile) {
                 if ($tile->type == $factoryTile->type) {
                     $selectedTiles[] = $factoryTile;
+                    $selectedNormalTiles++;
                 }
             }
         }
@@ -71,7 +74,7 @@ trait ActionTrait {
 
             if ($hasFirstPlayer) {
                 $selectedTiles[] = $firstPlayerTokens[0];
-                $this->putFirstPlayerTile($playerId, $selectedTiles);
+                $pointsLossFirstTile = $this->putFirstPlayerTile($playerId, $selectedTiles);
             }
         } else {
             foreach($factoryTiles as $factoryTile) {
@@ -93,7 +96,7 @@ trait ActionTrait {
         self::notifyAllPlayers('tilesSelected', $message, [
             'playerId' => $playerId,
             'player_name' => self::getActivePlayerName(),
-            'number' => count($selectedTiles),
+            'number' => $selectedNormalTiles,
             'color' => $this->getColor($tile->type),   
             'wild' => $additionalWildTile != null ? $this->getColor($additionalWildTile->type) : '',   
             'i18n' => ['color'],           
@@ -107,6 +110,9 @@ trait ActionTrait {
 
         $this->setGlobalVariable(UNDO_SELECT, new UndoSelect(
             array_merge($selectedTiles, $discardedTiles, $firstPlayerTokens),
+            $selectedNormalTiles,
+            $additionalWildTile != null,
+            $pointsLossFirstTile,
             $factory, 
             $previousFirstPlayer,
             $previousScore,
@@ -114,17 +120,33 @@ trait ActionTrait {
 
         if ($this->allowUndo()) {
             $this->gamestate->nextState('confirm');
-        } else {
-            $this->gamestate->nextState('nextPlayer');
+        } else {            
+            $this->applyConfirmTiles($playerId);
         }
     }
 
-    function confirmAcquire($skipActionCheck = false) {
-        if (!$skipActionCheck) {
-            $this->checkAction('confirmAcquire');
+    function confirmAcquire() {
+        $this->checkAction('confirmAcquire');
+
+        $playerId = intval(self::getActivePlayerId());
+        $this->applyConfirmTiles($playerId);
+    }
+
+    function applyConfirmTiles(int $playerId) {
+        $undo = $this->getGlobalVariable(UNDO_SELECT);
+        self::incStat($undo->normalTiles, 'normalTilesCollected');
+        self::incStat($undo->normalTiles, 'normalTilesCollected', $playerId);
+        if ($undo->wildTile) {
+            self::incStat(1, 'wildTilesCollected');
+            self::incStat(1, 'wildTilesCollected', $playerId);
+        }
+        if ($undo->pointsLossFirstTile > 0) {
+            self::incStat($undo->pointsLossFirstTile, 'pointsLossFirstTile');
+            self::incStat($undo->pointsLossFirstTile, 'pointsLossFirstTile', $playerId);
+            
         }
         
-        $this->gamestate->nextState('nextPlayer');
+        $this->gamestate->jumpToState(ST_NEXT_PLAYER_ACQUIRE);
     }
 
     function undoTakeTiles() {
@@ -261,10 +283,7 @@ trait ActionTrait {
 
         $this->incPlayerScore($playerId, $points);
 
-        self::incStat($points, 'pointsCompleteLine'); // TODO
-        self::incStat($points, 'pointsCompleteLine', $playerId); // TODO
-
-        $this->setGlobalVariable(UNDO_PLACE, new UndoPlace($tiles, $previousScore));
+        $this->setGlobalVariable(UNDO_PLACE, new UndoPlace($tiles, $previousScore, $points));
 
         $additionalTiles = $this->additionalTilesDetail($playerId, $placedTile);
         if ($additionalTiles['count'] > 0) {        
@@ -276,7 +295,7 @@ trait ActionTrait {
         } else if ($this->allowUndo()) {
             $this->gamestate->jumpToState(ST_PLAYER_CONFIRM_PLAY);
         } else {
-            $this->gamestate->jumpToState(ST_NEXT_PLAYER_PLAY);
+            $this->applyConfirmPlay($playerId);
         }
     }
 
@@ -284,15 +303,44 @@ trait ActionTrait {
         if (!$skipActionCheck) {
             $this->checkAction('confirmPlay');
         }
-        
+
+        $playerId = intval(self::getActivePlayerId());   
+     
+        $this->applyConfirmPlay($playerId);
+    }
+
+    function applyConfirmPlay(int $playerId) {
+        $undo = $this->getGlobalVariable(UNDO_PLACE);
+        $count = count($undo->supplyTiles);
+        if ($count > 0) {
+            self::incStat($count, 'bonusTilesCollected');
+            self::incStat($count, 'bonusTilesCollected', $playerId);
+            self::incStat($count, 'bonusTile'.$count);
+            self::incStat($count, 'bonusTile'.$count, $playerId);
+        }
+
+        self::incStat($undo->points, 'pointsWallTile');
+        self::incStat($undo->points, 'pointsWallTile', $playerId);
+
         $this->gamestate->jumpToState(ST_NEXT_PLAYER_PLAY);
     }
 
-    function confirmPass($skipActionCheck = false) {
-        if (!$skipActionCheck) {
-            $this->checkAction('confirmPass');
+    function confirmPass() {
+        $this->checkAction('confirmPass');
+
+        $playerId = intval(self::getActivePlayerId());   
+
+        $this->applyConfirmPass($playerId);
+    }
+
+    function applyConfirmPass(int $playerId) {
+        $undo = $this->getGlobalVariable(UNDO_PLACE);
+        $count = $undo->points;
+        if ($count > 0) {
+            self::incStat($count, 'pointsLossDiscardedTiles');
+            self::incStat($count, 'pointsLossDiscardedTiles', $playerId);
         }
-        
+
         $this->gamestate->jumpToState(ST_NEXT_PLAYER_PLAY);
     }
     
@@ -443,11 +491,16 @@ trait ActionTrait {
             ]);
         }
 
+        if ($discardedNumber > 0) {  
+            $this->decPlayerScore($playerId, $discardedNumber); 
+        }
+
+        $this->setGlobalVariable(UNDO_PLACE, new UndoPlace($hand, $previousScore, count($discardedTiles)));
+
         if ($this->allowUndo() && count($ids) > 0) {
-            $this->setGlobalVariable(UNDO_PLACE, new UndoPlace($hand, $previousScore));
             $this->gamestate->jumpToState(ST_PLAYER_CONFIRM_PASS);
         } else {
-            $this->gamestate->jumpToState(ST_NEXT_PLAYER_PLAY);
+            $this->applyConfirmPass($playerId);
         }
     }
 
@@ -500,7 +553,7 @@ trait ActionTrait {
         if ($this->allowUndo()) {
             $this->gamestate->jumpToState(ST_PLAYER_CONFIRM_PLAY);
         } else {
-            $this->gamestate->jumpToState(ST_NEXT_PLAYER_PLAY);
+            $this->applyConfirmPlay($playerId);
         }
     }
 

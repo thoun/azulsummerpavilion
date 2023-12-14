@@ -391,6 +391,7 @@
 .player-table-wrapper .player-table .corner .tile {
   margin-left: -30px;
   margin-top: -31px;
+  position: absolute !important;
 }
 .player-table-wrapper .player-table .star {
   position: absolute;

@@ -157,21 +157,20 @@ trait UtilTrait {
         $points = count($selectedTiles);
         $this->decPlayerScore($playerId, $points);
 
-        self::incStat($points, 'pointsLossFloorLine'); // TODO
-        self::incStat($points, 'pointsLossFloorLine', $playerId);
-
         self::notifyAllPlayers('firstPlayerToken', clienttranslate('${player_name} took First Player tile and will start next round, losing ${points} points for taking ${points} tiles'), [
             'playerId' => $playerId,
             'player_name' => $this->getPlayerName($playerId),
             'points' => $points, // for logs
             'decScore' => $points,
         ]);
+
+        return $points;
     }
 
     function getColor(int $type) {
         $colorName = null;
         switch ($type) {
-            case 0: $colorName = clienttranslate('All colors'); break;
+            case 0: $colorName = clienttranslate('Multicolor'); break; // for log about complete stars
             case 1: $colorName = clienttranslate('Fuschia'); break;
             case 2: $colorName = clienttranslate('Green'); break;
             case 3: $colorName = clienttranslate('Orange'); break;
@@ -209,9 +208,11 @@ trait UtilTrait {
                 $scoresNotif[$playerId] = $obj;
 
                 $this->incPlayerScore($playerId, $obj->points);
-
-                self::incStat($obj->points, 'pointsCompleteStar');
-                self::incStat($obj->points, 'pointsCompleteStar', $playerId);
+                
+                self::incStat($obj->points, 'pointsCompleteStars');
+                self::incStat($obj->points, 'pointsCompleteStars', $playerId);
+                self::incStat($obj->points, 'pointsCompleteStars'.$color);
+                self::incStat($obj->points, 'pointsCompleteStars'.$color, $playerId);
             }
         }
 
@@ -256,10 +257,12 @@ trait UtilTrait {
 
                 $scoresNotif[$playerId] = $obj;
 
-                $this->incPlayerScore($playerId, $obj->points);
-
-                self::incStat($obj->points, 'pointsCompleteNumber');
-                self::incStat($obj->points, 'pointsCompleteNumber', $playerId);
+                $this->incPlayerScore($playerId, $obj->points);  
+                
+                self::incStat($obj->points, 'pointsCompleteNumbers');
+                self::incStat($obj->points, 'pointsCompleteNumbers', $playerId);
+                self::incStat($obj->points, 'pointsCompleteNumbers'.$number);
+                self::incStat($obj->points, 'pointsCompleteNumbers'.$number, $playerId);
             }
         }
 

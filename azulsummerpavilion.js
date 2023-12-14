@@ -626,7 +626,7 @@ function slideToObjectAndAttach(game, object, destinationId, posX, posY, rotatio
         var attachToNewParent = function () {
             object.style.top = posY !== undefined ? "".concat(posY, "px") : 'unset';
             object.style.left = posX !== undefined ? "".concat(posX, "px") : 'unset';
-            object.style.position = (posX !== undefined || posY !== undefined) ? 'absolute' : 'relative';
+            object.style.position = (posX !== undefined || posY !== undefined) ? 'absolute' : 'unset';
             object.style.zIndex = originalZIndex ? '' + originalZIndex : 'unset';
             object.style.transform = '';
             object.style.setProperty('--rotation', "".concat(rotation !== null && rotation !== void 0 ? rotation : 0, "deg"));
@@ -1912,7 +1912,9 @@ var AzulSummerPavilion = /** @class */ (function () {
         var _a = notif.args, playerId = _a.playerId, keptTiles = _a.keptTiles, discardedTiles = _a.discardedTiles;
         this.getPlayerTable(playerId).placeTilesOnCorner(keptTiles);
         this.removeTiles(discardedTiles, true);
-        // TODO updateScoring -discardedTiles
+        if (discardedTiles.length > 0) {
+            this.displayScoring("player-hand-".concat(playerId), this.getPlayerColor(Number(playerId)), -discardedTiles.length, SCORE_MS);
+        }
     };
     AzulSummerPavilion.prototype.notif_cornerToHand = function (notif) {
         var _a = notif.args, playerId = _a.playerId, tiles = _a.tiles;
