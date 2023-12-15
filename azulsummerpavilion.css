@@ -73,10 +73,9 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 20px;
 }
-#factories-and-scoring-board.play {
-  flex-direction: column-reverse;
+#factories-and-scoring-board.play #factories {
+  display: none;
 }
 
 #factories {
