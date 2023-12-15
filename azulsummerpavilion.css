@@ -652,16 +652,8 @@
   display: none;
 }
 
-html {
-  background: url("img/background.jpg") #fff8f0;
-  background-repeat: repeat;
-}
-html.background2 {
-  background: url("img/background2.jpg") #00587a;
-}
-
-.mode_3d #game_play_area_background {
-  background: url("img/background.jpg") #fff8f0;
+html, .mode_3d #game_play_area_background {
+  background: url("img/background.jpg") #fbefe2;
   background-repeat: repeat;
 }
 

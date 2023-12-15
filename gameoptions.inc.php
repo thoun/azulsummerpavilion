@@ -89,16 +89,6 @@ $game_preferences = [
         'default' => 1
     ],
 
-    202 => [ // TODO !
-        'name' => totranslate('Dark background'),
-        'needReload' => false,
-        'values' => [
-            1 => [ 'name' => totranslate('Disabled')],
-            2 => [ 'name' => totranslate('Enabled')],
-        ],
-        'default' => 1
-    ],
-
     203 => [ // TODO !
         'name' => totranslate('Add pattern for red tile (color-blind help)'),
         'needReload' => false,

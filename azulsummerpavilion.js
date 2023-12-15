@@ -1478,10 +1478,6 @@ var AzulSummerPavilion = /** @class */ (function () {
             case 201:
                 dojo.toggleClass('table', 'disabled-shimmer', prefValue == 2);
                 break;
-            case 202:
-                dojo.toggleClass(document.getElementsByTagName('html')[0], 'background2', prefValue == 2);
-                this.zoomManager.setZoomControlsColor(prefValue == 2 ? 'white' : 'black');
-                break;
             case 203:
                 dojo.toggleClass(document.getElementsByTagName('html')[0], 'cb', prefValue == 1);
                 break;

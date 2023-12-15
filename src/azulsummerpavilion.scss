@@ -13,19 +13,9 @@ $tile6-color: #ef3340;
 @import 'playerboards';
 @import 'tile';
 
-html {
-    background: url('img/background.jpg') #fff8f0;
+html, .mode_3d #game_play_area_background {
+    background: url('img/background.jpg') #fbefe2;
     background-repeat: repeat;
-
-
-    &.background2 {  
-      background: url('img/background2.jpg') #00587a;
-    }
-}
-
-.mode_3d #game_play_area_background {
-  background: url('img/background.jpg') #fff8f0;
-  background-repeat: repeat;
 }
 
 @font-face {
