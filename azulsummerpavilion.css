@@ -427,6 +427,8 @@
   height: 63px;
   width: 63px;
   pointer-events: none;
+  background-position: center;
+  background-repeat: no-repeat;
   /*.ghost {
       opacity: 0.5;
   }*/
@@ -513,6 +515,19 @@
     background: rgba(255, 255, 255, 0.2);
   }
 }
+.cb .space.cb-tile1 {
+  background-image: url("img/fuschia.svg");
+  background-size: 70%;
+}
+.cb .space.cb-tile4 {
+  background-image: url("img/yellow.svg");
+  background-size: 50%;
+}
+.cb .space.cb-tile6 {
+  background-image: url("img/red.svg");
+  background-size: 60%;
+}
+
 .player_board_content .tile {
   position: relative;
   margin: 5px;
@@ -615,6 +630,19 @@
   100% {
     transform: translateX(200%);
   }
+}
+
+.cb .tile.tile1::before {
+  background-image: url("img/fuschia.svg");
+  background-size: 80%;
+}
+.cb .tile.tile4::before {
+  background-image: url("img/yellow.svg");
+  background-size: 70%;
+}
+.cb .tile.tile6::before {
+  background-image: url("img/red.svg");
+  background-size: 80%;
 }
 
 @keyframes selected {

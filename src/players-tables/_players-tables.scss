@@ -183,6 +183,8 @@
             height: 63px;
             width: 63px;
             pointer-events: none;
+            background-position: center;
+            background-repeat: no-repeat;
 
             &.selectable {
                 &::before {
@@ -265,5 +267,20 @@
     to {
         border-color: rgb(90, 0, 0);
         background: #FFFFFF33;
+    }
+}
+
+.cb {
+    .space.cb-tile1 {
+        background-image: url('img/fuschia.svg');
+        background-size: 70%;
+    }
+    .space.cb-tile4 {
+        background-image: url('img/yellow.svg');
+        background-size: 50%;
+    }
+    .space.cb-tile6 {
+        background-image: url('img/red.svg');
+        background-size: 60%;
     }
 }

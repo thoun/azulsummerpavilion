@@ -1,5 +1,11 @@
 const HAND_CENTER = 327;
 
+const STAR_TO_PLAIN_COLOR = {
+    1: 1,
+    3: 6,
+    5: 4,
+};
+
 class PlayerTable {
     public playerId: number;
 
@@ -10,11 +16,12 @@ class PlayerTable {
         this.playerId = Number(player.id);
 
         const nameClass = player.name.indexOf(' ') !== -1 ? 'with-space' : 'without-space';
+        const variant = this.game.isVariant();
 
         let html = `<div id="player-table-wrapper-${this.playerId}" class="player-table-wrapper">
         <div id="player-hand-${this.playerId}" class="player-hand">
         </div>
-        <div id="player-table-${this.playerId}" class="player-table ${this.game.isVariant() ? 'variant' : ''}" style="--player-color: #${player.color};">
+        <div id="player-table-${this.playerId}" class="player-table ${variant ? 'variant' : ''}" style="--player-color: #${player.color};">
             <div class="player-name-box">
                 <div class="player-name-wrapper shift">
                     <div id="player-name-shift-${this.playerId}" class="player-name color ${game.isDefaultFont() ? 'standard' : 'azul'} ${nameClass}">${player.name}</div>
@@ -29,9 +36,13 @@ class PlayerTable {
             html += `<div id="player-table-${this.playerId}-corner-${corner}" class="corner corner${corner}"></div>`;
         }
         for (let star=0; star<=6; star++) {
+            let cbTileColor = '';
+            if (!variant && STAR_TO_PLAIN_COLOR[star]) {
+                cbTileColor = `cb-tile${STAR_TO_PLAIN_COLOR[star]}`;
+            }
             html += `<div id="player-table-${this.playerId}-star-${star}" class="star star${star}">`;
             for (let space=1; space<=6; space++) {
-                html += `<div id="player-table-${this.playerId}-star-${star}-space-${space}" class="space space${space}" style="--number: '${space}'; --rotation: ${240 - space * 60 - (star == 0 ? 3 : star - 4) * 60}deg;"></div>`;
+                html += `<div id="player-table-${this.playerId}-star-${star}-space-${space}" class="space space${space} ${cbTileColor}" style="--number: '${space}'; --rotation: ${240 - space * 60 - (star == 0 ? 3 : star - 4) * 60}deg;"></div>`;
             }
             html += `</div>`;
         }

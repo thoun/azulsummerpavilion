@@ -103,6 +103,21 @@
     }
 }
 
+.cb {
+    .tile.tile1::before {
+        background-image: url('img/fuschia.svg');
+        background-size: 80%;
+    }
+    .tile.tile4::before {
+        background-image: url('img/yellow.svg');
+        background-size: 70%;
+    }
+    .tile.tile6::before {
+        background-image: url('img/red.svg');
+        background-size: 80%;
+    }
+}
+
 @keyframes selected {
     0% {
         outline: 6px solid white;
