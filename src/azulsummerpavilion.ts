@@ -144,8 +144,6 @@ class AzulSummerPavilion implements AzulSummerPavilionGame {
     }
 
     private onEnteringChooseTile(args: EnteringChooseTileArgs) {
-        document.getElementById('factories-and-scoring-board').classList.remove('play');
-
         if ((this as any).isCurrentPlayerActive()) {
             this.factories.wildColor = args.wildColor;
             dojo.addClass('factories', 'selectable');
@@ -826,7 +824,9 @@ class AzulSummerPavilion implements AzulSummerPavilionGame {
         });
     }
 
-    notif_factoriesFilled(notif: Notif<NotifFactoriesFilledArgs>) {
+    notif_factoriesFilled(notif: Notif<NotifFactoriesFilledArgs>) {        
+        document.getElementById('factories-and-scoring-board').classList.remove('play');
+
         this.factories.fillFactories(notif.args.factories);
         this.factories.setRemainingTiles(notif.args.remainingTiles);
         this.scoringBoard.setRoundNumber(notif.args.roundNumber);

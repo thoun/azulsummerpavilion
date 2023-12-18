@@ -25,6 +25,8 @@ trait StateTrait {
             $factories[$factory] = $this->getTilesFromDb($this->tiles->pickCardsForLocation(4, 'deck', 'factory', $factory));
         }
 
+        $this->gamestate->changeActivePlayer(self::getGameStateValue(FIRST_PLAYER_FOR_NEXT_TURN));
+
         self::incStat(1, 'roundsNumber');
         self::incStat(1, 'firstPlayer', intval(self::getGameStateValue(FIRST_PLAYER_FOR_NEXT_TURN)));
 

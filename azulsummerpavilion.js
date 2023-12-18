@@ -1255,7 +1255,6 @@ var AzulSummerPavilion = /** @class */ (function () {
         }
     };
     AzulSummerPavilion.prototype.onEnteringChooseTile = function (args) {
-        document.getElementById('factories-and-scoring-board').classList.remove('play');
         if (this.isCurrentPlayerActive()) {
             this.factories.wildColor = args.wildColor;
             dojo.addClass('factories', 'selectable');
@@ -1849,6 +1848,7 @@ var AzulSummerPavilion = /** @class */ (function () {
         });
     };
     AzulSummerPavilion.prototype.notif_factoriesFilled = function (notif) {
+        document.getElementById('factories-and-scoring-board').classList.remove('play');
         this.factories.fillFactories(notif.args.factories);
         this.factories.setRemainingTiles(notif.args.remainingTiles);
         this.scoringBoard.setRoundNumber(notif.args.roundNumber);
