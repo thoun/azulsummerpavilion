@@ -76,7 +76,7 @@ class PlayerTable {
     }
 
     public placeTilesOnHand(tiles: Tile[]) {
-        tiles.forEach(tile => this.game.placeTile(tile, `player-hand-${this.playerId}`));
+        Promise.all(tiles.map(tile => this.game.placeTile(tile, `player-hand-${this.playerId}`))).then(() => this.handCountChanged());
         this.handCountChanged();
     }
 

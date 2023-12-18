@@ -1126,7 +1126,7 @@ var PlayerTable = /** @class */ (function () {
     };
     PlayerTable.prototype.placeTilesOnHand = function (tiles) {
         var _this = this;
-        tiles.forEach(function (tile) { return _this.game.placeTile(tile, "player-hand-".concat(_this.playerId)); });
+        Promise.all(tiles.map(function (tile) { return _this.game.placeTile(tile, "player-hand-".concat(_this.playerId)); })).then(function () { return _this.handCountChanged(); });
         this.handCountChanged();
     };
     PlayerTable.prototype.placeTilesOnCorner = function (tiles) {
