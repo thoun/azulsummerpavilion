@@ -233,11 +233,12 @@
                 border-radius: 50%;
                 background: #FFFFFF66;
             }*/
-            .scoring-tile {
-                transform: rotate(var(--rotation));
-                z-index: 30;
-                pointer-events: none;
-            }
+        }
+
+        .scoring-star, .scoring-tile {
+            transform: rotate(var(--rotation));
+            z-index: 30;
+            pointer-events: none;
         }
 
         .tile {

@@ -1092,7 +1092,7 @@ var PlayerTable = /** @class */ (function () {
             if (!variant && STAR_TO_PLAIN_COLOR[star]) {
                 cbTileColor = "cb-tile".concat(STAR_TO_PLAIN_COLOR[star]);
             }
-            html += "<div id=\"player-table-".concat(this.playerId, "-star-").concat(star, "\" class=\"star star").concat(star, "\">");
+            html += "<div id=\"player-table-".concat(this.playerId, "-star-").concat(star, "\" class=\"star star").concat(star, "\" style=\" --rotation: ").concat((star == 0 ? 3 : star - 4) * -60, "deg;\">");
             for (var space = 1; space <= 6; space++) {
                 html += "<div id=\"player-table-".concat(this.playerId, "-star-").concat(star, "-space-").concat(space, "\" class=\"space space").concat(space, " ").concat(cbTileColor, "\" style=\"--number: '").concat(space, "'; --rotation: ").concat(240 - space * 60 - (star == 0 ? 3 : star - 4) * 60, "deg;\"></div>");
             }
@@ -1809,7 +1809,10 @@ var AzulSummerPavilion = /** @class */ (function () {
         this.displayScoring("tile".concat(tile.id, "-scoring"), this.getPlayerColor(Number(playerId)), points, SCORE_MS);
     };
     AzulSummerPavilion.prototype.displayScoringOnStar = function (star, playerId, points) {
-        this.displayScoring("player-table-".concat(playerId, "-star-").concat(star), this.getPlayerColor(Number(playerId)), points, SCORE_MS);
+        if (!document.getElementById("player-table-".concat(playerId, "-star-").concat(star, "-scoring"))) {
+            dojo.place("<div id=\"player-table-".concat(playerId, "-star-").concat(star, "-scoring\" class=\"scoring-star\"></div>"), "player-table-".concat(playerId, "-star-").concat(star));
+        }
+        this.displayScoring("player-table-".concat(playerId, "-star-").concat(star, "-scoring"), this.getPlayerColor(Number(playerId)), points, SCORE_MS);
     };
     ///////////////////////////////////////////////////
     //// Reaction to cometD notifications
@@ -1835,7 +1838,6 @@ var AzulSummerPavilion = /** @class */ (function () {
             ['undoPlayTile', ANIMATION_MS],
             ['placeTileOnWall', ANIMATION_MS],
             ['putToCorner', ANIMATION_MS],
-            ['cornerToHand', 1],
             ['cornerToHand', 1],
             ['endScore', this.gamedatas.fastScoring ? SCORE_MS : SLOW_SCORE_MS],
             ['firstPlayerToken', 1],

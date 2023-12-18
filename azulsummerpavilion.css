@@ -487,7 +487,7 @@
   animation: selectable-space 1s alternate-reverse infinite ease-in-out;
   transform: rotate(45deg) skew(15deg, 15deg);
 }
-.player-table-wrapper .player-table .space .scoring-tile {
+.player-table-wrapper .player-table .scoring-star, .player-table-wrapper .player-table .scoring-tile {
   transform: rotate(var(--rotation));
   z-index: 30;
   pointer-events: none;
@@ -675,7 +675,7 @@
   z-index: 100;
 }
 
-.hide-scoring-tile .scoring-tile {
+.hide-scoring-tile .scoring-star, .hide-scoring-tile .scoring-tile {
   display: none;
 }
 

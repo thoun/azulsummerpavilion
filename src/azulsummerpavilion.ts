@@ -782,7 +782,10 @@ class AzulSummerPavilion implements AzulSummerPavilionGame {
     }
 
     private displayScoringOnStar(star: number, playerId: string | number, points: number) {
-        (this as any).displayScoring(`player-table-${playerId}-star-${star}`, this.getPlayerColor(Number(playerId)), points, SCORE_MS);
+        if (!document.getElementById(`player-table-${playerId}-star-${star}-scoring`)) {
+            dojo.place(`<div id="player-table-${playerId}-star-${star}-scoring" class="scoring-star"></div>`, `player-table-${playerId}-star-${star}`);
+        }
+        (this as any).displayScoring(`player-table-${playerId}-star-${star}-scoring`, this.getPlayerColor(Number(playerId)), points, SCORE_MS);
     }
 
     ///////////////////////////////////////////////////
@@ -810,7 +813,6 @@ class AzulSummerPavilion implements AzulSummerPavilionGame {
             ['undoPlayTile', ANIMATION_MS],
             ['placeTileOnWall', ANIMATION_MS],
             ['putToCorner', ANIMATION_MS],
-            ['cornerToHand', 1],
             ['cornerToHand', 1],
             ['endScore', this.gamedatas.fastScoring ? SCORE_MS : SLOW_SCORE_MS],
             ['firstPlayerToken', 1],
