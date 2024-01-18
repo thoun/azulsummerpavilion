@@ -88,16 +88,16 @@ $gameinfos = [
     'language_dependency' => false,
     
     // Complexity of the game, from 0 (extremely simple) to 5 (extremely complex)
-    'complexity' => 1,    
+    'complexity' => 2,    
     
     // Luck of the game, from 0 (absolutely no luck in this game) to 5 (totally luck driven)
-    'luck' => 3,    
+    'luck' => 2,    
     
     // Strategy of the game, from 0 (no strategy can be setup) to 5 (totally based on strategy)
     'strategy' => 3,    
     
     // Diplomacy of the game, from 0 (no interaction in this game) to 5 (totally based on interaction and discussion between players)
-    'diplomacy' => 0,    
+    'diplomacy' => 2,    
     
     // Colors attributed to players
     'player_colors' => ['ff0000', '008000', '0000ff', 'ffa500', '000000', 'e94190', '982fff', '72c3b1', 'f07f16', 'bdd002', '7b7b7b'],
@@ -132,9 +132,9 @@ $gameinfos = [
     // Each paragraph must be wrapped with totranslate() for translation and should not contain html (plain text without formatting).
     // A good length for this text is between 100 and 150 words (about 6 to 9 lines on a standard display)
     'presentation' => [
-        totranslate("Introduced by the Moors, azulejos (originally white and blue ceramic tiles) were fully embraced by the Portuguese when their king Manuel I, on a visit to the Alhambra palace in Southern Spain, was mesmerized by the stunning beauty of the Moorish decorative tiles. The king, awestruck by the interior beauty of the Alhambra, immediately ordered that his own palace in Portugal be decorated with similar wall tiles. As a tile-laying artist, you have been challenged to embellish the walls of the Royal Palace of Evora."),
-        totranslate("In the game Azul, players take turns drafting colored tiles from suppliers to their player board. Later in the round, players score points based on how they've placed their tiles to decorate the palace. Extra points are scored for specific patterns and completing sets; wasted supplies harm the player's score. The player with the most points at the end of the game wins."),
-    ],
+        totranslate("At the turn of the 16th Century, King Manuel I commissioned Portugal's greatest artisans to construct grandiose buildings. After completing the Palaces of Evora and Sintra, the king sought to build a summer pavilion to honor the most famous members of the royal family. This construction was intended for the most talented artisans — whose skills meet the splendor that the royal family deserves. Sadly, King Manuel I died before construction ever began."),
+        totranslate("In Azul: Summer Pavilion, players return to Portugal to accomplish the task that never began. As a master artisan, you must use the finest materials to create the summer pavilion while carefully avoiding wasting supplies. Only the best will rise to the challenge to honor the Portuguese royal family."),
+    ],    
     
     // Games categories
     //  You can attribute a maximum of FIVE "tags" for your game.
