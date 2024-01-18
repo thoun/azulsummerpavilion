@@ -610,7 +610,7 @@ var ZoomManager = /** @class */ (function () {
     };
     return ZoomManager;
 }());
-function slideToObjectAndAttach(game, object, destinationId, posX, posY, rotation) {
+function slideToObjectAndAttach(game, object, destinationId, posX, posY, rotation, placeInParent) {
     if (rotation === void 0) { rotation = 0; }
     var destination = document.getElementById(destinationId);
     if (destination.contains(object)) {
@@ -631,7 +631,12 @@ function slideToObjectAndAttach(game, object, destinationId, posX, posY, rotatio
             object.style.transform = '';
             object.style.setProperty('--rotation', "".concat(rotation !== null && rotation !== void 0 ? rotation : 0, "deg"));
             object.style.transition = null;
-            destination.appendChild(object);
+            if (placeInParent) {
+                placeInParent(object, destination);
+            }
+            else {
+                destination.appendChild(object);
+            }
         };
         if (document.visibilityState === 'hidden' || game.instantaneousMode) {
             // if tab is not visible, we skip animation (else they could be delayed or cancelled by browser)
@@ -1126,7 +1131,23 @@ var PlayerTable = /** @class */ (function () {
     };
     PlayerTable.prototype.placeTilesOnHand = function (tiles) {
         var _this = this;
-        Promise.all(tiles.map(function (tile) { return _this.game.placeTile(tile, "player-hand-".concat(_this.playerId)); })).then(function () { return _this.handCountChanged(); });
+        var placeInHand = function (tileDiv, handDiv) {
+            var tileType = Number(tileDiv.dataset.type);
+            var newIndex = 0;
+            var handTiles = Array.from(handDiv.querySelectorAll('.tile'));
+            handTiles.forEach(function (handTileDiv, index) {
+                if (Number(handTileDiv.dataset.type) < tileType) {
+                    newIndex = index + 1;
+                }
+            });
+            if (newIndex >= handTiles.length) {
+                handDiv.appendChild(tileDiv);
+            }
+            else {
+                handDiv.insertBefore(tileDiv, handDiv.children[newIndex]);
+            }
+        };
+        Promise.all(tiles.map(function (tile) { return _this.game.placeTile(tile, "player-hand-".concat(_this.playerId), undefined, undefined, undefined, placeInHand); })).then(function () { return _this.handCountChanged(); });
         this.handCountChanged();
     };
     PlayerTable.prototype.placeTilesOnCorner = function (tiles) {
@@ -1583,17 +1604,34 @@ var AzulSummerPavilion = /** @class */ (function () {
         var _a;
         (_a = this.scoreCtrl[playerId]) === null || _a === void 0 ? void 0 : _a.toValue(score);
     };
-    AzulSummerPavilion.prototype.placeTile = function (tile, destinationId, left, top, rotation) {
+    AzulSummerPavilion.prototype.placeTile = function (tile, destinationId, left, top, rotation, placeInParent) {
         var _this = this;
         //this.removeTile(tile);
         //dojo.place(`<div id="tile${tile.id}" class="tile tile${tile.type}" style="left: ${left}px; top: ${top}px;"></div>`, destinationId);
         var tileDiv = document.getElementById("tile".concat(tile.id));
         if (tileDiv) {
-            return slideToObjectAndAttach(this, tileDiv, destinationId, left, top, rotation);
+            return slideToObjectAndAttach(this, tileDiv, destinationId, left, top, rotation, placeInParent);
         }
         else {
-            dojo.place("<div id=\"tile".concat(tile.id, "\" class=\"tile tile").concat(tile.type, "\" data-id=\"").concat(tile.id, "\" data-type=\"").concat(tile.type, "\" style=\"").concat(left !== undefined ? "left: ".concat(left, "px;") : '').concat(top !== undefined ? "top: ".concat(top, "px;") : '', "\" data-rotation=\"").concat(rotation !== null && rotation !== void 0 ? rotation : 0, "\"></div>"), destinationId);
-            var newTileDiv = document.getElementById("tile".concat(tile.id));
+            var destination = document.getElementById(destinationId);
+            var newTileDiv = document.createElement('div');
+            newTileDiv.id = "tile".concat(tile.id);
+            newTileDiv.classList.add("tile", "tile".concat(tile.type));
+            newTileDiv.dataset.id = "".concat(tile.id);
+            newTileDiv.dataset.type = "".concat(tile.type);
+            newTileDiv.dataset.rotation = "".concat(rotation !== null && rotation !== void 0 ? rotation : 0);
+            if (left !== undefined) {
+                newTileDiv.style.left = "".concat(left, "px");
+            }
+            if (top !== undefined) {
+                newTileDiv.style.top = "".concat(top, "px");
+            }
+            if (placeInParent) {
+                placeInParent(newTileDiv, destination);
+            }
+            else {
+                destination.appendChild(newTileDiv);
+            }
             newTileDiv.style.setProperty('--rotation', "".concat(rotation !== null && rotation !== void 0 ? rotation : 0, "deg"));
             newTileDiv.addEventListener('click', function () {
                 if (tile.type > 0) {

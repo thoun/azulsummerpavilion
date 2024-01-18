@@ -57,7 +57,7 @@ interface AzulSummerPavilionGame extends Game {
     selectPlace(star: number, space: number): void;
     removeTile(tile: Tile): void;
     removeTiles(tiles: Tile[]): void;
-    placeTile(tile: Tile, destinationId: string, left?: number, top?: number, rotation?: number): Promise<boolean>;
+    placeTile(tile: Tile, destinationId: string, left?: number, top?: number, rotation?: number, placeInParent?: (elem, parent) => void): Promise<boolean>;
 }
 
 interface EnteringChooseTileArgs {

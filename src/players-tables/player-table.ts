@@ -76,7 +76,24 @@ class PlayerTable {
     }
 
     public placeTilesOnHand(tiles: Tile[]) {
-        Promise.all(tiles.map(tile => this.game.placeTile(tile, `player-hand-${this.playerId}`))).then(() => this.handCountChanged());
+        const placeInHand = (tileDiv: HTMLDivElement, handDiv: HTMLDivElement): void => {
+            const tileType = Number(tileDiv.dataset.type);
+            let newIndex = 0;
+            const handTiles = Array.from(handDiv.querySelectorAll('.tile')) as HTMLDivElement[];
+            handTiles.forEach((handTileDiv, index) => {
+                if (Number(handTileDiv.dataset.type) < tileType) {
+                    newIndex = index + 1;
+                }
+            });
+            
+            if (newIndex >= handTiles.length) {
+                handDiv.appendChild(tileDiv);
+            } else {
+                handDiv.insertBefore(tileDiv, handDiv.children[newIndex]);
+            }
+        };
+
+        Promise.all(tiles.map(tile => this.game.placeTile(tile, `player-hand-${this.playerId}`, undefined, undefined, undefined, placeInHand))).then(() => this.handCountChanged());
         this.handCountChanged();
     }
 

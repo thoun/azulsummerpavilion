@@ -1,4 +1,4 @@
-function slideToObjectAndAttach(game: AzulSummerPavilionGame, object: HTMLElement, destinationId: string, posX?: number, posY?: number, rotation: number = 0): Promise<boolean> {
+function slideToObjectAndAttach(game: AzulSummerPavilionGame, object: HTMLElement, destinationId: string, posX?: number, posY?: number, rotation: number = 0, placeInParent?: (elem, parent) => void): Promise<boolean> {
     const destination = document.getElementById(destinationId);
     if (destination.contains(object)) {
         return Promise.resolve(true);
@@ -22,7 +22,11 @@ function slideToObjectAndAttach(game: AzulSummerPavilionGame, object: HTMLElemen
             object.style.transform = '';
             object.style.setProperty('--rotation', `${rotation ?? 0}deg`);
             object.style.transition = null;
-            destination.appendChild(object);
+            if (placeInParent) {
+                placeInParent(object, destination);
+            } else {
+                destination.appendChild(object);
+            }
         }
 
         if (document.visibilityState === 'hidden' || (game as any).instantaneousMode) {

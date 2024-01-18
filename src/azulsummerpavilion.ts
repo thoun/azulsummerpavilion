@@ -515,15 +515,33 @@ class AzulSummerPavilion implements AzulSummerPavilionGame {
          (this as any).scoreCtrl[playerId]?.toValue(score);
     }
 
-    public placeTile(tile: Tile, destinationId: string, left?: number, top?: number, rotation?: number): Promise<boolean> {
+    public placeTile(tile: Tile, destinationId: string, left?: number, top?: number, rotation?: number, placeInParent?: (elem, parent) => void): Promise<boolean> {
         //this.removeTile(tile);
         //dojo.place(`<div id="tile${tile.id}" class="tile tile${tile.type}" style="left: ${left}px; top: ${top}px;"></div>`, destinationId);
         const tileDiv = document.getElementById(`tile${tile.id}`);
         if (tileDiv) {
-            return slideToObjectAndAttach(this, tileDiv, destinationId, left, top, rotation);
+            return slideToObjectAndAttach(this, tileDiv, destinationId, left, top, rotation, placeInParent);
         } else {
-            dojo.place(`<div id="tile${tile.id}" class="tile tile${tile.type}" data-id="${tile.id}" data-type="${tile.type}" style="${left !== undefined ? `left: ${left}px;` : ''}${top !== undefined ? `top: ${top}px;` : ''}" data-rotation="${rotation ?? 0}"></div>`, destinationId);
-            const newTileDiv = document.getElementById(`tile${tile.id}`);
+            const destination = document.getElementById(destinationId);
+            const newTileDiv = document.createElement('div');
+            newTileDiv.id = `tile${tile.id}`;
+            newTileDiv.classList.add(`tile`, `tile${tile.type}`);
+            newTileDiv.dataset.id = `${tile.id}`;
+            newTileDiv.dataset.type = `${tile.type}`;
+            newTileDiv.dataset.rotation = `${rotation ?? 0}`;
+            if (left !== undefined) {
+                newTileDiv.style.left = `${left}px`;
+            }
+            if (top !== undefined) {
+                newTileDiv.style.top = `${top}px`;
+            }
+
+            if (placeInParent) {
+                placeInParent(newTileDiv, destination);
+            } else {
+                destination.appendChild(newTileDiv);
+            }
+            
             newTileDiv.style.setProperty('--rotation', `${rotation ?? 0}deg`);
             newTileDiv.addEventListener('click', () => {
                 if (tile.type > 0) {
