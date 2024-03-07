@@ -285,7 +285,8 @@ trait ActionTrait {
 
         $this->setGlobalVariable(UNDO_PLACE, new UndoPlace($tiles, $previousScore, $points));
 
-        $additionalTiles = $this->additionalTilesDetail($playerId, $placedTile);
+        $wall = $this->getTilesFromDb($this->tiles->getCardsInLocation('wall'.$playerId));
+        $additionalTiles = $this->additionalTilesDetail($wall, $placedTile);
         if ($additionalTiles['count'] > 0) {        
             $this->setGlobalVariable(ADDITIONAL_TILES_DETAIL, $additionalTiles);
         }

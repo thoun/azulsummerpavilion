@@ -335,13 +335,12 @@ trait UtilTrait {
         return $scoredTiles;
     }
 
-    function additionalTilesDetail(int $playerId, $placedTile) {
-        $wall = $this->getTilesFromDb($this->tiles->getCardsInLocation('wall'.$playerId));
+    function additionalTilesDetail(array $wall, $placedTile) {
         $additionalTiles = 0;
         $highlightedTiles = [];
 
         if ($placedTile->star > 0) {
-            if (in_array($placedTile->space, [1, 2])) {
+            if (in_array($placedTile->space, [1, 2])) { // statue
                 $otherTile = $this->array_find($wall, fn($tile) => $tile->star == $placedTile->star && $tile->space == 3 - $placedTile->space);
                 if ($otherTile) {
                     $otherStar = ($placedTile->star % 6) + 1;
@@ -353,7 +352,7 @@ trait UtilTrait {
                     }
                 }
             }
-            if (in_array($placedTile->space, [3, 4])) {
+            if (in_array($placedTile->space, [3, 4])) { // statue
                 $otherTile = $this->array_find($wall, fn($tile) => $tile->star == $placedTile->star && $tile->space == 7 - $placedTile->space);
                 if ($otherTile) {
                     $otherStar = (($placedTile->star + 4) % 6) + 1;
@@ -365,14 +364,25 @@ trait UtilTrait {
                     }
                 }
             }
-            if (in_array($placedTile->space, [5, 6])) {
+            if (in_array($placedTile->space, [5, 6])) { // window
                 $otherTile = $this->array_find($wall, fn($tile) => $tile->star == $placedTile->star && $tile->space == 11 - $placedTile->space);
                 if ($otherTile) {
                     $additionalTiles += 3;
                     $highlightedTiles = array_merge($highlightedTiles, [$placedTile, $otherTile]);
                 }
             }
-        } else { // star 0
+            if (in_array($placedTile->space, [2, 3])) { // pillar
+                $otherTile = $this->array_find($wall, fn($tile) => $tile->star == $placedTile->star && $tile->space == 5 - $placedTile->space);
+                if ($otherTile) {
+                    $space1 = $this->array_find($wall, fn($tile) => $tile->star == 0 && $tile->space == (($placedTile->star + 3) % 6 + 1));
+                    $space2 = $this->array_find($wall, fn($tile) => $tile->star == 0 && $tile->space == (($placedTile->star + 4) % 6 + 1));
+                    if ($space1 && $space2) {
+                        $additionalTiles += 1;
+                        $highlightedTiles = array_merge($highlightedTiles, [$placedTile, $otherTile, $space1, $space2]);
+                    }
+                }
+            }
+        } else { // star 0, pillar
             $spaceBefore = (($placedTile->space + 4) % 6) + 1;           
             $otherTile = $this->array_find($wall, fn($tile) => $tile->star == 0 && $tile->space == $spaceBefore);
             if ($otherTile) {
