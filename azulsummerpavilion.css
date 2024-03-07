@@ -261,6 +261,27 @@
 #scoring-board #supply .supply-space.space10 {
   transform: rotate(432deg) translate(136px) rotate(90deg);
 }
+#scoring-board .bonus-info {
+  position: absolute;
+  left: 16px;
+  width: 48px;
+  border-radius: 5px;
+}
+#scoring-board .bonus-info[data-bonus="1"] {
+  top: 150px;
+  height: 83px;
+}
+#scoring-board .bonus-info[data-bonus="2"] {
+  top: 254px;
+  height: 111px;
+}
+#scoring-board .bonus-info[data-bonus="3"] {
+  top: 387px;
+  height: 120px;
+}
+#scoring-board .bonus-info.active {
+  outline: 6px solid #c5299b;
+}
 
 #table {
   display: flex;
@@ -495,13 +516,13 @@
 .player-table-wrapper .player-table .tile.highlight {
   animation: highlight-animation 0.7s alternate 2;
 }
-.player-table-wrapper .player-table .tile.highlight.infinite {
-  animation: highlight-animation 2s alternate infinite;
-}
 @keyframes highlight-animation {
   100% {
     box-shadow: 0 0 30px 15px white;
   }
+}
+.player-table-wrapper .player-table .tile.bonus {
+  outline: 6px solid white;
 }
 
 @keyframes selectable-space {

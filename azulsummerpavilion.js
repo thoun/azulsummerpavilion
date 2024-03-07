@@ -1053,7 +1053,20 @@ var ScoringBoard = /** @class */ (function () {
             html += "<div id=\"supply-space-".concat(i, "\" class=\"supply-space space").concat(i, "\"></div>");
         }
         html += "</div>";
+        for (var i = 1; i <= 3; i++) {
+            html += "<div id=\"bonus-info-".concat(i, "\" class=\"bonus-info\" data-bonus=\"").concat(i, "\"></div>");
+        }
         scoringBoardDiv.insertAdjacentHTML('beforeend', html);
+        var bonusInfos = [
+            _("a pillar"),
+            _("a statue"),
+            _("a window"),
+        ];
+        for (var i = 1; i <= 3; i++) {
+            this.game.addTooltipHtml("bonus-info-".concat(i), _("When you surround the 4 adjacent spaces of ${a_bonus_shape} with tiles, you must then immediately take any ${number} tile(s) of your choice from the supply.")
+                .replace('${a_bonus_shape}', "<strong>".concat(bonusInfos[i - 1], "</strong>"))
+                .replace('${number}', "<strong>".concat(i, "</strong>")));
+        }
         this.placeTiles(supplyTiles, false);
     }
     ScoringBoard.prototype.placeTiles = function (tiles, animation) {
@@ -1315,7 +1328,8 @@ var AzulSummerPavilion = /** @class */ (function () {
         }
     };
     AzulSummerPavilion.prototype.onEnteringTakeBonusTiles = function (args) {
-        args.highlightedTiles.forEach(function (tile) { return document.getElementById("tile".concat(tile.id)).classList.add('highlight', 'infinite'); });
+        args.highlightedTiles.forEach(function (tile) { return document.getElementById("tile".concat(tile.id)).classList.add('bonus'); });
+        document.getElementById("bonus-info-".concat(args.count)).classList.add('active');
         if (this.isCurrentPlayerActive()) {
             document.getElementById("supply").classList.add('selectable');
         }
@@ -1371,7 +1385,8 @@ var AzulSummerPavilion = /** @class */ (function () {
     AzulSummerPavilion.prototype.onLeavingTakeBonusTiles = function () {
         document.getElementById("supply").classList.remove('selectable');
         document.querySelectorAll('.tile.selected').forEach(function (elem) { return elem.classList.remove('selected'); });
-        document.querySelectorAll('.tile.highlight').forEach(function (elem) { return elem.classList.remove('highlight', 'infinite'); });
+        document.querySelectorAll('.tile.bonus').forEach(function (elem) { return elem.classList.remove('bonus'); });
+        document.querySelectorAll(".bonus-info.active").forEach(function (elem) { return elem.classList.remove('active'); });
     };
     AzulSummerPavilion.prototype.updateSelectKeptTilesButton = function () {
         var _this = this;

@@ -13,12 +13,32 @@ class ScoringBoard {
         }
         html += `</div>
         <div id="supply">`;
-        for (let i=1; i<=10; i++) {            
+        for (let i=1; i<=10; i++) {
             html += `<div id="supply-space-${i}" class="supply-space space${i}"></div>`;
         }
         html += `</div>`;
 
+        
+        for (let i=1; i<=3; i++) {
+            html += `<div id="bonus-info-${i}" class="bonus-info" data-bonus="${i}"></div>`;
+        }
+
         scoringBoardDiv.insertAdjacentHTML('beforeend', html);
+
+        const bonusInfos = [
+            _("a pillar"),
+            _("a statue"),
+            _("a window"),
+        ];
+
+        for (let i=1; i<=3; i++) {
+            (this.game as any).addTooltipHtml(
+                `bonus-info-${i}`, 
+                _("When you surround the 4 adjacent spaces of ${a_bonus_shape} with tiles, you must then immediately take any ${number} tile(s) of your choice from the supply.")
+                    .replace('${a_bonus_shape}', `<strong>${bonusInfos[i - 1]}</strong>`)
+                    .replace('${number}', `<strong>${i}</strong>`)                
+            );
+        }
 
         this.placeTiles(supplyTiles, false);
     }

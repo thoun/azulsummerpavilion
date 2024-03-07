@@ -55,4 +55,28 @@
             pointer-events: none;
         }
     }
+
+    .bonus-info {
+        position: absolute;
+        left: 16px;
+        width: 48px;
+        border-radius: 5px;
+
+        &[data-bonus="1"] {
+            top: 150px;
+            height: 83px;
+        }
+        &[data-bonus="2"] {
+            top: 254px;
+            height: 111px;
+        }
+        &[data-bonus="3"] {
+            top: 387px;
+            height: 120px;
+        }
+
+        &.active {
+            outline: 6px solid #c5299b;
+        }
+    }
 }
