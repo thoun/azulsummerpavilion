@@ -50,7 +50,7 @@ var BgaAttachWithAnimation = /** @class */ (function (_super) {
     return BgaAttachWithAnimation;
 }(BgaAnimation));
 /**
- * Linear slide of the element from origin to destination.
+ * Slide of the element from origin to destination.
  *
  * @param animationManager the animation manager
  * @param animation a `BgaAnimation` object
@@ -58,17 +58,18 @@ var BgaAttachWithAnimation = /** @class */ (function (_super) {
  */
 function slideAnimation(animationManager, animation) {
     var promise = new Promise(function (success) {
-        var _a, _b, _c, _d;
+        var _a, _b, _c, _d, _e;
         var settings = animation.settings;
         var element = settings.element;
-        var _e = getDeltaCoordinates(element, settings), x = _e.x, y = _e.y;
-        var duration = (_a = settings === null || settings === void 0 ? void 0 : settings.duration) !== null && _a !== void 0 ? _a : 500;
+        var _f = getDeltaCoordinates(element, settings), x = _f.x, y = _f.y;
+        var duration = (_a = settings.duration) !== null && _a !== void 0 ? _a : 500;
         var originalZIndex = element.style.zIndex;
         var originalTransition = element.style.transition;
-        element.style.zIndex = "".concat((_b = settings === null || settings === void 0 ? void 0 : settings.zIndex) !== null && _b !== void 0 ? _b : 10);
+        var transitionTimingFunction = (_b = settings.transitionTimingFunction) !== null && _b !== void 0 ? _b : 'linear';
+        element.style.zIndex = "".concat((_c = settings === null || settings === void 0 ? void 0 : settings.zIndex) !== null && _c !== void 0 ? _c : 10);
         element.style.transition = null;
         element.offsetHeight;
-        element.style.transform = "translate(".concat(-x, "px, ").concat(-y, "px) rotate(").concat((_c = settings === null || settings === void 0 ? void 0 : settings.rotationDelta) !== null && _c !== void 0 ? _c : 0, "deg)");
+        element.style.transform = "translate(".concat(-x, "px, ").concat(-y, "px) rotate(").concat((_d = settings === null || settings === void 0 ? void 0 : settings.rotationDelta) !== null && _d !== void 0 ? _d : 0, "deg)");
         var timeoutId = null;
         var cleanOnTransitionEnd = function () {
             element.style.zIndex = originalZIndex;
@@ -93,9 +94,9 @@ function slideAnimation(animationManager, animation) {
         element.addEventListener('transitionend', cleanOnTransitionEnd);
         document.addEventListener('visibilitychange', cleanOnTransitionCancel);
         element.offsetHeight;
-        element.style.transition = "transform ".concat(duration, "ms linear");
+        element.style.transition = "transform ".concat(duration, "ms ").concat(transitionTimingFunction);
         element.offsetHeight;
-        element.style.transform = (_d = settings === null || settings === void 0 ? void 0 : settings.finalTransform) !== null && _d !== void 0 ? _d : null;
+        element.style.transform = (_e = settings === null || settings === void 0 ? void 0 : settings.finalTransform) !== null && _e !== void 0 ? _e : null;
         // safety in case transitionend and transitioncancel are not called
         timeoutId = setTimeout(cleanOnTransitionEnd, duration + 100);
     });
@@ -254,24 +255,24 @@ var AnimationManager = /** @class */ (function () {
      * @returns the animation promise.
      */
     AnimationManager.prototype.play = function (animation) {
-        var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l;
+        var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o, _p, _q;
         return __awaiter(this, void 0, void 0, function () {
-            var settings, _m;
-            return __generator(this, function (_o) {
-                switch (_o.label) {
+            var settings, _r;
+            return __generator(this, function (_s) {
+                switch (_s.label) {
                     case 0:
                         animation.played = animation.playWhenNoAnimation || this.animationsActive();
                         if (!animation.played) return [3 /*break*/, 2];
                         settings = animation.settings;
                         (_a = settings.animationStart) === null || _a === void 0 ? void 0 : _a.call(settings, animation);
                         (_b = settings.element) === null || _b === void 0 ? void 0 : _b.classList.add((_c = settings.animationClass) !== null && _c !== void 0 ? _c : 'bga-animations_animated');
-                        animation.settings = __assign(__assign({}, animation.settings), { duration: (_e = (_d = this.settings) === null || _d === void 0 ? void 0 : _d.duration) !== null && _e !== void 0 ? _e : 500, scale: (_g = (_f = this.zoomManager) === null || _f === void 0 ? void 0 : _f.zoom) !== null && _g !== void 0 ? _g : undefined });
-                        _m = animation;
+                        animation.settings = __assign({ duration: (_g = (_e = (_d = animation.settings) === null || _d === void 0 ? void 0 : _d.duration) !== null && _e !== void 0 ? _e : (_f = this.settings) === null || _f === void 0 ? void 0 : _f.duration) !== null && _g !== void 0 ? _g : 500, scale: (_l = (_j = (_h = animation.settings) === null || _h === void 0 ? void 0 : _h.scale) !== null && _j !== void 0 ? _j : (_k = this.zoomManager) === null || _k === void 0 ? void 0 : _k.zoom) !== null && _l !== void 0 ? _l : undefined }, animation.settings);
+                        _r = animation;
                         return [4 /*yield*/, animation.animationFunction(this, animation)];
                     case 1:
-                        _m.result = _o.sent();
-                        (_j = (_h = animation.settings).animationEnd) === null || _j === void 0 ? void 0 : _j.call(_h, animation);
-                        (_k = settings.element) === null || _k === void 0 ? void 0 : _k.classList.remove((_l = settings.animationClass) !== null && _l !== void 0 ? _l : 'bga-animations_animated');
+                        _r.result = _s.sent();
+                        (_o = (_m = animation.settings).animationEnd) === null || _o === void 0 ? void 0 : _o.call(_m, animation);
+                        (_p = settings.element) === null || _p === void 0 ? void 0 : _p.classList.remove((_q = settings.animationClass) !== null && _q !== void 0 ? _q : 'bga-animations_animated');
                         return [3 /*break*/, 3];
                     case 2: return [2 /*return*/, Promise.resolve(animation)];
                     case 3: return [2 /*return*/];
@@ -387,6 +388,42 @@ function throttle(callback, delay) {
         }
     };
 }
+var advThrottle = function (func, delay, options) {
+    if (options === void 0) { options = { leading: true, trailing: false }; }
+    var timer = null, lastRan = null, trailingArgs = null;
+    return function () {
+        var args = [];
+        for (var _i = 0; _i < arguments.length; _i++) {
+            args[_i] = arguments[_i];
+        }
+        if (timer) { //called within cooldown period
+            lastRan = this; //update context
+            trailingArgs = args; //save for later
+            return;
+        }
+        if (options.leading) { // if leading
+            func.call.apply(// if leading
+            func, __spreadArray([this], args, false)); //call the 1st instance
+        }
+        else { // else it's trailing
+            lastRan = this; //update context
+            trailingArgs = args; //save for later
+        }
+        var coolDownPeriodComplete = function () {
+            if (options.trailing && trailingArgs) { // if trailing and the trailing args exist
+                func.call.apply(// if trailing and the trailing args exist
+                func, __spreadArray([lastRan], trailingArgs, false)); //invoke the instance with stored context "lastRan"
+                lastRan = null; //reset the status of lastRan
+                trailingArgs = null; //reset trailing arguments
+                timer = setTimeout(coolDownPeriodComplete, delay); //clear the timout
+            }
+            else {
+                timer = null; // reset timer
+            }
+        };
+        timer = setTimeout(coolDownPeriodComplete, delay);
+    };
+};
 var ZoomManager = /** @class */ (function () {
     /**
      * Place the settings.element in a zoom wrapper and init zoomControls.
@@ -415,7 +452,7 @@ var ZoomManager = /** @class */ (function () {
         settings.element.classList.add('bga-zoom-inner');
         if ((_b = settings.smooth) !== null && _b !== void 0 ? _b : true) {
             settings.element.dataset.smooth = 'true';
-            settings.element.addEventListener('transitionend', function () { return _this.zoomOrDimensionChanged(); });
+            settings.element.addEventListener('transitionend', advThrottle(function () { return _this.zoomOrDimensionChanged(); }, this.throttleTime, { leading: true, trailing: true, }));
         }
         if ((_d = (_c = settings.zoomControls) === null || _c === void 0 ? void 0 : _c.visible) !== null && _d !== void 0 ? _d : true) {
             this.initZoomControls(settings);
@@ -424,15 +461,15 @@ var ZoomManager = /** @class */ (function () {
             this.setZoom(this._zoom);
         }
         this.throttleTime = (_e = settings.throttleTime) !== null && _e !== void 0 ? _e : 100;
-        window.addEventListener('resize', function () {
+        window.addEventListener('resize', advThrottle(function () {
             var _a;
             _this.zoomOrDimensionChanged();
             if ((_a = _this.settings.autoZoom) === null || _a === void 0 ? void 0 : _a.expectedWidth) {
                 _this.setAutoZoom();
             }
-        });
+        }, this.throttleTime, { leading: true, trailing: true, }));
         if (window.ResizeObserver) {
-            new ResizeObserver(function () { return _this.zoomOrDimensionChanged(); }).observe(settings.element);
+            new ResizeObserver(advThrottle(function () { return _this.zoomOrDimensionChanged(); }, this.throttleTime, { leading: true, trailing: true, })).observe(settings.element);
         }
         if ((_f = this.settings.autoZoom) === null || _f === void 0 ? void 0 : _f.expectedWidth) {
             this.setAutoZoom();
@@ -509,7 +546,7 @@ var ZoomManager = /** @class */ (function () {
         (_b = this.zoomOutButton) === null || _b === void 0 ? void 0 : _b.classList.toggle('disabled', newIndex === 0);
         this.settings.element.style.transform = zoom === 1 ? '' : "scale(".concat(zoom, ")");
         (_d = (_c = this.settings).onZoomChange) === null || _d === void 0 ? void 0 : _d.call(_c, this._zoom);
-        this.zoomOrDimensionChangedUnsafe();
+        this.zoomOrDimensionChanged();
     };
     /**
      * Call this method for the browsers not supporting ResizeObserver, everytime the table height changes, if you know it.
@@ -522,17 +559,9 @@ var ZoomManager = /** @class */ (function () {
     };
     /**
      * Everytime the element dimensions changes, we update the style. And call the optional callback.
-     * To avoid spamming, a throttle is applied to the method.
+     * Unsafe method as this is not protected by throttle. Surround with  `advThrottle(() => this.zoomOrDimensionChanged(), this.throttleTime, { leading: true, trailing: true, })` to avoid spamming recomputation.
      */
     ZoomManager.prototype.zoomOrDimensionChanged = function () {
-        var _this = this;
-        throttle(function () { return _this.zoomOrDimensionChangedUnsafe(); }, this.throttleTime);
-    };
-    /**
-     * Everytime the element dimensions changes, we update the style. And call the optional callback.
-     * Unsafe method as this is not protected by throttle. Call `zoomOrDimensionChanged` instead.
-     */
-    ZoomManager.prototype.zoomOrDimensionChangedUnsafe = function () {
         var _a, _b;
         this.settings.element.style.width = "".concat(this.wrapper.getBoundingClientRect().width / this._zoom, "px");
         this.wrapper.style.height = "".concat(this.settings.element.getBoundingClientRect().height, "px");
@@ -1496,30 +1525,15 @@ var AzulSummerPavilion = /** @class */ (function () {
     ///////////////////////////////////////////////////
     AzulSummerPavilion.prototype.setupPreferences = function () {
         var _this = this;
-        // Extract the ID and value from the UI control
-        var onchange = function (e) {
-            var match = e.target.id.match(/^preference_control_(\d+)$/);
-            if (!match) {
-                return;
-            }
-            var prefId = +match[1];
-            var prefValue = +e.target.value;
-            _this.prefs[prefId].value = prefValue;
-            _this.onPreferenceChange(prefId, prefValue);
-        };
-        // Call onPreferenceChange() when any value changes
-        dojo.query(".preference_control").connect("onchange", onchange);
-        // Call onPreferenceChange() now
-        dojo.forEach(dojo.query("#ingame_menu_content .preference_control"), function (el) { return onchange({ target: el }); });
         try {
             document.getElementById('preference_control_299').closest(".preference_choice").style.display = 'none';
             document.getElementById('preference_fontrol_299').closest(".preference_choice").style.display = 'none';
         }
         catch (e) { }
+        [201, 202, 203, 205, 206, 299].forEach(function (prefId) { return _this.onGameUserPreferenceChanged(prefId, _this.getGameUserPreference(prefId)); });
     };
-    AzulSummerPavilion.prototype.onPreferenceChange = function (prefId, prefValue) {
+    AzulSummerPavilion.prototype.onGameUserPreferenceChanged = function (prefId, prefValue) {
         switch (prefId) {
-            // KEEP
             case 201:
                 dojo.toggleClass('table', 'disabled-shimmer', prefValue == 2);
                 break;
@@ -1538,15 +1552,13 @@ var AzulSummerPavilion = /** @class */ (function () {
         }
     };
     AzulSummerPavilion.prototype.toggleZoomNotice = function (visible) {
+        var _this = this;
         var elem = document.getElementById('zoom-notice');
         if (visible) {
             if (!elem) {
                 dojo.place("\n                <div id=\"zoom-notice\">\n                    ".concat(_("Use zoom controls to adapt players board size !"), "\n                    <div style=\"text-align: center; margin-top: 10px;\"><a id=\"hide-zoom-notice\">").concat(_("Dismiss"), "</a></div>\n                    <div class=\"arrow-right\"></div>\n                </div>\n                "), 'bga-zoom-controls');
                 document.getElementById('hide-zoom-notice').addEventListener('click', function () {
-                    var select = document.getElementById('preference_control_299');
-                    select.value = '2';
-                    var event = new Event('change');
-                    select.dispatchEvent(event);
+                    return _this.setGameUserPreference(299, 2);
                 });
             }
         }
@@ -1555,11 +1567,10 @@ var AzulSummerPavilion = /** @class */ (function () {
         }
     };
     AzulSummerPavilion.prototype.isDefaultFont = function () {
-        return Number(this.prefs[206].value) == 1;
+        return this.getGameUserPreference(206) == 1;
     };
     AzulSummerPavilion.prototype.startActionTimer = function (buttonId, time) {
-        var _a;
-        if (((_a = this.prefs[204]) === null || _a === void 0 ? void 0 : _a.value) === 2) {
+        if (this.getGameUserPreference(204) == 2) {
             return;
         }
         var button = document.getElementById(buttonId);
@@ -1848,7 +1859,8 @@ var AzulSummerPavilion = /** @class */ (function () {
         var firstPlayerToken = document.getElementById('firstPlayerToken');
         if (firstPlayerToken) {
             this.animationManager.attachWithAnimation(new BgaSlideAnimation({
-                element: firstPlayerToken
+                element: firstPlayerToken,
+                scale: 1, // ignore game zoom
             }), document.getElementById("player_board_".concat(playerId, "_firstPlayerWrapper")));
         }
         else {

@@ -134,14 +134,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"azul@workspace:.":
+"azulsummerpavilion@workspace:.":
   version: 0.0.0-use.local
-  resolution: "azul@workspace:."
+  resolution: "azulsummerpavilion@workspace:."
   dependencies:
-    bga-animations: "thoun/bga-animations#1.0.2"
-    bga-cards: "thoun/bga-cards#3.0.0"
-    bga-jump-to: "thoun/bga-jump-to#1.0.0"
-    bga-zoom: "thoun/bga-zoom#1.0.1"
+    bga-animations: "thoun/bga-animations#1.1.1"
+    bga-zoom: "thoun/bga-zoom#1.0.2"
     sass: ^1.62.1
     typescript: ^5.0.4
   languageName: unknown
@@ -154,33 +152,17 @@ __metadata:
   languageName: node
   linkType: hard
 
-"bga-animations@thoun/bga-animations#1.0.2":
-  version: 1.0.0
-  resolution: "bga-animations@https://github.com/thoun/bga-animations.git#commit=74a2aa97bc5367a84965aed6b4903d46a024b43e"
-  checksum: c4b4bc65d941c4a52c7c8853a1c1e4391686064bb77aa0548494bdc79676f7ea6c4f9dc2331f35fbb718e81fbdb8ff6079e12fcbc8edf236d386acf6e1af4027
+"bga-animations@thoun/bga-animations#1.1.1":
+  version: 1.1.1
+  resolution: "bga-animations@https://github.com/thoun/bga-animations.git#commit=91a2747fa5f5a7402a5adfa84d976d8216269f6b"
+  checksum: c1c962f6ab3623d1ab4e99067e5ad66179e19ebb35e015bf1c1f4cf0e4f8feaad547969182ac342d2011e3ba835545e27bb122c27d3812be4599c8f2071b294b
   languageName: node
   linkType: hard
 
-"bga-cards@thoun/bga-cards#3.0.0":
-  version: 3.0.0
-  resolution: "bga-cards@https://github.com/thoun/bga-cards.git#commit=ec4bfc34ee804623b8e7cf825bb4ba3f684315fe"
-  peerDependencies:
-    bga-animations: "*"
-  checksum: 9bc64d3195fa7dcabe4581e06e1bdd3cc762dc6eeddd0965b4c515871019cde375b67f1dadde2502a5ab5b56e90122eb35b57f0a9fb0e87581f7bc3d94ca4e58
-  languageName: node
-  linkType: hard
-
-"bga-jump-to@thoun/bga-jump-to#1.0.0":
-  version: 1.0.0
-  resolution: "bga-jump-to@https://github.com/thoun/bga-jump-to.git#commit=4aec4554cf458a56f7ea24bd257a076b34a2080e"
-  checksum: 51cb15f78d814a79a9048954faa727f24b96623feffea8e500ffa518da28f8b6d9df466efa6e340ab3a582819f84eec9b1e601b96659a280eac171305d6d1645
-  languageName: node
-  linkType: hard
-
-"bga-zoom@thoun/bga-zoom#1.0.1":
-  version: 1.0.1
-  resolution: "bga-zoom@https://github.com/thoun/bga-zoom.git#commit=52d04138db7aa77e4df7a9c36725247a32b28a23"
-  checksum: 2de1688af7b80b8ee8bed9460f3995fdf966ab6a622057afae4e75cc52d898220e4efc280ca7017604c1f53d62cac7e891103949274a26948b1400a9d789be47
+"bga-zoom@thoun/bga-zoom#1.0.2":
+  version: 1.0.2
+  resolution: "bga-zoom@https://github.com/thoun/bga-zoom.git#commit=3668486f5445085bddbb1a8dd054bcf987bc9f41"
+  checksum: c209c6003722ebc4560b369dc15917e996078ee4b59dc91e8b4f759e271dbcec89a1a794ab6a03c20fa27998fa31f6c1289e833629ffc4e41698c935bd0b6ff3
   languageName: node
   linkType: hard
 

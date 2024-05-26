@@ -371,36 +371,18 @@ class AzulSummerPavilion implements AzulSummerPavilionGame {
     ///////////////////////////////////////////////////
 
     private setupPreferences() {
-        // Extract the ID and value from the UI control
-        const onchange = (e) => {
-          var match = e.target.id.match(/^preference_control_(\d+)$/);
-          if (!match) {
-            return;
-          }
-          var prefId = +match[1];
-          var prefValue = +e.target.value;
-          (this as any).prefs[prefId].value = prefValue;
-          this.onPreferenceChange(prefId, prefValue);
-        }
-        
-        // Call onPreferenceChange() when any value changes
-        dojo.query(".preference_control").connect("onchange", onchange);
-        
-        // Call onPreferenceChange() now
-        dojo.forEach(
-          dojo.query("#ingame_menu_content .preference_control"),
-          el => onchange({ target: el })
-        );
-
         try {
             (document.getElementById('preference_control_299').closest(".preference_choice") as HTMLDivElement).style.display = 'none';
             (document.getElementById('preference_fontrol_299').closest(".preference_choice") as HTMLDivElement).style.display = 'none';
         } catch (e) {}
+
+        [201, 202, 203, 205, 206, 299].forEach(
+            prefId => this.onGameUserPreferenceChanged(prefId, (this as any).getGameUserPreference(prefId))
+        );
     }
       
-    private onPreferenceChange(prefId: number, prefValue: number) {
+    private onGameUserPreferenceChanged(prefId: number, prefValue: number) {
         switch (prefId) {
-            // KEEP
             case 201: 
                 dojo.toggleClass('table', 'disabled-shimmer', prefValue == 2);
                 break;
@@ -431,13 +413,9 @@ class AzulSummerPavilion implements AzulSummerPavilionGame {
                 </div>
                 `, 'bga-zoom-controls');
 
-                document.getElementById('hide-zoom-notice').addEventListener('click', () => {
-                    const select = document.getElementById('preference_control_299') as HTMLSelectElement;
-                    select.value = '2';
-    
-                    var event = new Event('change');
-                    select.dispatchEvent(event);
-                });
+                document.getElementById('hide-zoom-notice').addEventListener('click', () => 
+                    (this as any).setGameUserPreference(299, 2)
+                );
             }
         } else if (elem) {
             elem.parentElement.removeChild(elem);
@@ -445,11 +423,11 @@ class AzulSummerPavilion implements AzulSummerPavilionGame {
     }
 
     public isDefaultFont(): boolean {
-        return Number((this as any).prefs[206].value) == 1;
+        return (this as any).getGameUserPreference(206) == 1;
     }
 
     private startActionTimer(buttonId: string, time: number) {
-        if ((this as any).prefs[204]?.value === 2) {
+        if ((this as any).getGameUserPreference(204) == 2) {
             return;
         }
 
@@ -784,7 +762,8 @@ class AzulSummerPavilion implements AzulSummerPavilionGame {
         if (firstPlayerToken) {
             this.animationManager.attachWithAnimation(
                 new BgaSlideAnimation({
-                    element: firstPlayerToken
+                    element: firstPlayerToken,
+                    scale: 1, // ignore game zoom
                 }), 
                 document.getElementById(`player_board_${playerId}_firstPlayerWrapper`),
             );
