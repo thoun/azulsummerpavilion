@@ -154,7 +154,7 @@ trait UtilTrait {
     function putFirstPlayerTile(int $playerId, array $selectedTiles) {
         self::setGameStateValue(FIRST_PLAYER_FOR_NEXT_TURN, $playerId);
 
-        $points = count($selectedTiles);
+        $points = count($selectedTiles) - 1;
         $this->decPlayerScore($playerId, $points);
 
         self::notifyAllPlayers('firstPlayerToken', clienttranslate('${player_name} took First Player tile and will start next round, losing ${points} points for taking ${points} tiles'), [
