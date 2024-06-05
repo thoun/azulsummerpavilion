@@ -376,7 +376,7 @@ class AzulSummerPavilion implements AzulSummerPavilionGame {
             (document.getElementById('preference_fontrol_299').closest(".preference_choice") as HTMLDivElement).style.display = 'none';
         } catch (e) {}
 
-        [201, 202, 203, 205, 206, 299].forEach(
+        [201, 203, 205, 206, 299].forEach(
             prefId => this.onGameUserPreferenceChanged(prefId, (this as any).getGameUserPreference(prefId))
         );
     }

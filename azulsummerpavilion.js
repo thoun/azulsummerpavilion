@@ -1530,7 +1530,7 @@ var AzulSummerPavilion = /** @class */ (function () {
             document.getElementById('preference_fontrol_299').closest(".preference_choice").style.display = 'none';
         }
         catch (e) { }
-        [201, 202, 203, 205, 206, 299].forEach(function (prefId) { return _this.onGameUserPreferenceChanged(prefId, _this.getGameUserPreference(prefId)); });
+        [201, 203, 205, 206, 299].forEach(function (prefId) { return _this.onGameUserPreferenceChanged(prefId, _this.getGameUserPreference(prefId)); });
     };
     AzulSummerPavilion.prototype.onGameUserPreferenceChanged = function (prefId, prefValue) {
         switch (prefId) {
