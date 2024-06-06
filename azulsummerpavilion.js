@@ -1091,8 +1091,14 @@ var ScoringBoard = /** @class */ (function () {
             _("a statue"),
             _("a window"),
         ];
+        var bonusAdjacent = [
+            4,
+            4,
+            2,
+        ];
         for (var i = 1; i <= 3; i++) {
-            this.game.addTooltipHtml("bonus-info-".concat(i), _("When you surround the 4 adjacent spaces of ${a_bonus_shape} with tiles, you must then immediately take any ${number} tile(s) of your choice from the supply.")
+            this.game.addTooltipHtml("bonus-info-".concat(i), _("When you surround the ${adjacent_number} adjacent spaces of ${a_bonus_shape} with tiles, you must then immediately take any ${number} tile(s) of your choice from the supply.")
+                .replace('${adjacent_number}', "".concat(bonusAdjacent[i - 1]))
                 .replace('${a_bonus_shape}', "<strong>".concat(bonusInfos[i - 1], "</strong>"))
                 .replace('${number}', "<strong>".concat(i, "</strong>")));
         }

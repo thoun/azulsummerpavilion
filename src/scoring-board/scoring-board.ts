@@ -30,11 +30,17 @@ class ScoringBoard {
             _("a statue"),
             _("a window"),
         ];
+        const bonusAdjacent = [
+            4,
+            4,
+            2,
+        ];
 
         for (let i=1; i<=3; i++) {
             (this.game as any).addTooltipHtml(
                 `bonus-info-${i}`, 
-                _("When you surround the 4 adjacent spaces of ${a_bonus_shape} with tiles, you must then immediately take any ${number} tile(s) of your choice from the supply.")
+                _("When you surround the ${adjacent_number} adjacent spaces of ${a_bonus_shape} with tiles, you must then immediately take any ${number} tile(s) of your choice from the supply.")
+                    .replace('${adjacent_number}', `${bonusAdjacent[i - 1]}`)
                     .replace('${a_bonus_shape}', `<strong>${bonusInfos[i - 1]}</strong>`)
                     .replace('${number}', `<strong>${i}</strong>`)                
             );
