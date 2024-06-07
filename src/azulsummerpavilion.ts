@@ -909,12 +909,13 @@ class AzulSummerPavilion implements AzulSummerPavilionGame {
     }
 
     notif_putToCorner(notif: Notif<NotifPutToCornerArgs>) {
-        const { playerId, keptTiles, discardedTiles } = notif.args;
+        const { playerId, keptTiles, discardedTiles, newScore } = notif.args;
         this.getPlayerTable(playerId).placeTilesOnCorner(keptTiles);
         this.removeTiles(discardedTiles, true);
 
         if (discardedTiles.length > 0) {
             (this as any).displayScoring(`player-hand-${playerId}`, this.getPlayerColor(Number(playerId)), -discardedTiles.length, SCORE_MS);
+            this.setScore(playerId, newScore);
         }
     }
 
@@ -941,9 +942,9 @@ class AzulSummerPavilion implements AzulSummerPavilionGame {
     }
 
     notif_firstPlayerToken(notif: Notif<NotifFirstPlayerTokenArgs>) {
-        const { playerId, decScore } = notif.args;
+        const { playerId, decScore, newScore } = notif.args;
         this.placeFirstPlayerToken(playerId);
-        this.incScore(playerId, -decScore);
+        this.setScore(playerId, newScore);
 
         this.factories.displayScoringCenter(playerId, -decScore);
     }

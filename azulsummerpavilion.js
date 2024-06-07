@@ -1988,11 +1988,12 @@ var AzulSummerPavilion = /** @class */ (function () {
         this.incScore(playerId, scoredTiles.length);
     };
     AzulSummerPavilion.prototype.notif_putToCorner = function (notif) {
-        var _a = notif.args, playerId = _a.playerId, keptTiles = _a.keptTiles, discardedTiles = _a.discardedTiles;
+        var _a = notif.args, playerId = _a.playerId, keptTiles = _a.keptTiles, discardedTiles = _a.discardedTiles, newScore = _a.newScore;
         this.getPlayerTable(playerId).placeTilesOnCorner(keptTiles);
         this.removeTiles(discardedTiles, true);
         if (discardedTiles.length > 0) {
             this.displayScoring("player-hand-".concat(playerId), this.getPlayerColor(Number(playerId)), -discardedTiles.length, SCORE_MS);
+            this.setScore(playerId, newScore);
         }
     };
     AzulSummerPavilion.prototype.notif_cornerToHand = function (notif) {
@@ -2014,9 +2015,9 @@ var AzulSummerPavilion = /** @class */ (function () {
         });
     };
     AzulSummerPavilion.prototype.notif_firstPlayerToken = function (notif) {
-        var _a = notif.args, playerId = _a.playerId, decScore = _a.decScore;
+        var _a = notif.args, playerId = _a.playerId, decScore = _a.decScore, newScore = _a.newScore;
         this.placeFirstPlayerToken(playerId);
-        this.incScore(playerId, -decScore);
+        this.setScore(playerId, newScore);
         this.factories.displayScoringCenter(playerId, -decScore);
     };
     AzulSummerPavilion.prototype.notif_lastRound = function () {

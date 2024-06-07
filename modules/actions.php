@@ -476,6 +476,11 @@ trait ActionTrait {
         $keptNumber = count($keptTiles);
         $discardedNumber = count($discardedTiles);
 
+        $newScore = null;
+        if ($discardedNumber > 0) {  
+            $newScore = $this->decPlayerScore($playerId, $discardedNumber); 
+        }
+
         if ($keptNumber > 0 || $discardedNumber > 0) {        
             $this->tiles->moveCards(array_map('getIdPredicate', $keptTiles), 'corner', $playerId);
             $this->tiles->moveCards(array_map('getIdPredicate', $discardedTiles), 'discard');
@@ -485,13 +490,10 @@ trait ActionTrait {
                 'player_name' => $this->getPlayerName($playerId),
                 'keptTiles' => $keptTiles,
                 'discardedTiles' => $discardedTiles,
-                'keptNumber' => $keptNumber,
-                'discardedNumber' => $discardedNumber,
+                'keptNumber' => $keptNumber, // for logs
+                'discardedNumber' => $discardedNumber, // for logs
+                'newScore' => $newScore,
             ]);
-        }
-
-        if ($discardedNumber > 0) {  
-            $this->decPlayerScore($playerId, $discardedNumber); 
         }
 
         $this->setGlobalVariable(UNDO_PLACE, new UndoPlace($hand, $previousScore, count($discardedTiles)));

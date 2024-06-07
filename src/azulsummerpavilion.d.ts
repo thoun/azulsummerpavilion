@@ -107,6 +107,7 @@ interface SelectedColumn {
 interface NotifFirstPlayerTokenArgs {
     playerId: number;
     decScore: number;
+    newScore: number;
 }
 
 interface NotifFactoriesFilledArgs {
@@ -183,6 +184,7 @@ interface NotifPutToCornerArgs {
     playerId: number;
     keptTiles: Tile[];
     discardedTiles: Tile[];
+    newScore: number | null;
 }
 
 interface NotifCornerToHandArgs {
