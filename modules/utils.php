@@ -385,27 +385,28 @@ trait UtilTrait {
             }
         } else { // star 0, pillar
             $spaceBefore = (($placedTile->space + 4) % 6) + 1;           
-            $otherTile = $this->array_find($wall, fn($tile) => $tile->star == 0 && $tile->space == $spaceBefore);
-            if ($otherTile) {
-                $otherStar = ($placedTile->space % 6) + 1;
+            $tileBefore = $this->array_find($wall, fn($tile) => $tile->star == 0 && $tile->space == $spaceBefore);
+            if ($tileBefore) {
+                $otherStar = (($placedTile->space + 0) % 6) + 1;
                 $space2 = $this->array_find($wall, fn($tile) => $tile->star == $otherStar && $tile->space == 2);
                 $space3 = $this->array_find($wall, fn($tile) => $tile->star == $otherStar && $tile->space == 3);
                 if ($space2 && $space3) {
                     $additionalTiles += 1;
-                    $highlightedTiles = array_merge($highlightedTiles, [$placedTile, $otherTile, $space2, $space3]);
+                    $highlightedTiles = array_merge($highlightedTiles, [$placedTile, $tileBefore, $space2, $space3]);
                 }
             }
             $spaceAfter = ($placedTile->space % 6) + 1;
-            $otherTile = $this->array_find($wall, fn($tile) => $tile->star == 0 && $tile->space == $spaceAfter);
-            if ($otherTile) {
-                $otherStar = (($placedTile->space + 2) % 6) + 1;
+            $tileAfter = $this->array_find($wall, fn($tile) => $tile->star == 0 && $tile->space == $spaceAfter);
+            if ($tileAfter) {
+                $otherStar = (($placedTile->space + 1) % 6) + 1;
                 $space2 = $this->array_find($wall, fn($tile) => $tile->star == $otherStar && $tile->space == 2);
                 $space3 = $this->array_find($wall, fn($tile) => $tile->star == $otherStar && $tile->space == 3);
                 if ($space2 && $space3) {
                     $additionalTiles += 1;
-                    $highlightedTiles = array_merge($highlightedTiles, [$placedTile, $otherTile, $space2, $space3]);
+                    $highlightedTiles = array_merge($highlightedTiles, [$placedTile, $tileAfter, $space2, $space3]);
                 }
             }
+            //echo json_encode([$spaceBefore, $placedTile->space, $spaceAfter, boolval($tileBefore), boolval($tileAfter)]);
         }
 
         return [
