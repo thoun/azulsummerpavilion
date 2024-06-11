@@ -398,6 +398,8 @@ trait ActionTrait {
             }
         }
 
+        self::DbQuery("UPDATE player SET passed = FALSE WHERE player_id = $playerId" );
+
         self::notifyAllPlayers('undoPlayTile', clienttranslate('${player_name} cancels ending the round'), [
             'playerId' => $playerId,
             'player_name' => self::getActivePlayerName(),
