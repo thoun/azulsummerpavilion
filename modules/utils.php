@@ -224,10 +224,12 @@ trait UtilTrait {
 
             foreach ($scoresNotif as $playerId => $notif) {
                 self::notifyAllPlayers('completeStarLogDetails', clienttranslate('${player_name} gains ${points} points with complete star ${color}'), [
+                    'playerId' => $playerId,
                     'player_name' => $this->getPlayerName($playerId),
                     'color' => $this->getColor($color),
                     'i18n' => ['color'],
                     'points' => $notif->points,
+                    'newScore' =>  $this->getPlayerScore($playerId),
                 ]);
             }
         }
@@ -274,9 +276,11 @@ trait UtilTrait {
 
             foreach ($scoresNotif as $playerId => $notif) {
                 self::notifyAllPlayers('completeNumberLogDetails', clienttranslate('${player_name} gains ${points} points with complete number ${number}'), [
+                    'playerId' => $playerId,
                     'player_name' => $this->getPlayerName($playerId),
                     'number' => $number,
                     'points' => $notif->points,
+                    'newScore' =>  $this->getPlayerScore($playerId),
                 ]);
             }
         }

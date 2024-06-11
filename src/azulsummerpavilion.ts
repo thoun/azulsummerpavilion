@@ -483,14 +483,6 @@ class AzulSummerPavilion implements AzulSummerPavilionGame {
         return this.playersTables.find(playerTable => playerTable.playerId === playerId);
     }
 
-    private incScore(playerId: number, incScore: number) {
-        if ((this as any).scoreCtrl[playerId]?.getValue() + incScore < 1) {
-            (this as any).scoreCtrl[playerId]?.toValue(1);
-        } else {
-            (this as any).scoreCtrl[playerId]?.incValue(incScore);
-        }
-    }
-
     private setScore(playerId: number, score: number) {
          (this as any).scoreCtrl[playerId]?.toValue(score);
     }
@@ -820,63 +812,79 @@ class AzulSummerPavilion implements AzulSummerPavilionGame {
         ];
 
         notifs.forEach((notif) => {
-            dojo.subscribe(notif[0], this, `notif_${notif[0]}`);
+            dojo.subscribe(notif[0], this, e => {
+                this[`notif_${notif[0]}`](e.args);
+                if (e.args.playerId && e.args.newScore !== undefined) {
+                    this.setScore(e.args.playerId, e.args.newScore);
+                }
+            });
             (this as any).notifqueue.setSynchronous(notif[0], notif[1]);
         });
+
+        ['completeStarLogDetails', 'completeNumberLogDetails'].forEach(notifName => {
+            dojo.subscribe(notifName, this, e => {
+                if (e.args.playerId && e.args.newScore !== undefined) {
+                    this.setScore(e.args.playerId, e.args.newScore);
+                }
+            });
+        });
+
+
+        
     }
 
-    notif_factoriesFilled(notif: Notif<NotifFactoriesFilledArgs>) {        
+    notif_factoriesFilled(args: NotifFactoriesFilledArgs) {        
         document.getElementById('factories-and-scoring-board').classList.remove('play');
 
-        this.factories.fillFactories(notif.args.factories);
-        this.factories.setRemainingTiles(notif.args.remainingTiles);
-        this.scoringBoard.setRoundNumber(notif.args.roundNumber);
-        document.getElementById('round').innerText = `${notif.args.roundNumber}`;
+        this.factories.fillFactories(args.factories);
+        this.factories.setRemainingTiles(args.remainingTiles);
+        this.scoringBoard.setRoundNumber(args.roundNumber);
+        document.getElementById('round').innerText = `${args.roundNumber}`;
         const wildToken = document.getElementById(`wildToken`);
-        wildToken.classList.remove(`tile${notif.args.roundNumber - 1}`);
-        wildToken.classList.add(`tile${notif.args.roundNumber}`);
+        wildToken.classList.remove(`tile${args.roundNumber - 1}`);
+        wildToken.classList.add(`tile${args.roundNumber}`);
 
         Object.keys(this.gamedatas.players).forEach(playerId => document.getElementById(`overall_player_board_${playerId}`).classList.remove('passed'));
     }
 
-    notif_supplyFilled(notif: Notif<NotifSupplyFilledArgs>) {
-        this.factories.setRemainingTiles(notif.args.remainingTiles);
-        this.scoringBoard.placeTiles(notif.args.newTiles, true);
+    notif_supplyFilled(args: NotifSupplyFilledArgs) {
+        this.factories.setRemainingTiles(args.remainingTiles);
+        this.scoringBoard.placeTiles(args.newTiles, true);
     }
 
-    notif_factoriesChanged(notif: Notif<NotifFactoriesChangedArgs>) {
-        this.factories.factoriesChanged(notif.args);
+    notif_factoriesChanged(args: NotifFactoriesChangedArgs) {
+        this.factories.factoriesChanged(args);
     }
 
-    notif_factoriesCompleted(notif: Notif<NotifFactoriesChangedArgs>) {
-        this.factories.factoriesCompleted(notif.args);
+    notif_factoriesCompleted(args: NotifFactoriesChangedArgs) {
+        this.factories.factoriesCompleted(args);
     }
 
-    notif_tilesSelected(notif: Notif<NotifTilesSelectedArgs>) {
-        if (!notif.args.fromSupply) {
-            if (notif.args.fromFactory == 0) {
-                this.factories.centerColorRemoved(notif.args.selectedTiles[0].type, notif.args.typeWild);
+    notif_tilesSelected(args: NotifTilesSelectedArgs) {
+        if (!args.fromSupply) {
+            if (args.fromFactory == 0) {
+                this.factories.centerColorRemoved(args.selectedTiles[0].type, args.typeWild);
             } else {
-                this.factories.factoryTilesRemoved(notif.args.fromFactory);
+                this.factories.factoryTilesRemoved(args.fromFactory);
             }
         }
-        const table = this.getPlayerTable(notif.args.playerId);
-        table.placeTilesOnHand(notif.args.selectedTiles);
-        if (!notif.args.fromSupply) {
-            this.factories.discardTiles(notif.args.discardedTiles);
+        const table = this.getPlayerTable(args.playerId);
+        table.placeTilesOnHand(args.selectedTiles);
+        if (!args.fromSupply) {
+            this.factories.discardTiles(args.discardedTiles);
         }
     }
 
-    notif_undoTakeTiles(notif: Notif<NotifUndoSelectArgs>) {
-        this.placeFirstPlayerToken(notif.args.undo.previousFirstPlayer);
+    notif_undoTakeTiles(args: NotifUndoSelectArgs) {
+        this.placeFirstPlayerToken(args.undo.previousFirstPlayer);
 
-        this.factories.undoTakeTiles(notif.args.undo.tiles, notif.args.undo.from, notif.args.factoryTilesBefore);
+        this.factories.undoTakeTiles(args.undo.tiles, args.undo.from, args.factoryTilesBefore);
 
-        this.setScore(notif.args.playerId, notif.args.undo.previousScore);
+        this.setScore(args.playerId, args.undo.previousScore);
     }
 
-    notif_undoPlayTile(notif: Notif<NotifUndoPlaceArgs>) {
-        const { playerId, undo } = notif.args;
+    notif_undoPlayTile(args: NotifUndoPlaceArgs) {
+        const { playerId, undo } = args;
         const table = this.getPlayerTable(playerId);
         if (undo) {
             table.placeTilesOnHand(undo.tiles);
@@ -889,12 +897,12 @@ class AzulSummerPavilion implements AzulSummerPavilionGame {
     }
 
 
-    /*notif_tilesPlacedOnLine(notif: Notif<NotifTilesPlacedOnLineArgs>) {
-        this.getPlayerTable(notif.args.playerId).placeTilesOnLine(notif.args.discardedTiles, 0);
-        this.getPlayerTable(notif.args.playerId).placeTilesOnLine(notif.args.placedTiles, notif.args.line);
+    /*notif_tilesPlacedOnLine(args: NotifTilesPlacedOnLineArgs) {
+        this.getPlayerTable(args.playerId).placeTilesOnLine(args.discardedTiles, 0);
+        this.getPlayerTable(args.playerId).placeTilesOnLine(args.placedTiles, args.line);
     }*/
-    notif_placeTileOnWall(notif: Notif<NotifPlaceTileOnWallArgs>) {
-        const { playerId, placedTile, discardedTiles, scoredTiles } = notif.args;
+    notif_placeTileOnWall(args: NotifPlaceTileOnWallArgs) {
+        const { playerId, placedTile, discardedTiles, scoredTiles } = args;
 
         //this.removeGhostTile();
         const playerTable = this.getPlayerTable(playerId);
@@ -905,46 +913,42 @@ class AzulSummerPavilion implements AzulSummerPavilionGame {
         setTimeout(() => scoredTiles.forEach(tile => dojo.removeClass(`tile${tile.id}`, 'highlight')), SCORE_MS - 50);
 
         this.displayScoringOnTile(placedTile, playerId, scoredTiles.length);
-        this.incScore(playerId, scoredTiles.length);
     }
 
-    notif_putToCorner(notif: Notif<NotifPutToCornerArgs>) {
-        const { playerId, keptTiles, discardedTiles, newScore } = notif.args;
+    notif_putToCorner(args: NotifPutToCornerArgs) {
+        const { playerId, keptTiles, discardedTiles } = args;
         this.getPlayerTable(playerId).placeTilesOnCorner(keptTiles);
         this.removeTiles(discardedTiles, true);
 
         if (discardedTiles.length > 0) {
             (this as any).displayScoring(`player-hand-${playerId}`, this.getPlayerColor(Number(playerId)), -discardedTiles.length, SCORE_MS);
-            this.setScore(playerId, newScore);
         }
     }
 
-    notif_cornerToHand(notif: Notif<NotifCornerToHandArgs>) {
-        const { playerId, tiles } = notif.args;
+    notif_cornerToHand(args: NotifCornerToHandArgs) {
+        const { playerId, tiles } = args;
         this.getPlayerTable(playerId).placeTilesOnHand(tiles);
     }
 
-    notif_pass(notif: Notif<NotifCornerToHandArgs>) {
-        const { playerId } = notif.args;
+    notif_pass(args: NotifCornerToHandArgs) {
+        const { playerId } = args;
         document.getElementById(`overall_player_board_${playerId}`).classList.add('passed');
     }
 
-    notif_endScore(notif: Notif<NotifEndScoreArgs>) {
-        Object.keys(notif.args.scores).forEach(playerId => {
-            const endScore: EndScoreTiles = notif.args.scores[playerId];
+    notif_endScore(args: NotifEndScoreArgs) {
+        Object.keys(args.scores).forEach(playerId => {
+            const endScore: EndScoreTiles = args.scores[playerId];
 
             endScore.tiles.forEach(tile => dojo.addClass(`tile${tile.id}`, 'highlight'));
             setTimeout(() => endScore.tiles.forEach(tile => dojo.removeClass(`tile${tile.id}`, 'highlight')), SCORE_MS - 50);
 
             this.displayScoringOnStar(endScore.star, playerId, endScore.points);
-            this.incScore(Number(playerId), endScore.points);
         });
     }
 
-    notif_firstPlayerToken(notif: Notif<NotifFirstPlayerTokenArgs>) {
-        const { playerId, decScore, newScore } = notif.args;
+    notif_firstPlayerToken(args: NotifFirstPlayerTokenArgs) {
+        const { playerId, decScore } = args;
         this.placeFirstPlayerToken(playerId);
-        this.setScore(playerId, newScore);
 
         this.factories.displayScoringCenter(playerId, -decScore);
     }

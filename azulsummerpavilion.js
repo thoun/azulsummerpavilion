@@ -1623,15 +1623,6 @@ var AzulSummerPavilion = /** @class */ (function () {
     AzulSummerPavilion.prototype.getPlayerTable = function (playerId) {
         return this.playersTables.find(function (playerTable) { return playerTable.playerId === playerId; });
     };
-    AzulSummerPavilion.prototype.incScore = function (playerId, incScore) {
-        var _a, _b, _c;
-        if (((_a = this.scoreCtrl[playerId]) === null || _a === void 0 ? void 0 : _a.getValue()) + incScore < 1) {
-            (_b = this.scoreCtrl[playerId]) === null || _b === void 0 ? void 0 : _b.toValue(1);
-        }
-        else {
-            (_c = this.scoreCtrl[playerId]) === null || _c === void 0 ? void 0 : _c.incValue(incScore);
-        }
-    };
     AzulSummerPavilion.prototype.setScore = function (playerId, score) {
         var _a;
         (_a = this.scoreCtrl[playerId]) === null || _a === void 0 ? void 0 : _a.toValue(score);
@@ -1916,53 +1907,65 @@ var AzulSummerPavilion = /** @class */ (function () {
             ['pass', 1],
         ];
         notifs.forEach(function (notif) {
-            dojo.subscribe(notif[0], _this, "notif_".concat(notif[0]));
+            dojo.subscribe(notif[0], _this, function (e) {
+                _this["notif_".concat(notif[0])](e.args);
+                if (e.args.playerId && e.args.newScore !== undefined) {
+                    _this.setScore(e.args.playerId, e.args.newScore);
+                }
+            });
             _this.notifqueue.setSynchronous(notif[0], notif[1]);
         });
+        ['completeStarLogDetails', 'completeNumberLogDetails'].forEach(function (notifName) {
+            dojo.subscribe(notifName, _this, function (e) {
+                if (e.args.playerId && e.args.newScore !== undefined) {
+                    _this.setScore(e.args.playerId, e.args.newScore);
+                }
+            });
+        });
     };
-    AzulSummerPavilion.prototype.notif_factoriesFilled = function (notif) {
+    AzulSummerPavilion.prototype.notif_factoriesFilled = function (args) {
         document.getElementById('factories-and-scoring-board').classList.remove('play');
-        this.factories.fillFactories(notif.args.factories);
-        this.factories.setRemainingTiles(notif.args.remainingTiles);
-        this.scoringBoard.setRoundNumber(notif.args.roundNumber);
-        document.getElementById('round').innerText = "".concat(notif.args.roundNumber);
+        this.factories.fillFactories(args.factories);
+        this.factories.setRemainingTiles(args.remainingTiles);
+        this.scoringBoard.setRoundNumber(args.roundNumber);
+        document.getElementById('round').innerText = "".concat(args.roundNumber);
         var wildToken = document.getElementById("wildToken");
-        wildToken.classList.remove("tile".concat(notif.args.roundNumber - 1));
-        wildToken.classList.add("tile".concat(notif.args.roundNumber));
+        wildToken.classList.remove("tile".concat(args.roundNumber - 1));
+        wildToken.classList.add("tile".concat(args.roundNumber));
         Object.keys(this.gamedatas.players).forEach(function (playerId) { return document.getElementById("overall_player_board_".concat(playerId)).classList.remove('passed'); });
     };
-    AzulSummerPavilion.prototype.notif_supplyFilled = function (notif) {
-        this.factories.setRemainingTiles(notif.args.remainingTiles);
-        this.scoringBoard.placeTiles(notif.args.newTiles, true);
+    AzulSummerPavilion.prototype.notif_supplyFilled = function (args) {
+        this.factories.setRemainingTiles(args.remainingTiles);
+        this.scoringBoard.placeTiles(args.newTiles, true);
     };
-    AzulSummerPavilion.prototype.notif_factoriesChanged = function (notif) {
-        this.factories.factoriesChanged(notif.args);
+    AzulSummerPavilion.prototype.notif_factoriesChanged = function (args) {
+        this.factories.factoriesChanged(args);
     };
-    AzulSummerPavilion.prototype.notif_factoriesCompleted = function (notif) {
-        this.factories.factoriesCompleted(notif.args);
+    AzulSummerPavilion.prototype.notif_factoriesCompleted = function (args) {
+        this.factories.factoriesCompleted(args);
     };
-    AzulSummerPavilion.prototype.notif_tilesSelected = function (notif) {
-        if (!notif.args.fromSupply) {
-            if (notif.args.fromFactory == 0) {
-                this.factories.centerColorRemoved(notif.args.selectedTiles[0].type, notif.args.typeWild);
+    AzulSummerPavilion.prototype.notif_tilesSelected = function (args) {
+        if (!args.fromSupply) {
+            if (args.fromFactory == 0) {
+                this.factories.centerColorRemoved(args.selectedTiles[0].type, args.typeWild);
             }
             else {
-                this.factories.factoryTilesRemoved(notif.args.fromFactory);
+                this.factories.factoryTilesRemoved(args.fromFactory);
             }
         }
-        var table = this.getPlayerTable(notif.args.playerId);
-        table.placeTilesOnHand(notif.args.selectedTiles);
-        if (!notif.args.fromSupply) {
-            this.factories.discardTiles(notif.args.discardedTiles);
+        var table = this.getPlayerTable(args.playerId);
+        table.placeTilesOnHand(args.selectedTiles);
+        if (!args.fromSupply) {
+            this.factories.discardTiles(args.discardedTiles);
         }
     };
-    AzulSummerPavilion.prototype.notif_undoTakeTiles = function (notif) {
-        this.placeFirstPlayerToken(notif.args.undo.previousFirstPlayer);
-        this.factories.undoTakeTiles(notif.args.undo.tiles, notif.args.undo.from, notif.args.factoryTilesBefore);
-        this.setScore(notif.args.playerId, notif.args.undo.previousScore);
+    AzulSummerPavilion.prototype.notif_undoTakeTiles = function (args) {
+        this.placeFirstPlayerToken(args.undo.previousFirstPlayer);
+        this.factories.undoTakeTiles(args.undo.tiles, args.undo.from, args.factoryTilesBefore);
+        this.setScore(args.playerId, args.undo.previousScore);
     };
-    AzulSummerPavilion.prototype.notif_undoPlayTile = function (notif) {
-        var _a = notif.args, playerId = _a.playerId, undo = _a.undo;
+    AzulSummerPavilion.prototype.notif_undoPlayTile = function (args) {
+        var playerId = args.playerId, undo = args.undo;
         var table = this.getPlayerTable(playerId);
         if (undo) {
             table.placeTilesOnHand(undo.tiles);
@@ -1972,12 +1975,12 @@ var AzulSummerPavilion = /** @class */ (function () {
         }
         // this.removeGhostTile();
     };
-    /*notif_tilesPlacedOnLine(notif: Notif<NotifTilesPlacedOnLineArgs>) {
-        this.getPlayerTable(notif.args.playerId).placeTilesOnLine(notif.args.discardedTiles, 0);
-        this.getPlayerTable(notif.args.playerId).placeTilesOnLine(notif.args.placedTiles, notif.args.line);
+    /*notif_tilesPlacedOnLine(args: NotifTilesPlacedOnLineArgs) {
+        this.getPlayerTable(args.playerId).placeTilesOnLine(args.discardedTiles, 0);
+        this.getPlayerTable(args.playerId).placeTilesOnLine(args.placedTiles, args.line);
     }*/
-    AzulSummerPavilion.prototype.notif_placeTileOnWall = function (notif) {
-        var _a = notif.args, playerId = _a.playerId, placedTile = _a.placedTile, discardedTiles = _a.discardedTiles, scoredTiles = _a.scoredTiles;
+    AzulSummerPavilion.prototype.notif_placeTileOnWall = function (args) {
+        var playerId = args.playerId, placedTile = args.placedTile, discardedTiles = args.discardedTiles, scoredTiles = args.scoredTiles;
         //this.removeGhostTile();
         var playerTable = this.getPlayerTable(playerId);
         playerTable.placeTilesOnWall([placedTile]);
@@ -1985,39 +1988,35 @@ var AzulSummerPavilion = /** @class */ (function () {
         scoredTiles.forEach(function (tile) { return dojo.addClass("tile".concat(tile.id), 'highlight'); });
         setTimeout(function () { return scoredTiles.forEach(function (tile) { return dojo.removeClass("tile".concat(tile.id), 'highlight'); }); }, SCORE_MS - 50);
         this.displayScoringOnTile(placedTile, playerId, scoredTiles.length);
-        this.incScore(playerId, scoredTiles.length);
     };
-    AzulSummerPavilion.prototype.notif_putToCorner = function (notif) {
-        var _a = notif.args, playerId = _a.playerId, keptTiles = _a.keptTiles, discardedTiles = _a.discardedTiles, newScore = _a.newScore;
+    AzulSummerPavilion.prototype.notif_putToCorner = function (args) {
+        var playerId = args.playerId, keptTiles = args.keptTiles, discardedTiles = args.discardedTiles;
         this.getPlayerTable(playerId).placeTilesOnCorner(keptTiles);
         this.removeTiles(discardedTiles, true);
         if (discardedTiles.length > 0) {
             this.displayScoring("player-hand-".concat(playerId), this.getPlayerColor(Number(playerId)), -discardedTiles.length, SCORE_MS);
-            this.setScore(playerId, newScore);
         }
     };
-    AzulSummerPavilion.prototype.notif_cornerToHand = function (notif) {
-        var _a = notif.args, playerId = _a.playerId, tiles = _a.tiles;
+    AzulSummerPavilion.prototype.notif_cornerToHand = function (args) {
+        var playerId = args.playerId, tiles = args.tiles;
         this.getPlayerTable(playerId).placeTilesOnHand(tiles);
     };
-    AzulSummerPavilion.prototype.notif_pass = function (notif) {
-        var playerId = notif.args.playerId;
+    AzulSummerPavilion.prototype.notif_pass = function (args) {
+        var playerId = args.playerId;
         document.getElementById("overall_player_board_".concat(playerId)).classList.add('passed');
     };
-    AzulSummerPavilion.prototype.notif_endScore = function (notif) {
+    AzulSummerPavilion.prototype.notif_endScore = function (args) {
         var _this = this;
-        Object.keys(notif.args.scores).forEach(function (playerId) {
-            var endScore = notif.args.scores[playerId];
+        Object.keys(args.scores).forEach(function (playerId) {
+            var endScore = args.scores[playerId];
             endScore.tiles.forEach(function (tile) { return dojo.addClass("tile".concat(tile.id), 'highlight'); });
             setTimeout(function () { return endScore.tiles.forEach(function (tile) { return dojo.removeClass("tile".concat(tile.id), 'highlight'); }); }, SCORE_MS - 50);
             _this.displayScoringOnStar(endScore.star, playerId, endScore.points);
-            _this.incScore(Number(playerId), endScore.points);
         });
     };
-    AzulSummerPavilion.prototype.notif_firstPlayerToken = function (notif) {
-        var _a = notif.args, playerId = _a.playerId, decScore = _a.decScore, newScore = _a.newScore;
+    AzulSummerPavilion.prototype.notif_firstPlayerToken = function (args) {
+        var playerId = args.playerId, decScore = args.decScore;
         this.placeFirstPlayerToken(playerId);
-        this.setScore(playerId, newScore);
         this.factories.displayScoringCenter(playerId, -decScore);
     };
     AzulSummerPavilion.prototype.notif_lastRound = function () {

@@ -267,6 +267,8 @@ trait ActionTrait {
         $scoredTiles = $this->getScoredTiles($playerId, $placedTile);
         $points = count($scoredTiles);
 
+        $this->incPlayerScore($playerId, $points);
+
         self::notifyAllPlayers('placeTileOnWall', clienttranslate('${player_name} places ${number} ${color} and gains ${points} point(s)'), [
             'placedTile' => $placedTile,
             'discardedTiles' => $discardedTiles,
@@ -279,9 +281,8 @@ trait ActionTrait {
             'type' => $placedTile->type,
             'preserve' => [ 2 => 'type' ],
             'points' => $points,
+            'newScore' => $this->getPlayerScore($playerId),
         ]);
-
-        $this->incPlayerScore($playerId, $points);
 
         $this->setGlobalVariable(UNDO_PLACE, new UndoPlace($tiles, $previousScore, $points));
 
