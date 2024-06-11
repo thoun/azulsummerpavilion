@@ -376,7 +376,7 @@ class AzulSummerPavilion implements AzulSummerPavilionGame {
             (document.getElementById('preference_fontrol_299').closest(".preference_choice") as HTMLDivElement).style.display = 'none';
         } catch (e) {}
 
-        [201, 203, 205, 206, 299].forEach(
+        [201, 203, 205, 206, 207, 299].forEach(
             prefId => this.onGameUserPreferenceChanged(prefId, (this as any).getGameUserPreference(prefId))
         );
     }
@@ -394,6 +394,9 @@ class AzulSummerPavilion implements AzulSummerPavilionGame {
                 break;
             case 206: 
                 this.playersTables.forEach(playerTable => playerTable.setFont(prefValue));
+                break;
+            case 207: 
+            dojo.toggleClass(document.getElementsByTagName('html')[0] as any, 'show-numbers', prefValue == 1);
                 break;
             case 299: 
                 this.toggleZoomNotice(prefValue == 1);

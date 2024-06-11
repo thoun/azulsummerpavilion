@@ -42,7 +42,11 @@ class PlayerTable {
             }
             html += `<div id="player-table-${this.playerId}-star-${star}" class="star star${star}" style=" --rotation: ${(star == 0 ? 3 : star - 4) * -60}deg;">`;
             for (let space=1; space<=6; space++) {
-                html += `<div id="player-table-${this.playerId}-star-${star}-space-${space}" class="space space${space} ${cbTileColor}" style="--number: '${space}'; --rotation: ${240 - space * 60 - (star == 0 ? 3 : star - 4) * 60}deg;"></div>`;
+                let displayedNumber = space;
+                if (variant) {
+                    displayedNumber = star == 0 ? 3 : [null, 3, 2, 1, 4, 5, 6][space];
+                }
+                html += `<div id="player-table-${this.playerId}-star-${star}-space-${space}" class="space space${space} ${cbTileColor}" style="--number: '${displayedNumber}'; --rotation: ${240 - space * 60 - (star == 0 ? 3 : star - 4) * 60}deg;"></div>`;
             }
             html += `</div>`;
         }

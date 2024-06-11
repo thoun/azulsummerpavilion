@@ -77,6 +77,15 @@
 
 
 $game_preferences = [
+    207 => [
+        'name' => totranslate('Show empty spaces numbers'),
+        'needReload' => false,
+        'values' => [
+            1 => [ 'name' => totranslate('Enabled')],
+            2 => [ 'name' => totranslate('Disabled')],
+        ],
+        'default' => 1
+    ],
 
     201 => [
         'name' => totranslate('Tile shimmer'),
@@ -127,6 +136,8 @@ $game_preferences = [
         ],
         'default' => 2
     ],
+
+    // 207 : show-numbers
 
     299 => [
         'name' => '',

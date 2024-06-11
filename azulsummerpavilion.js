@@ -1147,7 +1147,11 @@ var PlayerTable = /** @class */ (function () {
             }
             html += "<div id=\"player-table-".concat(this.playerId, "-star-").concat(star, "\" class=\"star star").concat(star, "\" style=\" --rotation: ").concat((star == 0 ? 3 : star - 4) * -60, "deg;\">");
             for (var space = 1; space <= 6; space++) {
-                html += "<div id=\"player-table-".concat(this.playerId, "-star-").concat(star, "-space-").concat(space, "\" class=\"space space").concat(space, " ").concat(cbTileColor, "\" style=\"--number: '").concat(space, "'; --rotation: ").concat(240 - space * 60 - (star == 0 ? 3 : star - 4) * 60, "deg;\"></div>");
+                var displayedNumber = space;
+                if (variant) {
+                    displayedNumber = star == 0 ? 3 : [null, 3, 2, 1, 4, 5, 6][space];
+                }
+                html += "<div id=\"player-table-".concat(this.playerId, "-star-").concat(star, "-space-").concat(space, "\" class=\"space space").concat(space, " ").concat(cbTileColor, "\" style=\"--number: '").concat(displayedNumber, "'; --rotation: ").concat(240 - space * 60 - (star == 0 ? 3 : star - 4) * 60, "deg;\"></div>");
             }
             html += "</div>";
         }
@@ -1536,7 +1540,7 @@ var AzulSummerPavilion = /** @class */ (function () {
             document.getElementById('preference_fontrol_299').closest(".preference_choice").style.display = 'none';
         }
         catch (e) { }
-        [201, 203, 205, 206, 299].forEach(function (prefId) { return _this.onGameUserPreferenceChanged(prefId, _this.getGameUserPreference(prefId)); });
+        [201, 203, 205, 206, 207, 299].forEach(function (prefId) { return _this.onGameUserPreferenceChanged(prefId, _this.getGameUserPreference(prefId)); });
     };
     AzulSummerPavilion.prototype.onGameUserPreferenceChanged = function (prefId, prefValue) {
         switch (prefId) {
@@ -1551,6 +1555,9 @@ var AzulSummerPavilion = /** @class */ (function () {
                 break;
             case 206:
                 this.playersTables.forEach(function (playerTable) { return playerTable.setFont(prefValue); });
+                break;
+            case 207:
+                dojo.toggleClass(document.getElementsByTagName('html')[0], 'show-numbers', prefValue == 1);
                 break;
             case 299:
                 this.toggleZoomNotice(prefValue == 1);

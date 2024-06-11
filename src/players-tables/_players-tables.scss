@@ -219,20 +219,6 @@
             /*.ghost {
                 opacity: 0.5;
             }*/
-
-            /*&::after {
-                content: var(--number);
-                position: absolute;
-                transform: rotate(var(--rotation));
-                transform-origin: center center;
-                top: 20px;
-                bottom: 20px;
-                left: 20px;
-                right: 20px;
-                text-align: center;
-                border-radius: 50%;
-                background: #FFFFFF66;
-            }*/
         }
 
         .scoring-star, .scoring-tile {
@@ -282,5 +268,22 @@
     .space.cb-tile6 {
         background-image: url('img/red.svg');
         background-size: 60%;
+    }
+}
+
+.show-numbers {
+    .space:empty::after {
+        content: var(--number);
+        position: absolute;
+        transform: translateY(-42px) rotate(var(--rotation));
+        transform-origin: center center;
+        top: 16px;
+        bottom: 16px;
+        left: 16px;
+        right: 16px;
+        text-align: center;
+        border-radius: 50%;
+        background: #FFFFFFBB;
+        font-size: 28px;
     }
 }
