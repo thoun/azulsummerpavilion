@@ -1909,7 +1909,7 @@ var AzulSummerPavilion = /** @class */ (function () {
         notifs.forEach(function (notif) {
             dojo.subscribe(notif[0], _this, function (e) {
                 _this["notif_".concat(notif[0])](e.args);
-                if (e.args.playerId && e.args.newScore !== undefined) {
+                if (e.args.playerId && e.args.newScore !== undefined && e.args.newScore !== null) {
                     _this.setScore(e.args.playerId, e.args.newScore);
                 }
             });

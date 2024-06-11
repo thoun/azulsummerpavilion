@@ -479,9 +479,9 @@ trait ActionTrait {
         $keptNumber = count($keptTiles);
         $discardedNumber = count($discardedTiles);
 
-        $newScore = null;
+        $newScoreArgs = [];
         if ($discardedNumber > 0) {  
-            $newScore = $this->decPlayerScore($playerId, $discardedNumber); 
+            $newScoreArgs['newScore'] = $this->decPlayerScore($playerId, $discardedNumber); 
         }
 
         if ($keptNumber > 0 || $discardedNumber > 0) {        
@@ -495,8 +495,7 @@ trait ActionTrait {
                 'discardedTiles' => $discardedTiles,
                 'keptNumber' => $keptNumber, // for logs
                 'discardedNumber' => $discardedNumber, // for logs
-                'newScore' => $newScore,
-            ]);
+            ] + $newScoreArgs);
         }
 
         $this->setGlobalVariable(UNDO_PLACE, new UndoPlace($hand, $previousScore, count($discardedTiles)));

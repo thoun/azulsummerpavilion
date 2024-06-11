@@ -814,7 +814,7 @@ class AzulSummerPavilion implements AzulSummerPavilionGame {
         notifs.forEach((notif) => {
             dojo.subscribe(notif[0], this, e => {
                 this[`notif_${notif[0]}`](e.args);
-                if (e.args.playerId && e.args.newScore !== undefined) {
+                if (e.args.playerId && e.args.newScore !== undefined && e.args.newScore !== null) {
                     this.setScore(e.args.playerId, e.args.newScore);
                 }
             });
