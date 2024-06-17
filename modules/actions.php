@@ -361,6 +361,8 @@ trait ActionTrait {
             foreach ($undo->supplyTiles as $tile) {
                 $this->tiles->moveCard($tile->id, $tile->location, $tile->space);
             }
+
+            $this->setPlayerScore($playerId, $undo->previousScore);
         }
 
         self::notifyAllPlayers('undoPlayTile', clienttranslate('${player_name} cancels tile placement'), [
