@@ -75,7 +75,7 @@ class PlayerTable {
         const handDiv = document.getElementById(`player-hand-${this.playerId}`);
         const tileCount = handDiv.querySelectorAll('.tile').length;
         handDiv.style.setProperty('--hand-overlap', `-${
-            tileCount < 12 ? 0 : (tileCount - 12) * 8
+            tileCount < 11 ? 0 : (tileCount - 11) * 3.5
         }px`);
     }
 

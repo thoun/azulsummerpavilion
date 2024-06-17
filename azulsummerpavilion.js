@@ -1179,7 +1179,7 @@ var PlayerTable = /** @class */ (function () {
     PlayerTable.prototype.handCountChanged = function () {
         var handDiv = document.getElementById("player-hand-".concat(this.playerId));
         var tileCount = handDiv.querySelectorAll('.tile').length;
-        handDiv.style.setProperty('--hand-overlap', "-".concat(tileCount < 12 ? 0 : (tileCount - 12) * 8, "px"));
+        handDiv.style.setProperty('--hand-overlap', "-".concat(tileCount < 11 ? 0 : (tileCount - 11) * 3.5, "px"));
     };
     PlayerTable.prototype.placeTilesOnHand = function (tiles) {
         var _this = this;

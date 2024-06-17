@@ -12,6 +12,7 @@
     position: relative;
     display: inline-block;
     margin-left: 20px;
+    overflow: auto;
 
     .player-hand {
         height: 128px;
