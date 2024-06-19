@@ -811,3 +811,7 @@ html, .mode_3d #game_play_area_background {
   right: -12px;
   top: 8px;
 }
+
+#table-decision {
+  margin-top: 24px;
+}

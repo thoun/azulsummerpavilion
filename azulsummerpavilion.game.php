@@ -181,7 +181,18 @@ class AzulSummerPavilion extends Table {
     */
     function getGameProgression() {
         $round = $this->getRound();
-        return ($round - 1) * 20;
+        $expectedTiles = $this->getFactoryNumber() * 4;
+        $factoryTileCount = $this->tiles->countCardInLocation('factory');
+
+        $inRoundProgress = 0; // 0 to 0.5 : take tiles -- 0.5 to 1 : place tiles
+        if ($factoryTileCount > 0) {
+            $inRoundProgress = 0.5 - min(0.5, max(0, 0.5 * $factoryTileCount / $expectedTiles));
+        } else {
+            $handTileCount = $this->tiles->countCardInLocation('hand');
+            $inRoundProgress = 1 - min(0.5, max(0, 0.5 * $handTileCount / $expectedTiles));
+        }
+
+        return ($round - 1 + $inRoundProgress) * 100 / 6;
     }
 
     //////////////////////////////////////////////////////////////////////////////
