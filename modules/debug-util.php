@@ -74,31 +74,35 @@ trait DebugUtilTrait {
         }
     }
 
-    public function debugReplacePlayersIds() {
-        if ($this->getBgaEnvironment() != 'studio') { 
-            return;
-        } 
+    public function loadBugReportSQL(int $reportId, array $studioPlayers): void
+    {
+        $prodPlayers = $this->getObjectListFromDb("SELECT `player_id` FROM `player`", true);
+        $prodCount = count($prodPlayers);
+        $studioCount = count($studioPlayers);
+        if ($prodCount != $studioCount) {
+            throw new BgaVisibleSystemException("Incorrect player count (bug report has $prodCount players, studio table has $studioCount players)");
+        }
 
-        $ids = array_map(fn($dbPlayer) => intval($dbPlayer['player_id']), array_values($this->getCollectionFromDb('select player_id from player order by player_no')));
+        // SQL specific to your game
+        // For example, reset the current state if it's already game over
+        $sql = [
+            "UPDATE `global` SET `global_value` = 20 WHERE `global_id` = 1 AND `global_value` = 99"
+        ];
+        foreach ($prodPlayers as $index => $prodId) {
+            $studioId = $studioPlayers[$index];
+            // SQL common to all games
+            $sql[] = "UPDATE `player` SET `player_id` = $studioId WHERE `player_id` = $prodId";
+            $sql[] = "UPDATE `global` SET `global_value` = $studioId WHERE `global_value` = $prodId";
+            $sql[] = "UPDATE `stats` SET `stats_player_id` = $studioId WHERE `stats_player_id` = $prodId";
 
-		// Id of the first player in BGA Studio
-		$sid = 2343492;
-		
-		foreach ($ids as $id) {
-			// basic tables
-			self::DbQuery("UPDATE player SET player_id=$sid WHERE player_id = $id" );
-			self::DbQuery("UPDATE global SET global_value=$sid WHERE global_value = $id" );
-			self::DbQuery("UPDATE stats SET stats_player_id=$sid WHERE stats_player_id = $id" );
-
-			// 'other' game specific tables. example:
-			// tables specific to your schema that use player_ids
-			self::DbQuery("UPDATE tile SET card_location='line$sid' WHERE card_location = 'line$id'" );
-			self::DbQuery("UPDATE tile SET card_location='wall$sid' WHERE card_location = 'wall$id'" );
-			self::DbQuery("UPDATE tile SET card_location_arg=$sid WHERE card_location_arg = $id" );
-			
-			++$sid;
-		}
-	}
+            // SQL specific to your game
+            $sql[] = "UPDATE `tile` SET `card_location_arg` = $studioId WHERE `card_location_arg` = $prodId";
+			$sql[] = "UPDATE tile SET card_location='wall$studioId' WHERE card_location = 'wall$prodId'";
+        }
+        foreach ($sql as $q) {
+            $this->DbQuery($q);
+        }
+    }
 
     function debug($debugData) {
         if ($this->getBgaEnvironment() != 'studio') { 

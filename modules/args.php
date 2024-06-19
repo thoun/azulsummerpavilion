@@ -42,7 +42,7 @@ trait ArgsTrait {
                 if ($variant || $forcedColor == 0) {
                     $starTiles = array_values(array_filter($placedTiles, fn($placedTile) => $placedTile->star == $star));
                     $starColors = array_map(fn($starTile) => $starTile->type, $starTiles);
-                    $colors = array_diff([1, 2, 3, 4, 5, 6], $starColors);
+                    $colors = $variant && count($starTiles) === 1 ? [1, 2, 3, 4, 5, 6] : array_values(array_diff([1, 2, 3, 4, 5, 6], $starColors));
                     if ($variant && count($starColors) >= 2 && $starColors[0] == $starColors[1]) {
                         $colors = [$starColors[0]];
                     }
