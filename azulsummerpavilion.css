@@ -780,6 +780,15 @@ html, .mode_3d #game_play_area_background {
   vertical-align: middle;
 }
 
+.gamelogreview .tile {
+  margin: 2px;
+  position: relative;
+  width: 24px;
+  height: 24px;
+  box-shadow: none;
+  vertical-align: middle;
+}
+
 #last-round {
   margin: 5px -5px -5px;
   text-align: center;
