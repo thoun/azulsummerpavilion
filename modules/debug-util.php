@@ -45,8 +45,8 @@ trait DebugUtilTrait {
         $this->tiles->moveCard($tile->id, 'wall'.$playerId, $star*100 + $space);
     }
 
-    function debugEmptyFactories($full = false) {
-        $this->debugRemoveFp();
+    function debug_emptyFactories($full = true, int $playerId = 2343492) {
+        $this->debug_removeFp();
 
         $factoryNumber = $this->getFactoryNumber();
         for ($i = 1; $i<=$factoryNumber; $i++) {
@@ -54,7 +54,7 @@ trait DebugUtilTrait {
                 $tiles = $this->getTilesFromDb($this->tiles->getCardsInLocation('factory', $i));
                 foreach ($tiles as $key => $tile) {
                     if ($full || $i > 1 || $key > 0) {
-                        $this->tiles->moveCard($tile->id, 'discard');
+                        $this->tiles->moveCard($tile->id, 'hand', $playerId + ($i % 2));
                     }
                 }
             }
@@ -63,8 +63,7 @@ trait DebugUtilTrait {
         //$this->tiles->moveAllCardsInLocation('corner', 'hand', $playerId, $playerId);
     }
 
-    function debugRemoveFp() {
-        $playerId = 2343492;
+    function debug_removeFp(int $playerId = 2343492) {
         $factoryTiles = $this->getTilesFromDb($this->tiles->getCardsInLocation('factory', 0));
         $firstPlayerTokens = array_values(array_filter($factoryTiles, fn($fpTile) => $fpTile->type == 0));
         $hasFirstPlayer = count($firstPlayerTokens) > 0;
@@ -72,6 +71,10 @@ trait DebugUtilTrait {
             $this->tiles->moveCards(array_map('getIdPredicate', $firstPlayerTokens), 'hand', $playerId);
             $this->putFirstPlayerTile($playerId, $firstPlayerTokens);
         }
+    }
+
+    function debug_place() {
+        $this->gamestate->jumpToState(ST_PLAYER_CHOOSE_PLACE);
     }
 
     public function loadBugReportSQL(int $reportId, array $studioPlayers): void

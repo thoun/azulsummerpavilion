@@ -346,7 +346,7 @@ class AzulSummerPavilion implements AzulSummerPavilionGame {
                     break;
                 case 'chooseKeptTiles':
                     (this as any).addActionButton('selectKeptTiles_button', '', () => this.selectKeptTiles());
-                    (this as any).addActionButton('cancel_button', _("Cancel"), () => this.cancel(), null, null, 'gray');
+                    (this as any).addActionButton('cancel_button', _("Cancel"), () => this.undoPass(), null, null, 'gray');
                     this.updateSelectKeptTilesButton();
                     break;
                 case 'confirmPass':
@@ -893,8 +893,8 @@ class AzulSummerPavilion implements AzulSummerPavilionGame {
             table.placeTilesOnHand(undo.tiles);
             this.setScore(playerId, undo.previousScore);
             this.scoringBoard.placeTiles(undo.supplyTiles, true);
-            document.getElementById(`overall_player_board_${playerId}`).classList.remove('passed');
         }
+        document.getElementById(`overall_player_board_${playerId}`).classList.remove('passed');
         
        // this.removeGhostTile();
     }

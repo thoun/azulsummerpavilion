@@ -160,10 +160,10 @@ $playerActionsGameStates = [
         "type" => "activeplayer",
         "possibleactions" => [ 
             "selectKeptTiles",
-            "cancel",
+            "undoPass",
         ],
         "transitions" => [
-            "cancel" => ST_PLAYER_CHOOSE_PLACE,
+            "undo" => ST_PLAYER_CHOOSE_PLACE,
         ],
     ],
 

@@ -1514,7 +1514,7 @@ var AzulSummerPavilion = /** @class */ (function () {
                     break;
                 case 'chooseKeptTiles':
                     this.addActionButton('selectKeptTiles_button', '', function () { return _this.selectKeptTiles(); });
-                    this.addActionButton('cancel_button', _("Cancel"), function () { return _this.cancel(); }, null, null, 'gray');
+                    this.addActionButton('cancel_button', _("Cancel"), function () { return _this.undoPass(); }, null, null, 'gray');
                     this.updateSelectKeptTilesButton();
                     break;
                 case 'confirmPass':
@@ -1978,8 +1978,8 @@ var AzulSummerPavilion = /** @class */ (function () {
             table.placeTilesOnHand(undo.tiles);
             this.setScore(playerId, undo.previousScore);
             this.scoringBoard.placeTiles(undo.supplyTiles, true);
-            document.getElementById("overall_player_board_".concat(playerId)).classList.remove('passed');
         }
+        document.getElementById("overall_player_board_".concat(playerId)).classList.remove('passed');
         // this.removeGhostTile();
     };
     /*notif_tilesPlacedOnLine(args: NotifTilesPlacedOnLineArgs) {
