@@ -58,6 +58,8 @@ trait StateTrait {
     }
 
     function stNextPlayerAcquire() {
+        $this->setGlobalVariable(UNDO_SELECT, null);
+
         $factoriesAllEmpty = $this->tiles->countCardInLocation('factory') == 0;
         $playerId = self::getActivePlayerId();
         self::giveExtraTime($playerId);
@@ -84,6 +86,8 @@ trait StateTrait {
     }
 
     function stNextPlayerPlay() {
+        $this->setGlobalVariable(UNDO_PLACE, null);
+
         $allPassed = intval(self::getUniqueValueFromDB("SELECT count(*) FROM player WHERE passed = FALSE")) == 0;
         $playerId = intval(self::getActivePlayerId());
 
