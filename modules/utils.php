@@ -82,8 +82,8 @@ trait UtilTrait {
         return intval(self::getGameStateValue(VARIANT_OPTION)) === 2;
     }
 
-    function allowUndo() {
-        return intval(self::getGameStateValue(UNDO)) === 1;
+    function isUndoActivated(int $player) {
+        return intval($this->getGameUserPreference($player, 101)) === 1;
     }
 
     function isFastScoring() {

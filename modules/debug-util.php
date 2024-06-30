@@ -63,6 +63,31 @@ trait DebugUtilTrait {
         //$this->tiles->moveAllCardsInLocation('corner', 'hand', $playerId, $playerId);
     }
 
+    function debug_testOnlyWild() {
+        $this->debug_removeFp();
+
+        $factoryNumber = $this->getFactoryNumber();
+        for ($i = 1; $i<=$factoryNumber; $i++) {
+            if (intval($this->tiles->countCardInLocation('factory', $i)) > 0) {
+                $tiles = $this->getTilesFromDb($this->tiles->getCardsInLocation('factory', $i));
+                foreach ($tiles as $key => $tile) {
+                    if ($i > 1 || $key > 2) {
+                        $this->tiles->moveCard($tile->id, 'void');
+                    } else {
+                        $type = $key == 0 ? 2 : 1;
+                        $this->DbQuery("UPDATE `tile` SET `card_type` = $type, card_location_arg = 0 WHERE `card_id` = $tile->id");
+                    }
+                }
+            }
+        }
+
+        //$this->tiles->moveAllCardsInLocation('corner', 'hand', $playerId, $playerId);
+    }
+
+    function debug_setType(int $tileId, int $type) {
+        $this->DbQuery("UPDATE `tile` SET `card_type` = $type WHERE `card_id` = $tileId");
+    }
+
     function debug_removeFp(int $playerId = 2343492) {
         $factoryTiles = $this->getTilesFromDb($this->tiles->getCardsInLocation('factory', 0));
         $firstPlayerTokens = array_values(array_filter($factoryTiles, fn($fpTile) => $fpTile->type == 0));

@@ -50,14 +50,11 @@ class Factories {
         return halfSize*2;
     }
 
-    public centerColorRemoved(color: number, typeWild: number) {
-        this.tilesInFactories[0][color] = [];
-        this.tilesPositionsInCenter[color] = [];
-
-        if (typeWild) {
-            this.tilesInFactories[0][typeWild].shift();
-            this.tilesPositionsInCenter[typeWild].shift();
-        }
+    public centerColorRemoved(selectedTiles: Tile[]) {
+        selectedTiles.forEach(tile => {
+            this.tilesInFactories[0][tile.type] = this.tilesInFactories[0][tile.type].filter(t => t.id != tile.id);
+            this.tilesPositionsInCenter[tile.type] = this.tilesPositionsInCenter[tile.type].filter(t => t.id != tile.id);
+        });
 
         this.updateDiscardedTilesNumbers();
     }
@@ -269,33 +266,27 @@ class Factories {
     }
 
     private updateDiscardedTilesNumbers() {
+        document.querySelectorAll('.tile-count').forEach(tc => tc?.remove());
+
         for (let type=1; type<=6; type++) {
             const number = this.tilesPositionsInCenter[type].length;
 
-            const numberDiv = document.getElementById(`tileCount${type}`);
-
             if (!number) {
-                numberDiv?.parentElement.removeChild(numberDiv);
                 continue;
             }
 
             const x = this.tilesPositionsInCenter[type].reduce((sum, place) => sum + place.x, 0) / number + 14;
             const y = this.tilesPositionsInCenter[type].reduce((sum, place) => sum + place.y, 0) / number + 14;
-            if (numberDiv) {
-                numberDiv.style.left = `${x}px`;
-                numberDiv.style.top = `${y}px`;
-                numberDiv.innerHTML = ''+number;
-            } else {
-                dojo.place(`
-                <div id="tileCount${type}" class="tile-count tile${type}" style="left: ${x}px; top: ${y}px;">${number}</div>
-                `, 'factories');
+            
+            dojo.place(`
+            <div id="tileCount${type}" class="tile-count tile${type}" style="left: ${x}px; top: ${y}px;">${number}</div>
+            `, 'factories');
 
-                const newNumberDiv = document.getElementById(`tileCount${type}`);
-                const firstTileId = this.tilesInFactories[0][type][0].id;
-                newNumberDiv.addEventListener('click', () => this.game.takeTiles(firstTileId));
-                newNumberDiv.addEventListener('mouseenter', () => this.tileMouseEnter(firstTileId));
-                newNumberDiv.addEventListener('mouseleave', () => this.tileMouseLeave(firstTileId));
-            }
+            const newNumberDiv = document.getElementById(`tileCount${type}`);
+            const firstTileId = this.tilesInFactories[0][type][0].id;
+            newNumberDiv.addEventListener('click', () => this.game.takeTiles(firstTileId));
+            newNumberDiv.addEventListener('mouseenter', () => this.tileMouseEnter(firstTileId));
+            newNumberDiv.addEventListener('mouseleave', () => this.tileMouseLeave(firstTileId));
         }
     }
 

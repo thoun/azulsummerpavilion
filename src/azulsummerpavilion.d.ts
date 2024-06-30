@@ -37,7 +37,6 @@ interface AzulSummerPavilionGamedatas {
     firstPlayerTokenPlayerId: number;
     variant: boolean;
     endRound: boolean;
-    undo: boolean;
     fastScoring: boolean;
     remainingTiles: number;
     round: number; // 1..6

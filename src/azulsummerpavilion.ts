@@ -866,7 +866,7 @@ class AzulSummerPavilion implements AzulSummerPavilionGame {
     notif_tilesSelected(args: NotifTilesSelectedArgs) {
         if (!args.fromSupply) {
             if (args.fromFactory == 0) {
-                this.factories.centerColorRemoved(args.selectedTiles[0].type, args.typeWild);
+                this.factories.centerColorRemoved(args.selectedTiles);
             } else {
                 this.factories.factoryTilesRemoved(args.fromFactory);
             }

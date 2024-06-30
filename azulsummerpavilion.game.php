@@ -50,7 +50,6 @@ class AzulSummerPavilion extends Table {
             FIRST_PLAYER_FOR_NEXT_TURN => 10,
 
             VARIANT_OPTION => 100,
-            UNDO => 101,
             FAST_SCORING => 102,
         ]);
 
@@ -160,7 +159,6 @@ class AzulSummerPavilion extends Table {
             $player['passed'] = boolval(self::getUniqueValueFromDB("SELECT passed FROM player WHERE player_id = $playerId"));
         }
 
-        $result['undo'] = $this->allowUndo();
         $result['fastScoring'] = $this->isFastScoring();
         $result['remainingTiles'] = intval($this->tiles->countCardInLocation('deck'));
         $result['round'] = $this->getRound();

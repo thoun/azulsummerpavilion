@@ -736,13 +736,12 @@ var Factories = /** @class */ (function () {
         var halfSize = radius + FACTORY_RADIUS;
         return halfSize * 2;
     };
-    Factories.prototype.centerColorRemoved = function (color, typeWild) {
-        this.tilesInFactories[0][color] = [];
-        this.tilesPositionsInCenter[color] = [];
-        if (typeWild) {
-            this.tilesInFactories[0][typeWild].shift();
-            this.tilesPositionsInCenter[typeWild].shift();
-        }
+    Factories.prototype.centerColorRemoved = function (selectedTiles) {
+        var _this = this;
+        selectedTiles.forEach(function (tile) {
+            _this.tilesInFactories[0][tile.type] = _this.tilesInFactories[0][tile.type].filter(function (t) { return t.id != tile.id; });
+            _this.tilesPositionsInCenter[tile.type] = _this.tilesPositionsInCenter[tile.type].filter(function (t) { return t.id != tile.id; });
+        });
         this.updateDiscardedTilesNumbers();
     };
     Factories.prototype.factoryTilesRemoved = function (factory) {
@@ -942,28 +941,20 @@ var Factories = /** @class */ (function () {
     };
     Factories.prototype.updateDiscardedTilesNumbers = function () {
         var _this = this;
+        document.querySelectorAll('.tile-count').forEach(function (tc) { return tc === null || tc === void 0 ? void 0 : tc.remove(); });
         var _loop_3 = function (type) {
             var number = this_2.tilesPositionsInCenter[type].length;
-            var numberDiv = document.getElementById("tileCount".concat(type));
             if (!number) {
-                numberDiv === null || numberDiv === void 0 ? void 0 : numberDiv.parentElement.removeChild(numberDiv);
                 return "continue";
             }
             var x = this_2.tilesPositionsInCenter[type].reduce(function (sum, place) { return sum + place.x; }, 0) / number + 14;
             var y = this_2.tilesPositionsInCenter[type].reduce(function (sum, place) { return sum + place.y; }, 0) / number + 14;
-            if (numberDiv) {
-                numberDiv.style.left = "".concat(x, "px");
-                numberDiv.style.top = "".concat(y, "px");
-                numberDiv.innerHTML = '' + number;
-            }
-            else {
-                dojo.place("\n                <div id=\"tileCount".concat(type, "\" class=\"tile-count tile").concat(type, "\" style=\"left: ").concat(x, "px; top: ").concat(y, "px;\">").concat(number, "</div>\n                "), 'factories');
-                var newNumberDiv = document.getElementById("tileCount".concat(type));
-                var firstTileId_1 = this_2.tilesInFactories[0][type][0].id;
-                newNumberDiv.addEventListener('click', function () { return _this.game.takeTiles(firstTileId_1); });
-                newNumberDiv.addEventListener('mouseenter', function () { return _this.tileMouseEnter(firstTileId_1); });
-                newNumberDiv.addEventListener('mouseleave', function () { return _this.tileMouseLeave(firstTileId_1); });
-            }
+            dojo.place("\n            <div id=\"tileCount".concat(type, "\" class=\"tile-count tile").concat(type, "\" style=\"left: ").concat(x, "px; top: ").concat(y, "px;\">").concat(number, "</div>\n            "), 'factories');
+            var newNumberDiv = document.getElementById("tileCount".concat(type));
+            var firstTileId = this_2.tilesInFactories[0][type][0].id;
+            newNumberDiv.addEventListener('click', function () { return _this.game.takeTiles(firstTileId); });
+            newNumberDiv.addEventListener('mouseenter', function () { return _this.tileMouseEnter(firstTileId); });
+            newNumberDiv.addEventListener('mouseleave', function () { return _this.tileMouseLeave(firstTileId); });
         };
         var this_2 = this;
         for (var type = 1; type <= 6; type++) {
@@ -1954,7 +1945,7 @@ var AzulSummerPavilion = /** @class */ (function () {
     AzulSummerPavilion.prototype.notif_tilesSelected = function (args) {
         if (!args.fromSupply) {
             if (args.fromFactory == 0) {
-                this.factories.centerColorRemoved(args.selectedTiles[0].type, args.typeWild);
+                this.factories.centerColorRemoved(args.selectedTiles);
             }
             else {
                 this.factories.factoryTilesRemoved(args.fromFactory);

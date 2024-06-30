@@ -118,7 +118,7 @@ trait ActionTrait {
             $previousScore,
         ));
 
-        if ($this->allowUndo()) {
+        if ($this->isUndoActivated($playerId)) {
             $this->gamestate->nextState('confirm');
         } else {            
             $this->applyConfirmTiles($playerId);
@@ -152,9 +152,9 @@ trait ActionTrait {
     function undoTakeTiles() {
         self::checkAction('undoTakeTiles'); 
 
-        if (!$this->allowUndo()) {
+        /*if (!$this->isUndoActivated()) {
             throw new BgaUserException('Undo is disabled');
-        }
+        }*/
         
         $playerId = intval(self::getActivePlayerId());
 
@@ -294,7 +294,7 @@ trait ActionTrait {
 
         if ($additionalTiles['count'] > 0) {
             $this->gamestate->jumpToState(ST_PLAYER_TAKE_BONUS_TILES);
-        } else if ($this->allowUndo()) {
+        } else if ($this->isUndoActivated($playerId)) {
             $this->gamestate->jumpToState(ST_PLAYER_CONFIRM_PLAY);
         } else {
             $this->applyConfirmPlay($playerId);
@@ -347,9 +347,9 @@ trait ActionTrait {
     function undoPlayTile() {
         self::checkAction('undoPlayTile'); 
 
-        if (!$this->allowUndo()) {
+        /*if (!$this->isUndoActivated()) {
             throw new BgaUserException('Undo is disabled');
-        }
+        }*/
         
         $playerId = intval(self::getActivePlayerId());       
 
@@ -384,9 +384,9 @@ trait ActionTrait {
             $this->checkAction('undoPass');
         }
 
-        if (!$this->allowUndo()) {
+        /*if (!$this->isUndoActivated()) {
             throw new BgaUserException('Undo is disabled');
-        }
+        }*/
         
         $playerId = intval(self::getActivePlayerId());       
 
@@ -502,7 +502,7 @@ trait ActionTrait {
 
         $this->setGlobalVariable(UNDO_PLACE, new UndoPlace($hand, $previousScore, count($discardedTiles)));
 
-        if ($this->allowUndo() && count($ids) > 0) {
+        if ($this->isUndoActivated($playerId) && count($ids) > 0) {
             $this->gamestate->jumpToState(ST_PLAYER_CONFIRM_PASS);
         } else {
             $this->applyConfirmPass($playerId);
@@ -555,7 +555,7 @@ trait ActionTrait {
             'fromSupply' => true,
         ]);
 
-        if ($this->allowUndo()) {
+        if ($this->isUndoActivated($playerId)) {
             $this->gamestate->jumpToState(ST_PLAYER_CONFIRM_PLAY);
         } else {
             $this->applyConfirmPlay($playerId);
