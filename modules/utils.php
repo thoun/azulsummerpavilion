@@ -290,7 +290,10 @@ trait UtilTrait {
         $newTiles = [];
         for ($i=1; $i<=10; $i++) {
             if (intval($this->tiles->countCardInLocation('supply', $i)) == 0) {
-                $newTiles[] = $this->getTileFromDb($this->tiles->pickCardForLocation('deck', 'supply', $i));
+                $dbTile = $this->tiles->pickCardForLocation('deck', 'supply', $i);
+                if ($dbTile) { // if the bag is empty, we can't refill
+                    $newTiles[] = $this->getTileFromDb($dbTile);
+                }
             }
         }
 
