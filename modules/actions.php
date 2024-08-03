@@ -502,7 +502,7 @@ trait ActionTrait {
 
         $this->setGlobalVariable(UNDO_PLACE, new UndoPlace($hand, $previousScore, count($discardedTiles)));
 
-        if ($this->isUndoActivated($playerId) && count($ids) > 0) {
+        if ($this->isUndoActivated($playerId) && (count($ids) > 0 || ($this->getRound() >= 6 && count($discardedTiles) > 0))) {
             $this->gamestate->jumpToState(ST_PLAYER_CONFIRM_PASS);
         } else {
             $this->applyConfirmPass($playerId);

@@ -45,6 +45,10 @@ trait DebugUtilTrait {
         $this->tiles->moveCard($tile->id, 'wall'.$playerId, $star*100 + $space);
     }
 
+    function debug_setRound(int $round = 6) {
+        $this->setStat($round, 'roundsNumber');
+    }
+
     function debug_emptyFactories($full = true, int $playerId = 2343492) {
         $this->debug_removeFp();
 

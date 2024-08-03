@@ -116,7 +116,8 @@ $playerActionsGameStates = [
         "type" => "activeplayer",
         "args" => "argChooseTile",
         "possibleactions" => [ 
-            "takeTiles" 
+            "takeTiles",
+            "actTakeTiles",
         ],
         "transitions" => [
             "confirm" => ST_PLAYER_CONFIRM_ACQUIRE,
@@ -132,6 +133,8 @@ $playerActionsGameStates = [
         "possibleactions" => [ 
             "confirmAcquire",
             "undoTakeTiles",
+            "actConfirmAcquire",
+            "actUndoTakeTiles",
          ],
         "transitions" => [
             "nextPlayer" => ST_NEXT_PLAYER_ACQUIRE,
@@ -149,6 +152,8 @@ $playerActionsGameStates = [
         "possibleactions" => [ 
             "selectPlace",
             "pass",
+            "actSelectPlace",
+            "actPass",
          ],
         "transitions" => [],
     ],
@@ -161,6 +166,8 @@ $playerActionsGameStates = [
         "possibleactions" => [ 
             "selectKeptTiles",
             "undoPass",
+            "actSelectKeptTiles",
+            "actUndoPass",
         ],
         "transitions" => [
             "undo" => ST_PLAYER_CHOOSE_PLACE,
@@ -175,6 +182,8 @@ $playerActionsGameStates = [
         "possibleactions" => [ 
             "confirmPass",
             "undoPass",
+            "actConfirmPass",
+            "actUndoPass",
          ],
         "transitions" => [
             "undo" => ST_PLAYER_CHOOSE_PLACE,
@@ -191,6 +200,9 @@ $playerActionsGameStates = [
             "selectColor",
             "undoPlayTile",
             "pass",
+            "actSelectColor",
+            "actUndoPlayTile",
+            "actPass",
          ],
         "transitions" => [
             "undo" => ST_PLAYER_CHOOSE_PLACE,
@@ -206,6 +218,8 @@ $playerActionsGameStates = [
         "possibleactions" => [ 
             "playTile",
             "undoPlayTile",
+            "actPlayTile",
+            "actUndoPlayTile",
          ],
         "transitions" => [
             "undo" => ST_PLAYER_CHOOSE_PLACE,
@@ -221,6 +235,8 @@ $playerActionsGameStates = [
         "possibleactions" => [ 
             "takeBonusTiles",
             "undoPlayTile",
+            "actTakeBonusTiles",
+            "actUndoPlayTile",
          ],
         "transitions" => [
             "undo" => ST_PLAYER_CHOOSE_PLACE,
@@ -235,6 +251,8 @@ $playerActionsGameStates = [
         "possibleactions" => [ 
             "confirmPlay",
             "undoPlayTile",
+            "actConfirmPlay",
+            "actUndoPlayTile",
          ],
         "transitions" => [
             "undo" => ST_PLAYER_CHOOSE_PLACE,
