@@ -18,9 +18,7 @@ trait ArgsTrait {
         ];
     }
 
-    function argChoosePlace() {
-        $playerId = self::getActivePlayerId();
-
+    function argChoosePlaceForPlayer(int $playerId) {
         $placedTiles = $this->getTilesFromDb($this->tiles->getCardsInLocation('wall'.$playerId));
         $hand = $this->getTilesFromDb($this->tiles->getCardsInLocation('hand', $playerId));
         $wildColor = $this->getWildColor();
@@ -57,6 +55,14 @@ trait ArgsTrait {
         return [
             'possibleSpaces' => $possibleSpaces,
             'skipIsFree' => $skipIsFree,
+        ];
+    }
+
+    function argChoosePlace() {
+        $playerId = self::getActivePlayerId();
+
+        return $this->argChoosePlaceForPlayer($playerId) + [
+            '_private' => $this->argAutopass(),
         ];
     }
 
@@ -100,6 +106,7 @@ trait ArgsTrait {
             'possibleColors' => $possibleColors,
             'star' => $star,
             'space' => $space,
+            '_private' => $this->argAutopass(),
         ];
     }
 
@@ -137,6 +144,7 @@ trait ArgsTrait {
             'wildColor' => $wildColor,
             'maxColor' => count($colorTiles),
             'maxWildTiles' => $maxWildTiles,
+            '_private' => $this->argAutopass(),
         ];
     }
 
@@ -149,6 +157,13 @@ trait ArgsTrait {
             'number' => $number, // for title
             'count' => $number,
             'highlightedTiles' => $highlightedTiles,
+            '_private' => $this->argAutopass(),
+        ];
+    }
+
+    function argConfirmPlay() {
+        return [
+            '_private' => $this->argAutopass(),
         ];
     }
 }

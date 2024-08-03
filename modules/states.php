@@ -104,9 +104,16 @@ trait StateTrait {
             while (boolval(self::getUniqueValueFromDB("SELECT passed FROM player WHERE player_id = $playerId"))) {
                 $playerId = intval($this->activeNextPlayer());
             }
-            self::giveExtraTime($playerId);
 
-            $this->gamestate->nextState('nextPlayer');
+            $autoPass = boolval(self::getUniqueValueFromDB("SELECT auto_pass FROM player WHERE player_id = $playerId"));
+            if ($autoPass) {
+                self::DbQuery("UPDATE player SET auto_pass = FALSE WHERE player_id = $playerId" );
+                $this->applyPass($playerId, true); // handles the redirection
+            } else {
+                self::giveExtraTime($playerId);
+
+                $this->gamestate->nextState('nextPlayer');
+            }
         }
     }
 

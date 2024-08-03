@@ -29,6 +29,7 @@ CREATE TABLE IF NOT EXISTS `tile` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 ALTER TABLE `player` ADD `passed` tinyint(1) NOT NULL DEFAULT FALSE;
+ALTER TABLE `player` ADD `auto_pass` tinyint(1) NOT NULL DEFAULT FALSE;
 
 CREATE TABLE IF NOT EXISTS `global_variables` (
   `name` varchar(50) NOT NULL,

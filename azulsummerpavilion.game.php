@@ -136,7 +136,7 @@ class AzulSummerPavilion extends Table {
     
         // Get information about players
         // Note: you can retrieve some extra field you added for "player" table in "dbmodel.sql" if you need it.
-        $sql = "SELECT player_id id, player_score score, player_no playerNo FROM player ";
+        $sql = "SELECT player_id id, player_score score, player_no playerNo, passed, auto_pass autoPass FROM player ";
         $result['players'] = self::getCollectionFromDb($sql);
 
         $result['factoryNumber'] = $this->getFactoryNumber(count($result['players']));
@@ -156,7 +156,8 @@ class AzulSummerPavilion extends Table {
             $player['playerNo'] = intval($player['playerNo']);
             $player['hand'] = $this->getTilesFromDb($this->tiles->getCardsInLocation('hand', $playerId));
             $player['corner'] = $this->getTilesFromDb($this->tiles->getCardsInLocation('corner', $playerId));
-            $player['passed'] = boolval(self::getUniqueValueFromDB("SELECT passed FROM player WHERE player_id = $playerId"));
+            $player['passed'] = boolval($player['passed']);
+            $player['autoPass'] = boolval($player['autoPass']);
         }
 
         $result['fastScoring'] = $this->isFastScoring();
@@ -285,10 +286,10 @@ class AzulSummerPavilion extends Table {
             // For example, if the game was running with a release of your game named "140430-1345",
             // $from_version is equal to 1404301345
             
-            /*if ($from_version <= 2109241936) {
+            if ($from_version <= 2408031258) {
                 // ! important ! Use <table_name> for all tables    
-                $sql = "ALTER TABLE DBPREFIX_player ADD `selected_columns` json";
-                self::applyDbUpgradeToAllDB($sql);
-            }*/
+                $sql = "ALTER TABLE DBPREFIX_player ADD `auto_pass` tinyint(1) NOT NULL DEFAULT FALSE";
+                $this->applyDbUpgradeToAllDB($sql);
+            }
         }    
 }

@@ -423,7 +423,7 @@ trait ActionTrait {
         $this->applyPass($playerId);
     }
 
-    function applyPass(int $playerId) {
+    function applyPass(int $playerId, bool $forceNoConfirm = false) {
         self::DbQuery("UPDATE player SET passed = TRUE WHERE player_id = $playerId" );
         self::notifyAllPlayers('pass', clienttranslate('${player_name} passes'), [
             'playerId' => $playerId,
@@ -438,7 +438,7 @@ trait ActionTrait {
         if (!$lastRound && count($colorTiles) > 4) {
             $this->gamestate->jumpToState(ST_PLAYER_CHOOSE_KEPT_TILES);
         } else {
-            $this->applySelectKeptTiles($playerId, $lastRound ? [] : array_map('getIdPredicate', $colorTiles));
+            $this->applySelectKeptTiles($playerId, $lastRound ? [] : array_map('getIdPredicate', $colorTiles), $forceNoConfirm);
         }
 
     }
@@ -457,7 +457,7 @@ trait ActionTrait {
         $this->applySelectKeptTiles($playerId, $ids);
     }
 
-    function applySelectKeptTiles(int $playerId, array $ids) {
+    function applySelectKeptTiles(int $playerId, array $ids, bool $forceNoConfirm = false) {
         // for undo
         $previousScore = $this->getPlayerScore($playerId);
 
@@ -502,7 +502,7 @@ trait ActionTrait {
 
         $this->setGlobalVariable(UNDO_PLACE, new UndoPlace($hand, $previousScore, count($discardedTiles)));
 
-        if ($this->isUndoActivated($playerId) && (count($ids) > 0 || ($this->getRound() >= 6 && count($discardedTiles) > 0))) {
+        if (!$forceNoConfirm && $this->isUndoActivated($playerId) && (count($ids) > 0 || ($this->getRound() >= 6 && count($discardedTiles) > 0))) {
             $this->gamestate->jumpToState(ST_PLAYER_CONFIRM_PASS);
         } else {
             $this->applyConfirmPass($playerId);
@@ -560,6 +560,17 @@ trait ActionTrait {
         } else {
             $this->applyConfirmPlay($playerId);
         }
+    }
+
+    function actSetAutopass(bool $autopass) {
+        $playerId = intval(self::getCurrentPlayerId());
+
+        if ($this->canSetAutopass($playerId)) {
+            self::DbQuery("UPDATE player SET auto_pass = ".($autopass ? 'TRUE' : 'FALSE')." WHERE player_id = $playerId" );
+        }
+        
+        // dummy notif so player gets back hand
+        $this->notifyPlayer($playerId, "setAutopass", '', []);
     }
 
 }

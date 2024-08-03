@@ -167,6 +167,17 @@
       self::ajaxResponse();
     }
 
+    public function actSetAutopass() {
+      self::setAjaxMode();
+
+      // Retrieve arguments
+      $autopass = self::getArg("autopass", AT_bool, true);
+
+      $this->game->actSetAutopass($autopass);
+
+      self::ajaxResponse();
+    }
+
   }
   
 

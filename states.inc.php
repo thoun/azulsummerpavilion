@@ -82,6 +82,7 @@ $basicGameStates = [
         "transitions" => [
             "nextPlayer" => ST_PLAYER_CHOOSE_PLACE, 
             "endRound" => ST_END_ROUND,
+            "autoPass" => ST_NEXT_PLAYER_PLAY,
         ],
     ],
    
@@ -248,6 +249,7 @@ $playerActionsGameStates = [
         "description" => clienttranslate('${actplayer} must confirm played tile'),
         "descriptionmyturn" => clienttranslate('${you} must confirm played tile'),
         "type" => "activeplayer",
+        "args" => "argConfirmPlay",
         "possibleactions" => [ 
             "confirmPlay",
             "undoPlayTile",

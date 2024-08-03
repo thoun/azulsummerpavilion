@@ -141,6 +141,13 @@ class AzulSummerPavilion implements AzulSummerPavilionGame {
                 }
                 break;
         }
+
+        const autopassParams = args.args?._private;
+        if (autopassParams?.canSetAutopass && !(this as any).isCurrentPlayerActive()) {
+            this.addAutopassToggle(autopassParams.autopass);
+        } else {
+            this.removeAutopassToggle();
+        }
     }
 
     private onEnteringChooseTile(args: EnteringChooseTileArgs) {
@@ -582,6 +589,24 @@ class AzulSummerPavilion implements AzulSummerPavilionGame {
 
     public removeTiles(tiles: Tile[], fadeOut?: boolean) {
         tiles.forEach(tile => this.removeTile(tile, fadeOut));
+    }
+
+    private addAutopassToggle(active: boolean) {
+        if (!document.getElementById('autopass-wrapper')) {
+            document.getElementById(`game_play_area`).insertAdjacentHTML('beforeend', `<div id="autopass-wrapper">
+                <label class="switch">
+                    <input id="autopass-checkbox" type="checkbox" ${active ? 'checked' : ''}>
+                    <span class="slider round"></span>
+                </label>
+                <label for="autopass-checkbox" class="text-label">${_("Auto-pass")}</label>
+            </div>`);
+
+            document.getElementById('autopass-checkbox').addEventListener('change', (e: any) => (this as any).bgaPerformAction('actSetAutopass', { autopass: e.target.checked }, { checkAction: false, }));
+        }
+    }
+
+    private removeAutopassToggle() {
+        document.getElementById('autopass-wrapper')?.remove();
     }
 
     public onTileClick(tile: Tile) {

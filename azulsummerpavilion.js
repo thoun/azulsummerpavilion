@@ -1290,6 +1290,7 @@ var AzulSummerPavilion = /** @class */ (function () {
     //                  You can use this method to perform some user interface changes at this moment.
     //
     AzulSummerPavilion.prototype.onEnteringState = function (stateName, args) {
+        var _a;
         log('Entering state: ' + stateName, args.args);
         switch (stateName) {
             case 'chooseTile':
@@ -1316,6 +1317,13 @@ var AzulSummerPavilion = /** @class */ (function () {
                     lastTurnBar.style.display = 'none';
                 }
                 break;
+        }
+        var autopassParams = (_a = args.args) === null || _a === void 0 ? void 0 : _a._private;
+        if ((autopassParams === null || autopassParams === void 0 ? void 0 : autopassParams.canSetAutopass) && !this.isCurrentPlayerActive()) {
+            this.addAutopassToggle(autopassParams.autopass);
+        }
+        else {
+            this.removeAutopassToggle();
         }
     };
     AzulSummerPavilion.prototype.onEnteringChooseTile = function (args) {
@@ -1712,6 +1720,17 @@ var AzulSummerPavilion = /** @class */ (function () {
     AzulSummerPavilion.prototype.removeTiles = function (tiles, fadeOut) {
         var _this = this;
         tiles.forEach(function (tile) { return _this.removeTile(tile, fadeOut); });
+    };
+    AzulSummerPavilion.prototype.addAutopassToggle = function (active) {
+        var _this = this;
+        if (!document.getElementById('autopass-wrapper')) {
+            document.getElementById("game_play_area").insertAdjacentHTML('beforeend', "<div id=\"autopass-wrapper\">\n                <label class=\"switch\">\n                    <input id=\"autopass-checkbox\" type=\"checkbox\" ".concat(active ? 'checked' : '', ">\n                    <span class=\"slider round\"></span>\n                </label>\n                <label for=\"autopass-checkbox\" class=\"text-label\">").concat(_("Auto-pass"), "</label>\n            </div>"));
+            document.getElementById('autopass-checkbox').addEventListener('change', function (e) { return _this.bgaPerformAction('actSetAutopass', { autopass: e.target.checked }, { checkAction: false, }); });
+        }
+    };
+    AzulSummerPavilion.prototype.removeAutopassToggle = function () {
+        var _a;
+        (_a = document.getElementById('autopass-wrapper')) === null || _a === void 0 ? void 0 : _a.remove();
     };
     AzulSummerPavilion.prototype.onTileClick = function (tile) {
         if (this.gamedatas.gamestate.name == 'chooseTile') {

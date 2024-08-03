@@ -824,3 +824,68 @@ html, .mode_3d #game_play_area_background {
 #table-decision {
   margin-top: 24px;
 }
+
+#autopass-wrapper {
+  display: flex;
+  align-items: center;
+  position: absolute;
+  right: 0;
+  top: -36px;
+  padding: 10px;
+  font-size: 12pt;
+  /* The switch - the box around the slider */
+  /* Hide default HTML checkbox */
+  /* The slider */
+  /* Rounded sliders */
+}
+#autopass-wrapper .switch {
+  position: relative;
+  display: inline-block;
+  width: 44px;
+  height: 26px;
+}
+#autopass-wrapper .switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+#autopass-wrapper .slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #ccc;
+  transition: 0.4s;
+}
+#autopass-wrapper .slider:before {
+  position: absolute;
+  content: "";
+  height: 18px;
+  width: 18px;
+  left: 4px;
+  bottom: 4px;
+  background-color: white;
+  transition: 0.4s;
+}
+#autopass-wrapper input:checked + .slider {
+  background-color: #0c4b60;
+}
+#autopass-wrapper input:focus + .slider {
+  box-shadow: 0 0 1px #0c4b60;
+}
+#autopass-wrapper input:checked + .slider:before {
+  transform: translateX(18px);
+}
+#autopass-wrapper .slider.round {
+  border-radius: 26px;
+}
+#autopass-wrapper .slider.round:before {
+  border-radius: 50%;
+}
+#autopass-wrapper .text-label {
+  color: black;
+  font-weight: bold;
+  margin-left: 5px;
+}

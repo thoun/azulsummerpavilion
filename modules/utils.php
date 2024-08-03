@@ -421,4 +421,37 @@ trait UtilTrait {
             'highlightedTiles' => $highlightedTiles,
         ];
     }
+
+    function canSetAutopass(int $playerId): bool {        
+        if (boolval(self::getUniqueValueFromDB("SELECT passed FROM player WHERE player_id = $playerId"))) {
+            return false;
+        }
+        
+        $hand = $this->getTilesFromDb($this->tiles->getCardsInLocation('hand', $playerId));
+        $tiles = count(array_filter($hand, fn($tile) => $tile->type > 0));
+        if ($tiles == 0) {
+            return true;
+        } else {
+            $lastRound = $this->getRound() >= 6;
+            if ($lastRound) {
+                $possibleSpaces = $this->argChoosePlaceForPlayer($playerId)['possibleSpaces'];
+                return count($possibleSpaces) <= 0;
+            } else {
+                return $tiles <= 4;
+            }
+        }
+    }
+
+    function argAutopass(): array {
+        $result = [];
+        $playersIds = $this->getPlayersIds();
+        foreach ($playersIds as $playerId) {
+            $result[$playerId] = [
+                'autopass' => boolval(self::getUniqueValueFromDB("SELECT auto_pass FROM player WHERE player_id = $playerId")),
+                'canSetAutopass' => $this->canSetAutopass($playerId),
+            ];
+        }
+        
+        return $result;
+    }
 }
