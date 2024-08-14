@@ -30,7 +30,7 @@ trait StateTrait {
         self::incStat(1, 'roundsNumber');
         self::incStat(1, 'firstPlayer', intval(self::getGameStateValue(FIRST_PLAYER_FOR_NEXT_TURN)));
 
-        self::DbQuery("UPDATE player SET passed = false");
+        self::DbQuery("UPDATE player SET passed = false, auto_pass = false");
 
         self::notifyAllPlayers("factoriesFilled", clienttranslate('Round ${round_number}/6 begins !'), [
             'factories' => $factories,
