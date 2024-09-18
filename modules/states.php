@@ -57,6 +57,41 @@ trait StateTrait {
         $this->gamestate->nextState('next');
     }
 
+    function stChooseTile() {
+        if (!$this->tableOptions->isTurnBased()) {
+            return;
+        }
+
+        $factoriesTiles = array_filter($this->getTilesFromDb($this->tiles->getCardsInLocation('factory')), fn($tile) => $tile->type > 0);
+
+        $possibleTile = null;
+
+        $factories = array_values(array_unique(array_map(fn($tile) => $tile->space, $factoriesTiles)));
+        
+        $wildColor = $this->getWildColor();
+        foreach ($factories as $factory) {
+            $factoryTiles = array_filter($factoriesTiles, fn($tile) => $tile->space === $factory);
+
+            foreach($factoryTiles as $tile) {
+                $isWild = $tile->type == $wildColor;
+                if ($isWild && $this->array_some($factoryTiles, fn($factoryTile) => !in_array($factoryTile->type, [0, $wildColor]))) {
+                    continue; // ignore wilds we cannot take
+                }
+
+                if ($possibleTile === null) {
+                    $possibleTile = $tile;
+                } else if ($tile->type !== $possibleTile->type || $tile->space !== $possibleTile->space) {
+                    // already another possible tile, we can't play automatically
+                    return;
+                }
+            }
+        }
+
+        if ($possibleTile !== null) { // play automatically this tile
+            $this->takeTiles($possibleTile->id, true, true);
+        }
+    }
+
     function stNextPlayerAcquire() {
         $this->setGlobalVariable(UNDO_SELECT, null);
 

@@ -2085,6 +2085,9 @@ var AzulSummerPavilion = /** @class */ (function () {
                     var html = "<div class=\"tile tile".concat(args.typeWild, "\"></div>");
                     log = _(log).replace('${wild}', html);
                 }
+                /*if (args._bga_automatic_action) {
+                    log = _(log) + ` (⚙)`;
+                }*/
             }
         }
         catch (e) {

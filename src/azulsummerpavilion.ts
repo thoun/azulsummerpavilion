@@ -1016,6 +1016,10 @@ class AzulSummerPavilion implements AzulSummerPavilionGame {
                     let html = `<div class="tile tile${args.typeWild}"></div>`;
                     log = _(log).replace('${wild}', html);
                 }
+
+                /*if (args._bga_automatic_action) {
+                    log = _(log) + ` (⚙)`;
+                }*/
             }
         } catch (e) {
             console.error(log,args,"Exception thrown", e.stack);

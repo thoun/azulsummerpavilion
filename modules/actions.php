@@ -11,7 +11,7 @@ trait ActionTrait {
         (note: each method below must match an input method in azul.action.php)
     */
     
-    function takeTiles(int $id, $skipActionCheck = false) {
+    function takeTiles(int $id, $skipActionCheck = false, $automatic = false) {
         if (!$skipActionCheck) {
             $this->checkAction('takeTiles');
         }
@@ -106,6 +106,7 @@ trait ActionTrait {
             'selectedTiles' => $selectedTiles,
             'discardedTiles' => $discardedTiles,
             'fromFactory' => $factory,
+            '_bga_automatic_action' => $automatic,
         ]);
 
         $this->setGlobalVariable(UNDO_SELECT, new UndoSelect(
@@ -118,7 +119,7 @@ trait ActionTrait {
             $previousScore,
         ));
 
-        if ($this->isUndoActivated($playerId)) {
+        if ($this->isUndoActivated($playerId) && !$automatic) {
             $this->gamestate->nextState('confirm');
         } else {            
             $this->applyConfirmTiles($playerId);

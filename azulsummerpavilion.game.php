@@ -19,6 +19,8 @@
 
 require_once( APP_GAMEMODULE_PATH.'module/table/table.game.php' );
 
+require_once('modules/php/framework-prototype/table-options.php');
+
 require_once('modules/constants.inc.php');
 require_once('modules/tile.php');
 require_once('modules/undo.php');
@@ -28,14 +30,18 @@ require_once('modules/args.php');
 require_once('modules/states.php');
 require_once('modules/debug-util.php');
 
+use \Bga\GameFrameworkPrototype\TableOptions;
 
 class AzulSummerPavilion extends Table {
-
     use UtilTrait;
     use ActionTrait;
     use ArgsTrait;
     use StateTrait;
     use DebugUtilTrait;
+
+    public $tiles;
+
+    public TableOptions $tableOptions;
 
 	function __construct() {
         // Your global variables labels:
@@ -52,6 +58,8 @@ class AzulSummerPavilion extends Table {
             VARIANT_OPTION => 100,
             FAST_SCORING => 102,
         ]);
+
+        $this->tableOptions = new TableOptions($this);
 
         $this->tiles = self::getNew("module.common.deck");
         $this->tiles->init("tile");

@@ -49,7 +49,7 @@ trait DebugUtilTrait {
         $this->setStat($round, 'roundsNumber');
     }
 
-    function debug_emptyFactories($full = true, int $playerId = 2343492) {
+    function debug_emptyFactories(bool $full = false, int $playerId = 2343492) {
         $this->debug_removeFp();
 
         $factoryNumber = $this->getFactoryNumber();
