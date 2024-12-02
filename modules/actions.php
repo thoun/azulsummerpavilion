@@ -399,6 +399,8 @@ trait ActionTrait {
             foreach ($undo->supplyTiles as $tile) {
                 $this->tiles->moveCard($tile->id, $tile->location, $tile->space);
             }
+
+            $this->setPlayerScore($playerId, $undo->previousScore);
         }
 
         self::DbQuery("UPDATE player SET passed = FALSE WHERE player_id = $playerId" );
