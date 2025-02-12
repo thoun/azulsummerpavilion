@@ -19,8 +19,6 @@
 
 require_once( APP_GAMEMODULE_PATH.'module/table/table.game.php' );
 
-require_once('modules/php/framework-prototype/table-options.php');
-
 require_once('modules/constants.inc.php');
 require_once('modules/tile.php');
 require_once('modules/undo.php');
@@ -30,7 +28,7 @@ require_once('modules/args.php');
 require_once('modules/states.php');
 require_once('modules/debug-util.php');
 
-use \Bga\GameFrameworkPrototype\TableOptions;
+use \Bga\GameFramework\TableOptions;
 
 class AzulSummerPavilion extends Table {
     use UtilTrait;
