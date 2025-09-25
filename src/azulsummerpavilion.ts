@@ -1,10 +1,3 @@
-declare const define;
-declare const ebg;
-declare const $;
-declare const dojo: Dojo;
-declare const _;
-declare const g_gamethemeurl;
-
 declare const board: HTMLDivElement;
 
 const ANIMATION_MS = 500;
@@ -22,10 +15,16 @@ const LOCAL_STORAGE_ZOOM_KEY = 'AzulSummerPavilion-zoom';
 const isDebug = window.location.host == 'studio.boardgamearena.com';
 const log = isDebug ? console.log.bind(window.console) : function () { };
 
-class AzulSummerPavilion implements AzulSummerPavilionGame {
+// @ts-ignore
+GameGui = (function () { // this hack required so we fake extend GameGui
+  function GameGui() {}
+  return GameGui;
+})();
+
+class AzulSummerPavilion extends GameGui<AzulSummerPavilionGamedatas> implements AzulSummerPavilionGame {
     public animationManager: AnimationManager;
 
-    private gamedatas: AzulSummerPavilionGamedatas;
+    public gamedatas: AzulSummerPavilionGamedatas;
     private zoomManager: ZoomManager;
     private factories: Factories;
     private scoringBoard: ScoringBoard;
@@ -34,6 +33,7 @@ class AzulSummerPavilion implements AzulSummerPavilionGame {
     public zoom: number = 0.75;
 
     constructor() {    
+        super();
         const zoomStr = localStorage.getItem(LOCAL_STORAGE_ZOOM_KEY);
         if (zoomStr) {
             this.zoom = Number(zoomStr);
@@ -56,11 +56,25 @@ class AzulSummerPavilion implements AzulSummerPavilionGame {
     public setup(gamedatas: AzulSummerPavilionGamedatas) {
         // ignore loading of some pictures
         if (this.isVariant()) {
-            (this as any).dontPreloadImage('playerboard.jpg');
+            this.dontPreloadImage('playerboard.jpg');
         } else {
-            (this as any).dontPreloadImage('playerboard-variant.jpg');
+            this.dontPreloadImage('playerboard-variant.jpg');
         }
-        (this as any).dontPreloadImage('publisher.png');
+
+        this.getGameAreaElement().insertAdjacentHTML('beforeend', `
+            <div id="table">
+                <div id="centered-table">
+                    <div id="factories-and-scoring-board">
+                        <div id="factories">
+                            <div id="bag">
+                                <span id="bag-counter"></span>
+                            </div>
+                        </div>
+                        <div id="scoring-board"></div>
+                    </div>
+                </div>
+            </div>
+        `);
 
         log("Starting game setup");
         
@@ -143,7 +157,7 @@ class AzulSummerPavilion implements AzulSummerPavilionGame {
         }
 
         const autopassParams = args.args?._private;
-        if (autopassParams?.canSetAutopass && !(this as any).isCurrentPlayerActive()) {
+        if (autopassParams?.canSetAutopass && !this.isCurrentPlayerActive()) {
             this.addAutopassToggle(autopassParams.autopass);
         } else {
             this.removeAutopassToggle();
@@ -151,7 +165,7 @@ class AzulSummerPavilion implements AzulSummerPavilionGame {
     }
 
     private onEnteringChooseTile(args: EnteringChooseTileArgs) {
-        if ((this as any).isCurrentPlayerActive()) {
+        if (this.isCurrentPlayerActive()) {
             this.factories.wildColor = args.wildColor;
             dojo.addClass('factories', 'selectable');
         }
@@ -160,7 +174,7 @@ class AzulSummerPavilion implements AzulSummerPavilionGame {
     private onEnteringChoosePlace(args: EnteringChoosePlaceArgs) {
         document.getElementById('factories-and-scoring-board').classList.add('play');
 
-        if ((this as any).isCurrentPlayerActive()) {
+        if (this.isCurrentPlayerActive()) {
             const playerId = this.getPlayerId();
             for (let star = 0; star <= 6; star++) {
                 for (let space = 1; space <= 6; space++) {
@@ -173,7 +187,7 @@ class AzulSummerPavilion implements AzulSummerPavilionGame {
     }
 
     private onEnteringChooseColor(args: EnteringChooseColorArgs) {
-        if ((this as any).isCurrentPlayerActive()) {
+        if (this.isCurrentPlayerActive()) {
             document.getElementById(`player-table-${args.playerId}-star-${args.star}-space-${args.space}`).classList.add('selected');
         }
     }
@@ -183,7 +197,7 @@ class AzulSummerPavilion implements AzulSummerPavilionGame {
     }*/
 
     private onEnteringPlayTile(args: EnteringPlayTileArgs) {
-        if ((this as any).isCurrentPlayerActive()) {
+        if (this.isCurrentPlayerActive()) {
             /*this.removeGhostTile();
 
             const spotId = `player-table-${this.getPlayerId()}-star-${args.selectedPlace[0]}-space-${args.selectedPlace[1]}`;
@@ -193,7 +207,7 @@ class AzulSummerPavilion implements AzulSummerPavilionGame {
     }
 
     private onEnteringChooseKeptTiles(args: EnteringChooseTileArgs) {
-        if ((this as any).isCurrentPlayerActive()) {
+        if (this.isCurrentPlayerActive()) {
             document.getElementById(`player-hand-${this.getPlayerId()}`).classList.add('selectable');
         }
     }
@@ -201,7 +215,7 @@ class AzulSummerPavilion implements AzulSummerPavilionGame {
     private onEnteringTakeBonusTiles(args: EnteringTakeBonusTileArgs) {
         args.highlightedTiles.forEach(tile => document.getElementById(`tile${tile.id}`).classList.add('bonus'));
         document.getElementById(`bonus-info-${args.count}`).classList.add('active');
-        if ((this as any).isCurrentPlayerActive()) {
+        if (this.isCurrentPlayerActive()) {
             document.getElementById(`supply`).classList.add('selectable');
         }
     }
@@ -315,24 +329,23 @@ class AzulSummerPavilion implements AzulSummerPavilionGame {
     public onUpdateActionButtons(stateName: string, args: any) {
         log('onUpdateActionButtons', stateName, args);
         
-        if((this as any).isCurrentPlayerActive()) {
+        if(this.isCurrentPlayerActive()) {
             switch (stateName) { 
                 case 'confirmAcquire':
-                    (this as any).addActionButton('confirmAcquire_button', _("Confirm"), () => this.confirmAcquire());
-                    (this as any).addActionButton('undoAcquire_button', _("Undo tile selection"), () => this.undoTakeTiles(), null, null, 'gray');
-                    this.startActionTimer('confirmAcquire_button', 5);
+                    this.statusBar.addActionButton(_("Confirm"), () => this.confirmAcquire(), { autoclick: this.getGameUserPreference(204) != 2 });
+                    this.statusBar.addActionButton(_("Undo tile selection"), () => this.undoTakeTiles(), { color: 'secondary'});
                     break;
                 case 'choosePlace':
                     const choosePlaceArgs = args as EnteringChoosePlaceArgs;
-                    (this as any).addActionButton('pass_button', _("Pass (end round)"), () => this.pass(), null, null, choosePlaceArgs?.skipIsFree ? undefined : 'red');
+                    this.statusBar.addActionButton(_("Pass (end round)"), () => this.pass(), { color: choosePlaceArgs?.skipIsFree ? undefined : 'alert' });
                     break;
                 case 'chooseColor':
                     const chooseColorArgs = args as EnteringChooseColorArgs;
                     chooseColorArgs.possibleColors.forEach(color => {
                         const label = this.format_string_recursive('${number} ${color}', { number: 1, type: color });
-                        (this as any).addActionButton(`chooseColor${color}_button`, label, () => this.selectColor(color));
+                        this.statusBar.addActionButton(label, () => this.selectColor(color));
                     });
-                    (this as any).addActionButton('undoPlayTile_button', _("Undo played tile"), () => this.undoPlayTile(), null, null, 'gray');
+                    this.statusBar.addActionButton(_("Undo played tile"), () => this.undoPlayTile(), { color: 'secondary'});
                     break;
                 case 'playTile':
                     const playTileArgs = args as EnteringPlayTileArgs;
@@ -341,29 +354,27 @@ class AzulSummerPavilion implements AzulSummerPavilionGame {
                         if (colorNumber <= args.maxColor) {
                             let label = this.format_string_recursive('${number} ${color}', { number: colorNumber, type: playTileArgs.color });
                             label += this.format_string_recursive('${number} ${color}', { number: i, type: playTileArgs.wildColor });
-                            (this as any).addActionButton(`playTile${i}_button`, label, () => this.playTile(i));
+                            this.statusBar.addActionButton(label, () => this.playTile(i));
                         }
                     }
-                    (this as any).addActionButton('undoPlayTile_button', _("Undo played tile"), () => this.undoPlayTile(), null, null, 'gray');
+                    this.statusBar.addActionButton(_("Undo played tile"), () => this.undoPlayTile(), { color: 'secondary'});
                     break;
                 case 'confirmPlay':
-                    (this as any).addActionButton('confirmPlay_button', _("Confirm"), () => this.confirmPlay());
-                    (this as any).addActionButton('undoPlayTile_button', _("Undo played tile"), () => this.undoPlayTile(), null, null, 'gray');
-                    this.startActionTimer('confirmPlay_button', 5);
+                    this.statusBar.addActionButton(_("Confirm"), () => this.confirmPlay(), { autoclick: this.getGameUserPreference(204) != 2 });
+                    this.statusBar.addActionButton(_("Undo played tile"), () => this.undoPlayTile(), { color: 'secondary'});
                     break;
                 case 'chooseKeptTiles':
-                    (this as any).addActionButton('selectKeptTiles_button', '', () => this.selectKeptTiles());
-                    (this as any).addActionButton('cancel_button', _("Cancel"), () => this.undoPass(), null, null, 'gray');
+                    this.statusBar.addActionButton('', () => this.selectKeptTiles(), { id: 'selectKeptTiles_button' });
+                    this.statusBar.addActionButton(_("Cancel"), () => this.undoPass(), { color: 'secondary'});
                     this.updateSelectKeptTilesButton();
                     break;
                 case 'confirmPass':
-                    (this as any).addActionButton('confirmPass_button', _("Confirm"), () => this.confirmPass());
-                    (this as any).addActionButton('cancel_button', _("Cancel"), () => this.undoPass(), null, null, 'gray');
-                    this.startActionTimer('confirmPass_button', 5);
+                    this.statusBar.addActionButton(_("Confirm"), () => this.confirmPass(), { autoclick: this.getGameUserPreference(204) != 2 });
+                    this.statusBar.addActionButton(_("Cancel"), () => this.undoPass(), { color: 'secondary'});
                     break;
                 case 'takeBonusTiles':
-                    (this as any).addActionButton('takeBonusTiles_button', '', () => this.takeBonusTiles());
-                    (this as any).addActionButton('undoPlayTile_button', _("Undo played tile"), () => this.undoPlayTile(), null, null, 'gray');
+                    this.statusBar.addActionButton('', () => this.takeBonusTiles(), { id: 'takeBonusTiles_button' });
+                    this.statusBar.addActionButton(_("Undo played tile"), () => this.undoPlayTile(), { color: 'secondary'});
                     this.updateTakeBonusTilesButton();
                     break;
             }
@@ -384,11 +395,12 @@ class AzulSummerPavilion implements AzulSummerPavilionGame {
         } catch (e) {}
 
         [201, 203, 205, 206, 207, 299].forEach(
-            prefId => this.onGameUserPreferenceChanged(prefId, (this as any).getGameUserPreference(prefId))
+            prefId => this.onGameUserPreferenceChanged(prefId, this.getGameUserPreference(prefId))
         );
     }
       
-    private onGameUserPreferenceChanged(prefId: number, prefValue: number) {
+    // @ts-ignore
+    public onGameUserPreferenceChanged(prefId: number, prefValue: number) {
         switch (prefId) {
             case 201: 
                 dojo.toggleClass('table', 'disabled-shimmer', prefValue == 2);
@@ -424,7 +436,7 @@ class AzulSummerPavilion implements AzulSummerPavilionGame {
                 `, 'bga-zoom-controls');
 
                 document.getElementById('hide-zoom-notice').addEventListener('click', () => 
-                    (this as any).setGameUserPreference(299, 2)
+                    this.setGameUserPreference(299, 2)
                 );
             }
         } else if (elem) {
@@ -433,32 +445,7 @@ class AzulSummerPavilion implements AzulSummerPavilionGame {
     }
 
     public isDefaultFont(): boolean {
-        return (this as any).getGameUserPreference(206) == 1;
-    }
-
-    private startActionTimer(buttonId: string, time: number) {
-        if ((this as any).getGameUserPreference(204) == 2) {
-            return;
-        }
-
-        const button = document.getElementById(buttonId);
- 
-        let actionTimerId = null;
-        const _actionTimerLabel = button.innerHTML;
-        let _actionTimerSeconds = time;
-        const actionTimerFunction = () => {
-            const button = document.getElementById(buttonId);
-            if (button == null) {
-                window.clearInterval(actionTimerId);
-            } else if (_actionTimerSeconds-- > 1) {
-                button.innerHTML = _actionTimerLabel + ' (' + _actionTimerSeconds + ')';
-            } else {
-                window.clearInterval(actionTimerId);
-                button.click();
-            }
-        };
-        actionTimerFunction();
-        actionTimerId = window.setInterval(() => actionTimerFunction(), 1000);
+        return this.getGameUserPreference(206) == 1;
     }
 
     public getZoom() {
@@ -482,7 +469,7 @@ class AzulSummerPavilion implements AzulSummerPavilionGame {
     }
 
     public getPlayerId(): number {
-        return Number((this as any).player_id);
+        return Number(this.player_id);
     }
 
     public getPlayerColor(playerId: number): string {
@@ -494,7 +481,7 @@ class AzulSummerPavilion implements AzulSummerPavilionGame {
     }
 
     private setScore(playerId: number, score: number) {
-         (this as any).scoreCtrl[playerId]?.toValue(score);
+         this.scoreCtrl[playerId]?.toValue(score);
     }
 
     public placeTile(tile: Tile, destinationId: string, left?: number, top?: number, rotation?: number, placeInParent?: (elem, parent) => void): Promise<boolean> {
@@ -556,7 +543,7 @@ class AzulSummerPavilion implements AzulSummerPavilionGame {
 
     private createPlayerTables(gamedatas: AzulSummerPavilionGamedatas) {
         const players = Object.values(gamedatas.players).sort((a, b) => a.playerNo - b.playerNo);
-        const playerIndex = players.findIndex(player => Number(player.id) === Number((this as any).player_id));
+        const playerIndex = players.findIndex(player => Number(player.id) === Number(this.player_id));
         const orderedPlayers = playerIndex > 0 ? [...players.slice(playerIndex), ...players.slice(0, playerIndex)] : players;
 
         orderedPlayers.forEach(player => 
@@ -579,7 +566,7 @@ class AzulSummerPavilion implements AzulSummerPavilionGame {
                 if (fadeOut) {
                     const destroyedId = `${divElement.id}-to-be-destroyed`;
                     divElement.id = destroyedId;
-                    (this as any).fadeOutAndDestroy(destroyedId);
+                    this.fadeOutAndDestroy(destroyedId);
                 } else {
                     divElement.parentElement.removeChild(divElement);
                 }
@@ -601,7 +588,7 @@ class AzulSummerPavilion implements AzulSummerPavilionGame {
                 <label for="autopass-checkbox" class="text-label">${_("Auto-pass")}</label>
             </div>`);
 
-            document.getElementById('autopass-checkbox').addEventListener('change', (e: any) => (this as any).bgaPerformAction('actSetAutopass', { autopass: e.target.checked }, { checkAction: false, }));
+            document.getElementById('autopass-checkbox').addEventListener('change', (e: any) => this.bgaPerformAction('actSetAutopass', { autopass: e.target.checked }, { checkAction: false, }));
         }
     }
 
@@ -628,97 +615,53 @@ class AzulSummerPavilion implements AzulSummerPavilionGame {
     }
 
     public takeTiles(id: number) {
-        if(!(this as any).checkAction('takeTiles')) {
-            return;
-        }
-
-        this.takeAction('takeTiles', {
+        this.bgaPerformAction('actTakeTiles', {
             id
         });
     }
 
     public undoTakeTiles() {
-        if(!(this as any).checkAction('undoTakeTiles')) {
-            return;
-        }
-
-        this.takeAction('undoTakeTiles');
+        this.bgaPerformAction('actUndoTakeTiles');
     }
 
     public confirmAcquire() {
-        if(!(this as any).checkAction('confirmAcquire')) {
-            return;
-        }
-
-        this.takeAction('confirmAcquire');
+        this.bgaPerformAction('actConfirmAcquire');
     }
 
     public pass() {
-        if(!(this as any).checkAction('pass')) {
-            return;
-        }
-
-        this.takeAction('pass');
+        this.bgaPerformAction('actPass');
     }
 
     public selectColor(color: number) {
-        if(!(this as any).checkAction('selectColor')) {
-            return;
-        }
-
-        this.takeAction('selectColor', {
+        this.bgaPerformAction('actSelectColor', {
             color
         });
     }
 
     public playTile(wilds: number) {
-        if(!(this as any).checkAction('playTile')) {
-            return;
-        }
-
-        this.takeAction('playTile', {
+        this.bgaPerformAction('actPlayTile', {
             wilds
         });
     }
 
     public confirmPlay() {
-        if(!(this as any).checkAction('confirmPlay')) {
-            return;
-        }
-
-        this.takeAction('confirmPlay');
+        this.bgaPerformAction('actConfirmPlay');
     }
 
     public confirmPass() {
-        if(!(this as any).checkAction('confirmPass')) {
-            return;
-        }
-
-        this.takeAction('confirmPass');
+        this.bgaPerformAction('actConfirmPass');
     }
 
     public undoPlayTile() {
-        if(!(this as any).checkAction('undoPlayTile')) {
-            return;
-        }
-
-        this.takeAction('undoPlayTile');
+        this.bgaPerformAction('actUndoPlayTile');
     }
 
     public undoPass() {
-        if(!(this as any).checkAction('undoPass')) {
-            return;
-        }
-
-        this.takeAction('undoPass');
+        this.bgaPerformAction('actUndoPass');
     }
 
     public selectPlace(star: number, space: number) {
-        if(!(this as any).checkAction('selectPlace')) {
-            return;
-        }
-
-        this.takeAction('selectPlace', {
+        this.bgaPerformAction('actSelectPlace', {
             star,
             space
         });
@@ -727,16 +670,12 @@ class AzulSummerPavilion implements AzulSummerPavilionGame {
     }
 
     public selectKeptTiles(askConfirmation = true) {
-        if(!(this as any).checkAction('selectKeptTiles')) {
-            return;
-        }
-
         const handDiv = document.getElementById(`player-hand-${this.getPlayerId()}`);
         const handTileDivs = handDiv.querySelectorAll('.tile');
         const selectedTileDivs = handDiv.querySelectorAll('.tile.selected');
 
         if (askConfirmation && selectedTileDivs.length < handTileDivs.length && selectedTileDivs.length < 4) {
-            (this as any).confirmationDialog(
+            this.confirmationDialog(
                 _('You will keep ${keep} tiles and discard ${discard} tiles, when you could keep ${possible} tiles!')
                     .replace('${keep}', `<strong>${selectedTileDivs.length}</strong>`)
                     .replace('${discard}', `<strong>${handTileDivs.length - selectedTileDivs.length}</strong>`)
@@ -744,37 +683,23 @@ class AzulSummerPavilion implements AzulSummerPavilionGame {
                 () => this.selectKeptTiles(false)
             );
         } else {
-            this.takeAction('selectKeptTiles', {
+            this.bgaPerformAction('actSelectKeptTiles', {
                 ids: Array.from(selectedTileDivs).map((tile: HTMLElement) => Number(tile.dataset.id)).sort().join(','),
             });
         }
     }
 
     public cancel() {
-        if(!(this as any).checkAction('cancel')) {
-            return;
-        }
-
-        this.takeAction('cancel');
+        this.bgaPerformAction('actCancel');
     }
 
     public takeBonusTiles() {
-        if(!(this as any).checkAction('takeBonusTiles')) {
-            return;
-        }
-
         const supplyDiv = document.getElementById(`supply`);
         const selectedTileDivs = supplyDiv.querySelectorAll('.tile.selected');
 
-        this.takeAction('takeBonusTiles', {
+        this.bgaPerformAction('takeBonusTiles', {
             ids: Array.from(selectedTileDivs).map((tile: HTMLElement) => Number(tile.dataset.id)).sort().join(','),
         });
-    }
-
-    public takeAction(action: string, data?: any) {
-        data = data || {};
-        data.lock = true;
-        (this as any).ajaxcall(`/azulsummerpavilion/azulsummerpavilion/${action}.html`, data, this, () => {});
     }
 
     placeFirstPlayerToken(playerId: number) {
@@ -790,21 +715,21 @@ class AzulSummerPavilion implements AzulSummerPavilionGame {
         } else {
             dojo.place('<div id="firstPlayerToken" class="tile tile0"></div>', `player_board_${playerId}_firstPlayerWrapper`);
 
-            (this as any).addTooltipHtml('firstPlayerToken', _("First Player token. Player with this token will start the next turn"));
+            this.addTooltipHtml('firstPlayerToken', _("First Player token. Player with this token will start the next turn"));
         }
     }
 
     private displayScoringOnTile(tile: Tile, playerId: string | number, points: number) {
         // create a div over tile, same position and width, but no overflow hidden (that must be kept on tile for glowing effect)
         dojo.place(`<div id="tile${tile.id}-scoring" class="scoring-tile"></div>`, `player-table-${playerId}-star-${tile.star}-space-${tile.space}`);
-        (this as any).displayScoring(`tile${tile.id}-scoring`, this.getPlayerColor(Number(playerId)), points, SCORE_MS);
+        this.displayScoring(`tile${tile.id}-scoring`, this.getPlayerColor(Number(playerId)), points, SCORE_MS);
     }
 
     private displayScoringOnStar(star: number, playerId: string | number, points: number) {
         if (!document.getElementById(`player-table-${playerId}-star-${star}-scoring`)) {
             dojo.place(`<div id="player-table-${playerId}-star-${star}-scoring" class="scoring-star"></div>`, `player-table-${playerId}-star-${star}`);
         }
-        (this as any).displayScoring(`player-table-${playerId}-star-${star}-scoring`, this.getPlayerColor(Number(playerId)), points, SCORE_MS);
+        this.displayScoring(`player-table-${playerId}-star-${star}-scoring`, this.getPlayerColor(Number(playerId)), points, SCORE_MS);
     }
 
     ///////////////////////////////////////////////////
@@ -949,7 +874,7 @@ class AzulSummerPavilion implements AzulSummerPavilionGame {
         this.removeTiles(discardedTiles, true);
 
         if (discardedTiles.length > 0) {
-            (this as any).displayScoring(`player-hand-${playerId}`, this.getPlayerColor(Number(playerId)), -discardedTiles.length, SCORE_MS);
+            this.displayScoring(`player-hand-${playerId}`, this.getPlayerColor(Number(playerId)), -discardedTiles.length, SCORE_MS);
         }
     }
 

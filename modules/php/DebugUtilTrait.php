@@ -1,4 +1,13 @@
 <?php
+namespace Bga\Games\AzulSummerPavilion;
+
+use Bga\GameFrameworkPrototype\Helpers\Arrays;
+
+function debug(...$debugData) {
+    if (\Bga\GameFramework\Table::getBgaEnvironment() != 'studio') { 
+        return;
+    }die('debug data : <pre>'.substr(json_encode($debugData, JSON_PRETTY_PRINT), 1, -1).'</pre>');
+}
 
 trait DebugUtilTrait {
 
@@ -6,18 +15,7 @@ trait DebugUtilTrait {
 //////////// Utility functions
 ////////////
 
-    // shortcut to launch multiple debug lines
-    function d() {
-        if ($this->getBgaEnvironment() != 'studio') { 
-            return;
-        } 
-
-        $this->setStat(6, 'roundsNumber');
-        //$this->debugEmptyFactories();
-        //$this->debugRemoveFp();
-        //$this->stFillFactories();
-    }
-
+/*
     function debugSetup() {
         if ($this->getBgaEnvironment() != 'studio') { 
             return;
@@ -37,7 +35,7 @@ trait DebugUtilTrait {
         $this->debugSetWallTile(2343492, 3, 2, 3);
 
         //$this->setStat(5, 'roundsNumber');
-    }
+    }*/
 
     function debugSetWallTile(int $playerId, int $star, int $space, int $color) {
         $tile = $this->getTilesFromDb($this->tiles->getCardsOfTypeInLocation($color, null, 'deck'))[0];
@@ -104,41 +102,5 @@ trait DebugUtilTrait {
 
     function debug_place() {
         $this->gamestate->jumpToState(ST_PLAYER_CHOOSE_PLACE);
-    }
-
-    public function loadBugReportSQL(int $reportId, array $studioPlayers): void
-    {
-        $prodPlayers = $this->getObjectListFromDb("SELECT `player_id` FROM `player`", true);
-        $prodCount = count($prodPlayers);
-        $studioCount = count($studioPlayers);
-        if ($prodCount != $studioCount) {
-            throw new BgaVisibleSystemException("Incorrect player count (bug report has $prodCount players, studio table has $studioCount players)");
-        }
-
-        // SQL specific to your game
-        // For example, reset the current state if it's already game over
-        $sql = [
-            "UPDATE `global` SET `global_value` = 20 WHERE `global_id` = 1 AND `global_value` = 99"
-        ];
-        foreach ($prodPlayers as $index => $prodId) {
-            $studioId = $studioPlayers[$index];
-            // SQL common to all games
-            $sql[] = "UPDATE `player` SET `player_id` = $studioId WHERE `player_id` = $prodId";
-            $sql[] = "UPDATE `global` SET `global_value` = $studioId WHERE `global_value` = $prodId";
-            $sql[] = "UPDATE `stats` SET `stats_player_id` = $studioId WHERE `stats_player_id` = $prodId";
-
-            // SQL specific to your game
-            $sql[] = "UPDATE `tile` SET `card_location_arg` = $studioId WHERE `card_location_arg` = $prodId";
-			$sql[] = "UPDATE tile SET card_location='wall$studioId' WHERE card_location = 'wall$prodId'";
-        }
-        foreach ($sql as $q) {
-            $this->DbQuery($q);
-        }
-    }
-
-    function debug($debugData) {
-        if ($this->getBgaEnvironment() != 'studio') { 
-            return;
-        }die('debug data : '.json_encode($debugData));
     }
 }

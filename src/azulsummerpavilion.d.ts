@@ -43,7 +43,7 @@ interface AzulSummerPavilionGamedatas {
     supply: Tile[];
 }
 
-interface AzulSummerPavilionGame extends Game {
+interface AzulSummerPavilionGame extends GameGui<AzulSummerPavilionGamedatas> {
     animationManager: AnimationManager;
     
     getPlayerId(): number;

@@ -88,7 +88,7 @@ trait StateTrait {
         }
 
         if ($possibleTile !== null) { // play automatically this tile
-            $this->takeTiles($possibleTile->id, true, true);
+            $this->actTakeTiles($possibleTile->id, true);
         }
     }
 

@@ -1,5 +1,7 @@
 <?php
 
+use Bga\GameFramework\Actions\Types\IntArrayParam;
+
 trait ActionTrait {
 
 //////////////////////////////////////////////////////////////////////////////
@@ -11,10 +13,7 @@ trait ActionTrait {
         (note: each method below must match an input method in azul.action.php)
     */
     
-    function takeTiles(int $id, $skipActionCheck = false, $automatic = false) {
-        if (!$skipActionCheck) {
-            $this->checkAction('takeTiles');
-        }
+    function actTakeTiles(int $id, bool $automatic = false) {
         
         $playerId = intval(self::getActivePlayerId());
 
@@ -126,9 +125,7 @@ trait ActionTrait {
         }
     }
 
-    function confirmAcquire() {
-        $this->checkAction('confirmAcquire');
-
+    function actConfirmAcquire() {
         $playerId = intval(self::getActivePlayerId());
         $this->applyConfirmTiles($playerId);
     }
@@ -150,13 +147,7 @@ trait ActionTrait {
         $this->gamestate->jumpToState(ST_NEXT_PLAYER_ACQUIRE);
     }
 
-    function undoTakeTiles() {
-        self::checkAction('undoTakeTiles'); 
-
-        /*if (!$this->isUndoActivated()) {
-            throw new BgaUserException('Undo is disabled');
-        }*/
-        
+    function actUndoTakeTiles() {
         $playerId = intval(self::getActivePlayerId());
 
         $undo = $this->getGlobalVariable(UNDO_SELECT);
@@ -175,11 +166,7 @@ trait ActionTrait {
         $this->gamestate->nextState('undo');
     }
 
-    function selectPlace(int $star, int $space, $skipActionCheck = false) {
-        if (!$skipActionCheck) {
-            $this->checkAction('selectPlace');
-        }
-
+    function actSelectPlace(int $star, int $space) {
         $args = $this->argChoosePlace();
         if (!in_array($star * 100 + $space, $args['possibleSpaces'])) {
             throw new BgaUserException('Space not available');
@@ -201,11 +188,7 @@ trait ActionTrait {
         }
     }
 
-    function selectColor(int $color, $skipActionCheck = false) {
-        if (!$skipActionCheck) {
-            $this->checkAction('selectColor');
-        }
-        
+    function actSelectColor(int $color) {
         $this->applySelectColor($color);
     }
 
@@ -225,11 +208,7 @@ trait ActionTrait {
         }
     }
 
-    function playTile(int $wilds, $skipActionCheck = false) {
-        if (!$skipActionCheck) {
-            $this->checkAction('playTile');
-        }
-        
+    function actPlayTile(int $wilds) {
         $playerId = intval(self::getActivePlayerId());
         $this->applyPlayTile($playerId, $wilds);
     }
@@ -302,9 +281,7 @@ trait ActionTrait {
         }
     }
 
-    function confirmPlay() {
-        $this->checkAction('confirmPlay');
-
+    function actConfirmPlay() {
         $playerId = intval(self::getActivePlayerId());   
      
         $this->applyConfirmPlay($playerId);
@@ -326,9 +303,7 @@ trait ActionTrait {
         $this->gamestate->jumpToState(ST_NEXT_PLAYER_PLAY);
     }
 
-    function confirmPass() {
-        $this->checkAction('confirmPass');
-
+    function actConfirmPass() {
         $playerId = intval(self::getActivePlayerId());   
 
         $this->applyConfirmPass($playerId);
@@ -345,13 +320,7 @@ trait ActionTrait {
         $this->gamestate->jumpToState(ST_NEXT_PLAYER_PLAY);
     }
     
-    function undoPlayTile() {
-        self::checkAction('undoPlayTile'); 
-
-        /*if (!$this->isUndoActivated()) {
-            throw new BgaUserException('Undo is disabled');
-        }*/
-        
+    function actUndoPlayTile() {
         $playerId = intval(self::getActivePlayerId());       
 
         $undo = $this->getGlobalVariable(UNDO_PLACE);
@@ -380,15 +349,7 @@ trait ActionTrait {
         $this->gamestate->nextState('undo');
     }
 
-    function undoPass($skipActionCheck = false) {
-        if (!$skipActionCheck) {
-            $this->checkAction('undoPass');
-        }
-
-        /*if (!$this->isUndoActivated()) {
-            throw new BgaUserException('Undo is disabled');
-        }*/
-        
+    function actUndoPass() {
         $playerId = intval(self::getActivePlayerId());       
 
         $undo = $this->getGlobalVariable(UNDO_PLACE);
@@ -416,11 +377,7 @@ trait ActionTrait {
         $this->gamestate->nextState('undo');
     }
 
-    function pass($skipActionCheck = false) {
-        if (!$skipActionCheck) {
-            $this->checkAction('pass');
-        }
-        
+    function actPass() {
         $playerId = self::getActivePlayerId();
 
         $this->applyPass($playerId);
@@ -446,11 +403,7 @@ trait ActionTrait {
 
     }
 
-    function selectKeptTiles(array $ids, $skipActionCheck = false) {
-        if (!$skipActionCheck) {
-            $this->checkAction('selectKeptTiles');
-        }
-
+    function actSelectKeptTiles(#[IntArrayParam] array $ids, $skipActionCheck = false) {
         if (count($ids) > 4) {
             throw new BgaUserException("You cannot keep more than 4 tiles");
         }
@@ -512,19 +465,11 @@ trait ActionTrait {
         }
     }
 
-    function cancel($skipActionCheck = false) {
-        if (!$skipActionCheck) {
-            $this->checkAction('cancel');
-        }
-        
+    function actCancel() {
         $this->gamestate->nextState('cancel');
     }
 
-    function takeBonusTiles(array $ids, $skipActionCheck = false) {
-        if (!$skipActionCheck) {
-            $this->checkAction('takeBonusTiles');
-        }
-
+    function actTakeBonusTiles(#[IntArrayParam] array $ids) {
         $args = $this->argTakeBonusTiles();
 
         if (count($ids) != $args['count']) {

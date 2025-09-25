@@ -40,7 +40,7 @@
       // Retrieve arguments
       $id = self::getArg("id", AT_posint, true);
 
-      $this->game->takeTiles($id);
+      $this->game->actTakeTiles($id);
 
       self::ajaxResponse();
     }
@@ -48,7 +48,7 @@
     public function confirmAcquire() {
       self::setAjaxMode();
 
-      $this->game->confirmAcquire();
+      $this->game->actConfirmAcquire();
 
       self::ajaxResponse();
     }
@@ -56,7 +56,7 @@
     public function undoTakeTiles() {
       self::setAjaxMode();
 
-      $this->game->undoTakeTiles();
+      $this->game->actUndoTakeTiles();
 
       self::ajaxResponse();
     }
@@ -68,7 +68,7 @@
       $star = self::getArg("star", AT_posint, true);
       $space = self::getArg("space", AT_posint, true);
 
-      $this->game->selectPlace($star, $space);
+      $this->game->actSelectPlace($star, $space);
 
       self::ajaxResponse();
     }
@@ -79,7 +79,7 @@
       // Retrieve arguments
       $color = self::getArg("color", AT_posint, true);
 
-      $this->game->selectColor($color);
+      $this->game->actSelectColor($color);
 
       self::ajaxResponse();
     }
@@ -90,7 +90,7 @@
       // Retrieve arguments
       $wilds = self::getArg("wilds", AT_posint, true);
 
-      $this->game->playTile($wilds);
+      $this->game->actPlayTile($wilds);
 
       self::ajaxResponse();
     }
@@ -98,7 +98,7 @@
     public function confirmPlay() {
       self::setAjaxMode();
 
-      $this->game->confirmPlay();
+      $this->game->actConfirmPlay();
 
       self::ajaxResponse();
     }
@@ -106,7 +106,7 @@
     public function confirmPass() {
       self::setAjaxMode();
 
-      $this->game->confirmPass();
+      $this->game->actConfirmPass();
 
       self::ajaxResponse();
     }
@@ -114,7 +114,7 @@
     public function undoPass() {
       self::setAjaxMode();
 
-      $this->game->undoPass();
+      $this->game->actUndoPass();
 
       self::ajaxResponse();
     }
@@ -122,7 +122,7 @@
     public function undoPlayTile() {
       self::setAjaxMode();
 
-      $this->game->undoPlayTile();
+      $this->game->actUndoPlayTile();
 
       self::ajaxResponse();
     }
@@ -130,7 +130,7 @@
     public function pass() {
       self::setAjaxMode();
 
-      $this->game->pass();
+      $this->game->actPass();
 
       self::ajaxResponse();
     }
@@ -142,7 +142,7 @@
       $idsStr = self::getArg( "ids", AT_numberlist, true );
       $ids = strlen($idsStr) > 0 ? array_map(fn($str) => intval($str), explode(',', $idsStr)) : [];
 
-      $this->game->selectKeptTiles($ids);
+      $this->game->actSelectKeptTiles($ids);
 
       self::ajaxResponse();
     }
@@ -150,7 +150,7 @@
     public function cancel() {
       self::setAjaxMode();
 
-      $this->game->cancel();
+      $this->game->actCancel();
 
       self::ajaxResponse();
     }
@@ -162,7 +162,7 @@
       $idsStr = self::getArg( "ids", AT_numberlist, true );
       $ids = strlen($idsStr) > 0 ? array_map(fn($str) => intval($str), explode(',', $idsStr)) : [];
 
-      $this->game->takeBonusTiles($ids);
+      $this->game->actTakeBonusTiles($ids);
 
       self::ajaxResponse();
     }

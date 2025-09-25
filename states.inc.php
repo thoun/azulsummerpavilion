@@ -14,6 +14,8 @@
  *
  */
 
+use Bga\GameFramework\GameStateBuilder;
+
 /*
    Game state machine is a tool used to facilitate game developpement by doing common stuff that can be set up
    in a very easy way from this configuration file.
@@ -48,18 +50,12 @@
 */
 
 //    !! It is not a good idea to modify this file when a game is running !!
-require_once("modules/constants.inc.php");
+require_once("modules/php/constants.inc.php");
 
 $basicGameStates = [
 
     // The initial state. Please do not modify.
-    ST_BGA_GAME_SETUP => [
-        "name" => "gameSetup",
-        "description" => clienttranslate("Game setup"),
-        "type" => "manager",
-        "action" => "stGameSetup",
-        "transitions" => [ "" => ST_FILL_FACTORIES ]
-    ],
+    ST_BGA_GAME_SETUP => GameStateBuilder::gameSetup(ST_FILL_FACTORIES)->build(),
 
     ST_NEXT_PLAYER_ACQUIRE => [
         "name" => "nextPlayerAcquire",
@@ -85,16 +81,6 @@ $basicGameStates = [
             "autoPass" => ST_NEXT_PLAYER_PLAY,
         ],
     ],
-   
-    // Final state.
-    // Please do not modify.
-    ST_END_GAME => [
-        "name" => "gameEnd",
-        "description" => clienttranslate("End of game"),
-        "type" => "manager",
-        "action" => "stGameEnd",
-        "args" => "argGameEnd",
-    ],
 ];
 
 $playerActionsGameStates = [
@@ -119,6 +105,7 @@ $playerActionsGameStates = [
         "action" => "stChooseTile",
         "possibleactions" => [ 
             "takeTiles",
+
             "actTakeTiles",
         ],
         "transitions" => [
@@ -135,6 +122,7 @@ $playerActionsGameStates = [
         "possibleactions" => [ 
             "confirmAcquire",
             "undoTakeTiles",
+
             "actConfirmAcquire",
             "actUndoTakeTiles",
          ],
@@ -154,6 +142,7 @@ $playerActionsGameStates = [
         "possibleactions" => [ 
             "selectPlace",
             "pass",
+
             "actSelectPlace",
             "actPass",
          ],
@@ -168,6 +157,7 @@ $playerActionsGameStates = [
         "possibleactions" => [ 
             "selectKeptTiles",
             "undoPass",
+
             "actSelectKeptTiles",
             "actUndoPass",
         ],
@@ -184,6 +174,7 @@ $playerActionsGameStates = [
         "possibleactions" => [ 
             "confirmPass",
             "undoPass",
+
             "actConfirmPass",
             "actUndoPass",
          ],
@@ -202,6 +193,7 @@ $playerActionsGameStates = [
             "selectColor",
             "undoPlayTile",
             "pass",
+
             "actSelectColor",
             "actUndoPlayTile",
             "actPass",
@@ -220,6 +212,7 @@ $playerActionsGameStates = [
         "possibleactions" => [ 
             "playTile",
             "undoPlayTile",
+
             "actPlayTile",
             "actUndoPlayTile",
          ],
@@ -237,6 +230,7 @@ $playerActionsGameStates = [
         "possibleactions" => [ 
             "takeBonusTiles",
             "undoPlayTile",
+
             "actTakeBonusTiles",
             "actUndoPlayTile",
          ],
@@ -254,6 +248,7 @@ $playerActionsGameStates = [
         "possibleactions" => [ 
             "confirmPlay",
             "undoPlayTile",
+            
             "actConfirmPlay",
             "actUndoPlayTile",
          ],

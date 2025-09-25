@@ -15,31 +15,32 @@
   * In this PHP file, you are going to defines the rules of the game.
   *
   */
+namespace Bga\Games\AzulSummerPavilion;
 
+require_once('constants.inc.php');
+require_once('tile.php');
+require_once('undo.php');
+require_once('utils.php');
+require_once('actions.php');
+require_once('args.php');
+require_once('states.php');
 
-require_once( APP_GAMEMODULE_PATH.'module/table/table.game.php' );
+use Bga\GameFramework\Components\Deck;
+use Bga\GameFramework\Table;
 
-require_once('modules/constants.inc.php');
-require_once('modules/tile.php');
-require_once('modules/undo.php');
-require_once('modules/utils.php');
-require_once('modules/actions.php');
-require_once('modules/args.php');
-require_once('modules/states.php');
-require_once('modules/debug-util.php');
-
-use \Bga\GameFramework\TableOptions;
-
-class AzulSummerPavilion extends Table {
-    use UtilTrait;
-    use ActionTrait;
-    use ArgsTrait;
-    use StateTrait;
+class Game extends Table {
+    use \UtilTrait;
+    use \ActionTrait;
+    use \ArgsTrait;
+    use \StateTrait;
     use DebugUtilTrait;
 
-    public $tiles;
+    public Deck $tiles;
 
-    public TableOptions $tableOptions;
+
+    public array $factoriesByPlayers;
+    public array $STANDARD_FACE_STAR_COLORS;
+    public array $FULL_STAR_POINTS_BY_COLOR;
 
 	function __construct() {
         // Your global variables labels:
@@ -57,17 +58,37 @@ class AzulSummerPavilion extends Table {
             FAST_SCORING => 102,
         ]);
 
-        $this->tableOptions = new TableOptions($this);
-
         $this->tiles = self::getNew("module.common.deck");
         $this->tiles->init("tile");
-        $this->tiles->autoreshuffle = true;      
+        $this->tiles->autoreshuffle = true; 
+        
+        
+        $this->factoriesByPlayers = [
+        2 => 5,
+        3 => 7,
+        4 => 9,
+        ];
+
+        $this->STANDARD_FACE_STAR_COLORS = [
+        0 => 0,
+        1 => 1,
+        2 => 3,
+        3 => 6,
+        4 => 5, 
+        5 => 4, 
+        6 => 2,
+        ];
+
+        $this->FULL_STAR_POINTS_BY_COLOR = [
+        0 => 12,
+        1 => 20,
+        2 => 18,
+        3 => 17,
+        4 => 16, 
+        5 => 15, 
+        6 => 14,
+        ];
 	}
-	
-    protected function getGameName() {
-		// Used for translations and stuff. Please do not modify.
-        return "azulsummerpavilion";
-    }	
 
     /*
         setupNewGame:
@@ -122,9 +143,6 @@ class AzulSummerPavilion extends Table {
         // Activate first player (which is in general a good idea :) )
         $this->activeNextPlayer();
 
-        // TODO TEMP to test
-        $this->debugSetup();
-
         /************ End of the game initialization *****/
     }
 
@@ -137,7 +155,7 @@ class AzulSummerPavilion extends Table {
         _ when the game starts
         _ when a player refreshes the game page (F5)
     */
-    protected function getAllDatas() {
+    protected function getAllDatas(): array {
         $result = [];
     
         // Get information about players
@@ -228,9 +246,9 @@ class AzulSummerPavilion extends Table {
                         $round = $this->getRound();
                         $normalTiles = array_values(array_filter($factoryTiles, fn($tile) => $tile->type != $round));
                         if (count($normalTiles) > 0) {
-                            $this->takeTiles($normalTiles[bga_rand(1, count($normalTiles)) - 1]->id, true);
+                            $this->actTakeTiles($normalTiles[bga_rand(1, count($normalTiles)) - 1]->id);
                         } else {
-                            $this->takeTiles($tiles[bga_rand(1, count($tiles)) - 1]->id, true);
+                            $this->actTakeTiles($tiles[bga_rand(1, count($tiles)) - 1]->id);
                         }
                         break;
                     case 'confirmAcquire':
@@ -240,10 +258,10 @@ class AzulSummerPavilion extends Table {
                         $this->applyPass($active_player);
                         break;
                     case 'chooseColor':
-                        $this->selectColor(0);
+                        $this->actSelectColor(0);
                         break;
                     case 'playTile':
-                        $this->playTile(0, true);
+                        $this->actPlayTile(0, true);
                         break;
                     case 'confirmPlay':
                         $this->applyConfirmPlay($active_player);
@@ -269,7 +287,7 @@ class AzulSummerPavilion extends Table {
                 return;
             }
     
-            throw new feException( "Zombie mode not supported at this game state: ".$statename );
+            throw new \feException( "Zombie mode not supported at this game state: ".$statename );
         }
         
     ///////////////////////////////////////////////////////////////////////////////////:
@@ -292,10 +310,10 @@ class AzulSummerPavilion extends Table {
             // For example, if the game was running with a release of your game named "140430-1345",
             // $from_version is equal to 1404301345
             
-            if ($from_version <= 2408031258) {
+            /*if ($from_version <= 2408031258) {
                 // ! important ! Use <table_name> for all tables    
                 $sql = "ALTER TABLE DBPREFIX_player ADD `auto_pass` tinyint(1) NOT NULL DEFAULT FALSE";
                 $this->applyDbUpgradeToAllDB($sql);
-            }
+            }*/
         }    
 }
