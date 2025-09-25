@@ -1,0 +1,246 @@
+{
+    "table": {
+        "turnsNumber": {
+            "id": 10,
+            "name": "Number of turns",
+            "type": "int"
+        },
+        "normalTilesCollected": {
+            "id": 12,
+            "name": "Normal tiles collected",
+            "type": "int"
+        },
+        "wildTilesCollected": {
+            "id": 13,
+            "name": "Wild tiles collected",
+            "type": "int"
+        },
+        "bonusTilesCollected": {
+            "id": 14,
+            "name": "Bonus tiles collected",
+            "type": "int"
+        },
+        "bonusTile1": {
+            "id": 16,
+            "name": "Bonus tiles with pillars",
+            "type": "int"
+        },
+        "bonusTile2": {
+            "id": 17,
+            "name": "Bonus tiles with statues",
+            "type": "int"
+        },
+        "bonusTile3": {
+            "id": 18,
+            "name": "Bonus tiles with windows",
+            "type": "int"
+        },
+        "pointsWallTile": {
+            "id": 20,
+            "name": "Points gained with placed tiles",
+            "type": "int"
+        },
+        "pointsLossDiscardedTiles": {
+            "id": 25,
+            "name": "Points lost with discarded tiles",
+            "type": "int"
+        },
+        "pointsLossFirstTile": {
+            "id": 26,
+            "name": "Points lost with taken First Player tile",
+            "type": "int"
+        },
+        "pointsCompleteStars": {
+            "id": 29,
+            "name": "Points gained with complete stars",
+            "type": "int"
+        },
+        "pointsCompleteStars0": {
+            "id": 30,
+            "name": "Points gained with complete multicolor stars",
+            "type": "int"
+        },
+        "pointsCompleteStars1": {
+            "id": 31,
+            "name": "Points gained with complete Fuschia stars",
+            "type": "int"
+        },
+        "pointsCompleteStars2": {
+            "id": 32,
+            "name": "Points gained with complete Green stars",
+            "type": "int"
+        },
+        "pointsCompleteStars3": {
+            "id": 33,
+            "name": "Points gained with complete Orange stars",
+            "type": "int"
+        },
+        "pointsCompleteStars4": {
+            "id": 34,
+            "name": "Points gained with complete Yellow stars",
+            "type": "int"
+        },
+        "pointsCompleteStars5": {
+            "id": 35,
+            "name": "Points gained with complete Blue stars",
+            "type": "int"
+        },
+        "pointsCompleteStars6": {
+            "id": 36,
+            "name": "Points gained with complete Red stars",
+            "type": "int"
+        },
+        "pointsCompleteNumbers": {
+            "id": 40,
+            "name": "Points gained with complete numbers",
+            "type": "int"
+        },
+        "pointsCompleteNumbers1": {
+            "id": 41,
+            "name": "Points gained with complete numbers 1",
+            "type": "int"
+        },
+        "pointsCompleteNumbers2": {
+            "id": 42,
+            "name": "Points gained with complete numbers 2",
+            "type": "int"
+        },
+        "pointsCompleteNumbers3": {
+            "id": 43,
+            "name": "Points gained with complete numbers 3",
+            "type": "int"
+        },
+        "pointsCompleteNumbers4": {
+            "id": 44,
+            "name": "Points gained with complete numbers 4",
+            "type": "int"
+        },
+        "roundsNumber": {
+            "id": 11,
+            "name": "Number of rounds",
+            "type": "int"
+        }
+    },
+    "player": {
+        "turnsNumber": {
+            "id": 10,
+            "name": "Number of turns",
+            "type": "int"
+        },
+        "normalTilesCollected": {
+            "id": 12,
+            "name": "Normal tiles collected",
+            "type": "int"
+        },
+        "wildTilesCollected": {
+            "id": 13,
+            "name": "Wild tiles collected",
+            "type": "int"
+        },
+        "bonusTilesCollected": {
+            "id": 14,
+            "name": "Bonus tiles collected",
+            "type": "int"
+        },
+        "bonusTile1": {
+            "id": 16,
+            "name": "Bonus tiles with pillars",
+            "type": "int"
+        },
+        "bonusTile2": {
+            "id": 17,
+            "name": "Bonus tiles with statues",
+            "type": "int"
+        },
+        "bonusTile3": {
+            "id": 18,
+            "name": "Bonus tiles with windows",
+            "type": "int"
+        },
+        "pointsWallTile": {
+            "id": 20,
+            "name": "Points gained with placed tiles",
+            "type": "int"
+        },
+        "pointsLossDiscardedTiles": {
+            "id": 25,
+            "name": "Points lost with discarded tiles",
+            "type": "int"
+        },
+        "pointsLossFirstTile": {
+            "id": 26,
+            "name": "Points lost with taken First Player tile",
+            "type": "int"
+        },
+        "pointsCompleteStars": {
+            "id": 29,
+            "name": "Points gained with complete stars",
+            "type": "int"
+        },
+        "pointsCompleteStars0": {
+            "id": 30,
+            "name": "Points gained with complete multicolor stars",
+            "type": "int"
+        },
+        "pointsCompleteStars1": {
+            "id": 31,
+            "name": "Points gained with complete Fuschia stars",
+            "type": "int"
+        },
+        "pointsCompleteStars2": {
+            "id": 32,
+            "name": "Points gained with complete Green stars",
+            "type": "int"
+        },
+        "pointsCompleteStars3": {
+            "id": 33,
+            "name": "Points gained with complete Orange stars",
+            "type": "int"
+        },
+        "pointsCompleteStars4": {
+            "id": 34,
+            "name": "Points gained with complete Yellow stars",
+            "type": "int"
+        },
+        "pointsCompleteStars5": {
+            "id": 35,
+            "name": "Points gained with complete Blue stars",
+            "type": "int"
+        },
+        "pointsCompleteStars6": {
+            "id": 36,
+            "name": "Points gained with complete Red stars",
+            "type": "int"
+        },
+        "pointsCompleteNumbers": {
+            "id": 40,
+            "name": "Points gained with complete numbers",
+            "type": "int"
+        },
+        "pointsCompleteNumbers1": {
+            "id": 41,
+            "name": "Points gained with complete numbers 1",
+            "type": "int"
+        },
+        "pointsCompleteNumbers2": {
+            "id": 42,
+            "name": "Points gained with complete numbers 2",
+            "type": "int"
+        },
+        "pointsCompleteNumbers3": {
+            "id": 43,
+            "name": "Points gained with complete numbers 3",
+            "type": "int"
+        },
+        "pointsCompleteNumbers4": {
+            "id": 44,
+            "name": "Points gained with complete numbers 4",
+            "type": "int"
+        },
+        "firstPlayer": {
+            "id": 60,
+            "name": "Number of rounds as first player",
+            "type": "int"
+        }
+    }
+}
