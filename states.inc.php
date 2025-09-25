@@ -56,45 +56,9 @@ $basicGameStates = [
 
     // The initial state. Please do not modify.
     ST_BGA_GAME_SETUP => GameStateBuilder::gameSetup(ST_FILL_FACTORIES)->build(),
-
-    ST_NEXT_PLAYER_ACQUIRE => [
-        "name" => "nextPlayerAcquire",
-        "description" => "",
-        "type" => "game",
-        "updateGameProgression" => true,
-        "action" => "stNextPlayerAcquire",
-        "transitions" => [
-            "nextPlayer" => ST_PLAYER_CHOOSE_TILE, 
-            "endAcquire" => ST_PLAYER_CHOOSE_PLACE,
-        ],
-    ],
-
-    ST_NEXT_PLAYER_PLAY => [
-        "name" => "nextPlayerPlay",
-        "description" => "",
-        "type" => "game",
-        "updateGameProgression" => true,
-        "action" => "stNextPlayerPlay",
-        "transitions" => [
-            "nextPlayer" => ST_PLAYER_CHOOSE_PLACE, 
-            "endRound" => ST_END_ROUND,
-            "autoPass" => ST_NEXT_PLAYER_PLAY,
-        ],
-    ],
 ];
 
 $playerActionsGameStates = [
-
-    ST_FILL_FACTORIES => [
-        "name" => "fillFactories",
-        "description" => "",
-        "type" => "game",
-        "updateGameProgression" => true,
-        "action" => "stFillFactories",
-        "transitions" => [ 
-            "next" => ST_PLAYER_CHOOSE_TILE,
-        ],
-    ],
 
     ST_PLAYER_CHOOSE_TILE => [
         "name" => "chooseTile",
@@ -104,8 +68,6 @@ $playerActionsGameStates = [
         "args" => "argChooseTile",
         "action" => "stChooseTile",
         "possibleactions" => [ 
-            "takeTiles",
-
             "actTakeTiles",
         ],
         "transitions" => [
@@ -120,9 +82,6 @@ $playerActionsGameStates = [
         "descriptionmyturn" => clienttranslate('${you} must confirm acquired tiles'),
         "type" => "activeplayer",
         "possibleactions" => [ 
-            "confirmAcquire",
-            "undoTakeTiles",
-
             "actConfirmAcquire",
             "actUndoTakeTiles",
          ],
@@ -140,9 +99,6 @@ $playerActionsGameStates = [
         "args" => "argChoosePlace",
         "action" => "stChoosePlace",
         "possibleactions" => [ 
-            "selectPlace",
-            "pass",
-
             "actSelectPlace",
             "actPass",
          ],
@@ -155,9 +111,6 @@ $playerActionsGameStates = [
         "descriptionmyturn" => clienttranslate('${you} may choose up to 4 tiles to keep'),
         "type" => "activeplayer",
         "possibleactions" => [ 
-            "selectKeptTiles",
-            "undoPass",
-
             "actSelectKeptTiles",
             "actUndoPass",
         ],
@@ -172,9 +125,6 @@ $playerActionsGameStates = [
         "descriptionmyturn" => clienttranslate('${you} must confirm ending the round'),
         "type" => "activeplayer",
         "possibleactions" => [ 
-            "confirmPass",
-            "undoPass",
-
             "actConfirmPass",
             "actUndoPass",
          ],
@@ -190,10 +140,6 @@ $playerActionsGameStates = [
         "type" => "activeplayer",
         "args" => "argChooseColor",
         "possibleactions" => [ 
-            "selectColor",
-            "undoPlayTile",
-            "pass",
-
             "actSelectColor",
             "actUndoPlayTile",
             "actPass",
@@ -210,9 +156,6 @@ $playerActionsGameStates = [
         "type" => "activeplayer",
         "args" => "argPlayTile",
         "possibleactions" => [ 
-            "playTile",
-            "undoPlayTile",
-
             "actPlayTile",
             "actUndoPlayTile",
          ],
@@ -228,9 +171,6 @@ $playerActionsGameStates = [
         "type" => "activeplayer",
         "args" => "argTakeBonusTiles",
         "possibleactions" => [ 
-            "takeBonusTiles",
-            "undoPlayTile",
-
             "actTakeBonusTiles",
             "actUndoPlayTile",
          ],
@@ -246,35 +186,11 @@ $playerActionsGameStates = [
         "type" => "activeplayer",
         "args" => "argConfirmPlay",
         "possibleactions" => [ 
-            "confirmPlay",
-            "undoPlayTile",
-            
             "actConfirmPlay",
             "actUndoPlayTile",
          ],
         "transitions" => [
             "undo" => ST_PLAYER_CHOOSE_PLACE,
-        ],
-    ],
-
-    ST_END_ROUND => [
-        "name" => "endRound",
-        "description" => "",
-        "type" => "game",
-        "action" => "stEndRound",
-        "transitions" => [
-            "newRound" => ST_FILL_FACTORIES,
-            "endScore" => ST_END_SCORE,
-        ],
-    ],
-
-    ST_END_SCORE => [
-        "name" => "endScore",
-        "description" => "",
-        "type" => "game",
-        "action" => "stEndScore",
-        "transitions" => [
-            "endGame" => ST_END_GAME,
         ],
     ],
 ];

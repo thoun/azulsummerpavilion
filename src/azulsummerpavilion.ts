@@ -697,7 +697,7 @@ class AzulSummerPavilion extends GameGui<AzulSummerPavilionGamedatas> implements
         const supplyDiv = document.getElementById(`supply`);
         const selectedTileDivs = supplyDiv.querySelectorAll('.tile.selected');
 
-        this.bgaPerformAction('takeBonusTiles', {
+        this.bgaPerformAction('actTakeBonusTiles', {
             ids: Array.from(selectedTileDivs).map((tile: HTMLElement) => Number(tile.dataset.id)).sort().join(','),
         });
     }

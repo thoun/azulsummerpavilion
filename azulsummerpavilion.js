@@ -1819,7 +1819,7 @@ var AzulSummerPavilion = /** @class */ (function (_super) {
     AzulSummerPavilion.prototype.takeBonusTiles = function () {
         var supplyDiv = document.getElementById("supply");
         var selectedTileDivs = supplyDiv.querySelectorAll('.tile.selected');
-        this.bgaPerformAction('takeBonusTiles', {
+        this.bgaPerformAction('actTakeBonusTiles', {
             ids: Array.from(selectedTileDivs).map(function (tile) { return Number(tile.dataset.id); }).sort().join(','),
         });
     };
