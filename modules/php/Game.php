@@ -481,7 +481,7 @@ class Game extends Table {
         $this->setGlobalVariable(SELECTED_COLOR, null);
         $this->setGlobalVariable(ADDITIONAL_TILES_DETAIL, null);
         
-        $this->gamestate->nextState('undo');
+        return ChoosePlace::class;
     }
 
     function actUndoPass(int $activePlayerId) {
