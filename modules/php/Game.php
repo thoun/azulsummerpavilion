@@ -23,22 +23,26 @@ require_once('constants.inc.php');
 require_once('tile.php');
 require_once('undo.php');
 require_once('utils.php');
-require_once('actions.php');
-require_once('args.php');
-require_once('states.php');
 
+use Bga\GameFramework\Actions\CheckAction;
 use Bga\GameFramework\Components\Deck;
 use Bga\GameFramework\Table;
+use Bga\GameFrameworkPrototype\Helpers\Arrays;
+use Bga\Games\AzulSummerPavilion\States\ChooseKeptTiles;
+use Bga\Games\AzulSummerPavilion\States\ChoosePlace;
+use Bga\Games\AzulSummerPavilion\States\ConfirmPass;
+use Bga\Games\AzulSummerPavilion\States\ConfirmPlay;
+use Bga\Games\AzulSummerPavilion\States\FillFactories;
+use Bga\Games\AzulSummerPavilion\States\NextPlayerAcquire;
+use Bga\Games\AzulSummerPavilion\States\NextPlayerPlay;
+use Bga\Games\AzulSummerPavilion\States\TakeBonusTiles;
+use UndoPlace;
 
 class Game extends Table {
     use \UtilTrait;
-    use \ActionTrait;
-    use \ArgsTrait;
-    use \StateTrait;
     use DebugUtilTrait;
 
     public Deck $tiles;
-
 
     public array $factoriesByPlayers;
     public array $STANDARD_FACE_STAR_COLORS;
@@ -145,6 +149,8 @@ class Game extends Table {
         // Activate first player (which is in general a good idea :) )
         $this->activeNextPlayer();
 
+        return FillFactories::class;
+
         /************ End of the game initialization *****/
     }
 
@@ -220,66 +226,662 @@ class Game extends Table {
         return ($round - 1 + $inRoundProgress) * 100 / 6;
     }
 
-    //////////////////////////////////////////////////////////////////////////////
-    //////////// Zombie
-    ////////////
-    
-        /*
-            zombieTurn:
-            
-            This method is called each time it is the turn of a player who has quit the game (= "zombie" player).
-            You can do whatever you want in order to make sure the turn of this player ends appropriately
-            (ex: pass).
-            
-            Important: your zombie code will be called when the player leaves the game. This action is triggered
-            from the main site and propagated to the gameserver from a server, not from a browser.
-            As a consequence, there is no current player associated to this action. In your zombieTurn function,
-            you must _never_ use getCurrentPlayerId() or getCurrentPlayerName(), otherwise it will fail with a "Not logged" error message. 
-        */
-    
-        function zombieTurn($state, $active_player) {
-            $statename = $state['name'];
-            
-            if ($state['type'] === "activeplayer") {
-                switch ($statename) {
-                    case 'confirmAcquire':
-                        $this->applyConfirmTiles($active_player);
-                        break;
-                    case 'choosePlace':
-                        $this->applyPass($active_player);
-                        break;
-                    case 'chooseColor':
-                        $this->actSelectColor(0);
-                        break;
-                    case 'playTile':
-                        $this->actPlayTile(0, true);
-                        break;
-                    case 'confirmPlay':
-                        $this->applyConfirmPlay($active_player);
-                        break;
-                    case 'chooseKeptTiles':
-                        $this->applySelectKeptTiles($active_player, []);
-                        break;
-                    case 'confirmPass':
-                        $this->applyConfirmPass($active_player);
-                        break;
-                    default:
-                        $this->gamestate->nextState("nextPlayer"); // all player actions got nextPlayer action as a "zombiePass"
-                        break;
+    function argChoosePlaceForPlayer(int $playerId) {
+        $placedTiles = $this->getTilesFromDb($this->tiles->getCardsInLocation('wall'.$playerId));
+        $hand = $this->getTilesFromDb($this->tiles->getCardsInLocation('hand', $playerId));
+        $wildColor = $this->getWildColor();
+        $possibleSpaces = [];
+        $variant = $this->isVariant();
+        $remainingColorTiles = count(array_filter($hand, fn($tile) => $tile->type > 0));
+        $skipIsFree = $remainingColorTiles <= ($this->getRound() >= 6 ? 0 : 4);
+
+        for ($star = 0; $star <= 6; $star++) {
+            $forcedColor = $this->STANDARD_FACE_STAR_COLORS[$star];
+
+            for ($space = 1; $space <= 6; $space++) {
+                if (Arrays::some($placedTiles, fn($placedTile) => $placedTile->star == $star && $placedTile->space == $space)) {
+                    continue;
                 }
-    
-                return;
+
+                $colors = [$forcedColor];
+                $number = $this->getSpaceNumber($star, $space, $variant);
+                if ($variant || $forcedColor == 0) {
+                    $starTiles = array_values(array_filter($placedTiles, fn($placedTile) => $placedTile->star == $star));
+                    $starColors = array_map(fn($starTile) => $starTile->type, $starTiles);
+                    $colors = $variant && count($starTiles) === 1 ? [1, 2, 3, 4, 5, 6] : array_values(array_diff([1, 2, 3, 4, 5, 6], $starColors));
+                    if ($variant && count($starColors) >= 2 && $starColors[0] == $starColors[1]) {
+                        $colors = [$starColors[0]];
+                    }
+                }
+
+                if (Arrays::some($colors, fn($color) => $this->getMaxWildTiles($hand, $number, $color, $wildColor) !== null)) {
+                    $possibleSpaces[] = $star * 100 + $space;
+                }
             }
-    
-            if ($state['type'] === "multipleactiveplayer") {
-                // Make sure player is in a non blocking status for role turn
-                $this->gamestate->setPlayerNonMultiactive( $active_player, '' );
-                
-                return;
-            }
-    
-            throw new \feException( "Zombie mode not supported at this game state: ".$statename );
         }
+
+        return [
+            'possibleSpaces' => $possibleSpaces,
+            'skipIsFree' => $skipIsFree,
+        ];
+    }
+
+    function argChooseColor(int $activePlayerId) {
+        $selectedPlace = $this->getGlobalVariable(SELECTED_PLACE);
+        $star = $selectedPlace[0];
+        $space = $selectedPlace[1];
+        $selectedColor = $this->STANDARD_FACE_STAR_COLORS[$star];
+
+        $possibleColors = [];
+        $variant = $this->isVariant();
+        if ($variant || $selectedColor == 0) {
+            $number = $this->getSpaceNumber($star, $space, $variant);
+            $placedTiles = $this->getTilesFromDb($this->tiles->getCardsInLocation('wall'.$activePlayerId));
+            $hand = $this->getTilesFromDb($this->tiles->getCardsInLocation('hand', $activePlayerId));
+            $wildColor = $this->getWildColor();
+            $starTiles = array_values(array_filter($placedTiles, fn($placedTile) => $placedTile->star == $star));
+            $starColors = array_map(fn($starTile) => $starTile->type, $starTiles);
+            $colors = array_diff([1, 2, 3, 4, 5, 6], $starColors);
+            if ($variant) {
+                if (count($starColors) <= 1) {
+                    $colors = [1, 2, 3, 4, 5, 6];
+                } else if (count($starColors) >= 2 && $starColors[0] == $starColors[1]) {
+                    $colors = [$starColors[0]];
+                }
+            }
+
+            foreach ($colors as $possibleColor) {
+                if ($this->getMaxWildTiles($hand, $number, $possibleColor, $wildColor) !== null) {
+                    $possibleColors[] = $possibleColor;
+                }
+            }
+
+        } else {
+            $possibleColors = [$selectedColor];
+        }
+        return [
+            'playerId' => $activePlayerId,
+            'possibleColors' => $possibleColors,
+            'star' => $star,
+            'space' => $space,
+            '_private' => $this->argAutopass(),
+        ];
+    }
+
+    function getMaxWildTiles(array $hand, int $cost, int $color, int $wildColor) { // null if cannot pay, else number max of wild tiles that can be used (0 is still valid choice!)
+        $colorTiles = array_values(array_filter($hand, fn($tile) => $tile->type == $color));
+        $wildTiles = array_values(array_filter($hand, fn($tile) => $tile->type == $wildColor));
+
+        if ($color == $wildColor) {
+            return count($colorTiles) < $cost ? null : 0;
+        } else if (count($colorTiles) + count($wildTiles) < $cost || count($colorTiles) < 1) {
+            return null;
+        } else {
+            return min($cost - 1, count($wildTiles));
+        }
+    }
+
+    function argPlayTile(int $activePlayerId) {
+        $variant = $this->isVariant();
+        $hand = $this->getTilesFromDb($this->tiles->getCardsInLocation('hand', $activePlayerId));
+
+        $selectedPlace = $this->getGlobalVariable(SELECTED_PLACE);
+        $star = $selectedPlace[0];
+        $space = $selectedPlace[1];
+        $selectedColor = $this->getGlobalVariable(SELECTED_COLOR);
+        $wildColor = $this->getWildColor();
+        $number = $this->getSpaceNumber($star, $space, $variant);
+        $maxWildTiles = $this->getMaxWildTiles($hand, $number, $selectedColor, $wildColor);
+        $colorTiles = array_values(array_filter($hand, fn($tile) => $tile->type == $selectedColor));
+
+        return [
+            'selectedPlace' => $selectedPlace,
+            'number' => $number,
+            'color' => $selectedColor,
+            'wildColor' => $wildColor,
+            'maxColor' => count($colorTiles),
+            'maxWildTiles' => $maxWildTiles,
+            '_private' => $this->argAutopass(),
+        ];
+    }
+
+    function applyConfirmPass(int $activePlayerId) {
+        $undo = $this->getGlobalVariable(UNDO_PLACE);
+        $count = $undo->points;
+        if ($count > 0) {
+            $this->incStat($count, 'pointsLossDiscardedTiles');
+            $this->incStat($count, 'pointsLossDiscardedTiles', $activePlayerId);
+        }
+
+        return NextPlayerPlay::class;
+    }
+
+    function applyConfirmTiles(int $playerId) {
+        $undo = $this->getGlobalVariable(UNDO_SELECT);
+        $this->incStat($undo->normalTiles, 'normalTilesCollected');
+        $this->incStat($undo->normalTiles, 'normalTilesCollected', $playerId);
+        if ($undo->wildTile) {
+            $this->incStat(1, 'wildTilesCollected');
+            $this->incStat(1, 'wildTilesCollected', $playerId);
+        }
+        if ($undo->pointsLossFirstTile > 0) {
+            $this->incStat($undo->pointsLossFirstTile, 'pointsLossFirstTile');
+            $this->incStat($undo->pointsLossFirstTile, 'pointsLossFirstTile', $playerId);
+            
+        }
+        
+        return NextPlayerAcquire::class;
+    }
+
+    function applyPlayTile(int $playerId, int $wilds) {
+
+        $variant = $this->isVariant();
+
+        // for undo
+        $previousScore = $this->getPlayerScore($playerId);
+
+        $hand = $this->getTilesFromDb($this->tiles->getCardsInLocation('hand', $playerId));
+
+        $selectedPlace = $this->getGlobalVariable(SELECTED_PLACE);
+        $star = $selectedPlace[0];
+        $space = $selectedPlace[1];
+        $selectedColor = $this->getGlobalVariable(SELECTED_COLOR);
+        $wildColor = $this->getWildColor();
+        $number = $this->getSpaceNumber($star, $space, $variant);
+
+        $colorTiles = array_values(array_filter($hand, fn($tile) => $tile->type == $selectedColor));
+        $wildTiles = array_values(array_filter($hand, fn($tile) => $tile->type == $wildColor));
+
+        $tiles = array_merge(
+            array_slice($colorTiles, 0, $number - $wilds),
+            array_slice($wildTiles, 0, $wilds),
+        );
+
+        $placedTile = $tiles[0];
+        $discardedTiles = array_slice($tiles, 1);
+        $placedTile->star = $star;
+        $placedTile->space = $space;
+        $this->tiles->moveCard($placedTile->id, 'wall'.$playerId, $placedTile->star * 100 + $placedTile->space);
+        $this->tiles->moveCards(array_map(fn($t) => $t->id, $discardedTiles), 'discard');
+
+        $scoredTiles = $this->getScoredTiles($playerId, $placedTile);
+        $points = count($scoredTiles);
+
+        $this->incPlayerScore($playerId, $points);
+
+        $this->notify->all('placeTileOnWall', clienttranslate('${player_name} places ${number} ${color} and gains ${points} point(s)'), [
+            'placedTile' => $placedTile,
+            'discardedTiles' => $discardedTiles,
+            'scoredTiles' => $scoredTiles,
+            'playerId' => $playerId,
+            'player_name' => $this->getPlayerNameById($playerId),
+            'number' => 1,
+            'color' => $this->getColor($placedTile->type),
+            'i18n' => ['color'],
+            'type' => $placedTile->type,
+            'preserve' => [ 2 => 'type' ],
+            'points' => $points,
+            'newScore' => $this->getPlayerScore($playerId),
+        ]);
+
+        $this->setGlobalVariable(UNDO_PLACE, new UndoPlace($tiles, $previousScore, $points));
+
+        $wall = $this->getTilesFromDb($this->tiles->getCardsInLocation('wall'.$playerId));
+        $additionalTiles = $this->additionalTilesDetail($wall, $placedTile);
+        if ($additionalTiles['count'] > 0) {        
+            $this->setGlobalVariable(ADDITIONAL_TILES_DETAIL, $additionalTiles);
+        }
+
+        if ($additionalTiles['count'] > 0) {
+            return TakeBonusTiles::class;
+        } else if ($this->isUndoActivated($playerId)) {
+            return ConfirmPlay::class;
+        } else {
+            return $this->applyConfirmPlay($playerId);
+        }
+    }
+
+    function applyConfirmPlay(int $playerId) {
+        $undo = $this->getGlobalVariable(UNDO_PLACE);
+        $count = count($undo->supplyTiles);
+        if ($count > 0) {
+            $this->incStat($count, 'bonusTilesCollected');
+            $this->incStat($count, 'bonusTilesCollected', $playerId);
+            $this->incStat($count, 'bonusTile'.$count);
+            $this->incStat($count, 'bonusTile'.$count, $playerId);
+        }
+
+        $this->incStat($undo->points, 'pointsWallTile');
+        $this->incStat($undo->points, 'pointsWallTile', $playerId);
+
+        return NextPlayerPlay::class;
+    }
+
+    function actUndoPlayTile(int $activePlayerId) {
+        $undo = $this->getGlobalVariable(UNDO_PLACE);
+
+        if ($undo) {
+            $this->tiles->moveCards(array_map(fn($t) => $t->id, $undo->tiles), 'hand', $activePlayerId);
+
+            foreach ($undo->supplyTiles as $tile) {
+                $this->tiles->moveCard($tile->id, $tile->location, $tile->space);
+            }
+
+            $this->setPlayerScore($activePlayerId, $undo->previousScore);
+        }
+
+        $this->notify->all('undoPlayTile', clienttranslate('${player_name} cancels tile placement'), [
+            'playerId' => $activePlayerId,
+            'player_name' => $this->getPlayerNameById($activePlayerId),
+            'undo' => $undo,
+        ]);
+
+        $this->setGlobalVariable(UNDO_PLACE, null);
+        $this->setGlobalVariable(SELECTED_PLACE, null);
+        $this->setGlobalVariable(SELECTED_COLOR, null);
+        $this->setGlobalVariable(ADDITIONAL_TILES_DETAIL, null);
+        
+        $this->gamestate->nextState('undo');
+    }
+
+    function actUndoPass(int $activePlayerId) {
+        $undo = $this->getGlobalVariable(UNDO_PLACE);
+
+        if ($undo) {
+            $this->tiles->moveCards(array_map(fn($t) => $t->id, $undo->tiles), 'hand', $activePlayerId);
+
+            foreach ($undo->supplyTiles as $tile) {
+                $this->tiles->moveCard($tile->id, $tile->location, $tile->space);
+            }
+
+            $this->setPlayerScore($activePlayerId, $undo->previousScore);
+        }
+
+        $this->DbQuery("UPDATE player SET passed = FALSE WHERE player_id = $activePlayerId" );
+
+        $this->notify->all('undoPlayTile', clienttranslate('${player_name} cancels ending the round'), [
+            'playerId' => $activePlayerId,
+            'player_name' => $this->getPlayerNameById($activePlayerId),
+            'undo' => $undo,
+        ]);
+
+        $this->setGlobalVariable(UNDO_PLACE, null);
+        
+        return ChoosePlace::class;
+    }
+
+    function applyPass(int $playerId, bool $forceNoConfirm = false) {
+        $this->DbQuery("UPDATE player SET passed = TRUE WHERE player_id = $playerId" );
+        $this->notify->all('pass', clienttranslate('${player_name} passes'), [
+            'playerId' => $playerId,
+            'player_name' => $this->getPlayerNameById($playerId),
+        ]);
+
+        $hand = $this->getTilesFromDb($this->tiles->getCardsInLocation('hand', $playerId));
+        $colorTiles = array_values(array_filter($hand, fn($tile) => $tile->type > 0));
+
+        $lastRound = $this->getRound() >= 6;
+
+        if (!$lastRound && count($colorTiles) > 4) {
+            return ChooseKeptTiles::class;
+        } else {
+            return $this->applySelectKeptTiles($playerId, $lastRound ? [] : array_map(fn($t) => $t->id, $colorTiles), $forceNoConfirm);
+        }
+
+    }
+
+    function applySelectKeptTiles(int $playerId, array $ids, bool $forceNoConfirm = false) {
+        // for undo
+        $previousScore = $this->getPlayerScore($playerId);
+
+        $hand = $this->getTilesFromDb($this->tiles->getCardsInLocation('hand', $playerId));
+        $keptTiles = [];
+        $discardedTiles = [];
+        foreach ($hand as $tile) {
+            if ($tile->type > 0) {
+                if (in_array($tile->id, $ids)) {
+                    $keptTiles[] = $tile;
+                } else {
+                    $discardedTiles[] = $tile;
+                }
+            }
+        }
+
+        if (count($ids) != count($keptTiles)) {
+            throw new \BgaUserException("You must select hand tiles");
+        }
+
+        $keptNumber = count($keptTiles);
+        $discardedNumber = count($discardedTiles);
+
+        $newScoreArgs = [];
+        if ($discardedNumber > 0) {  
+            $newScoreArgs['newScore'] = $this->decPlayerScore($playerId, $discardedNumber); 
+        }
+
+        if ($keptNumber > 0 || $discardedNumber > 0) {        
+            $this->tiles->moveCards(array_map(fn($t) => $t->id, $keptTiles), 'corner', $playerId);
+            $this->tiles->moveCards(array_map(fn($t) => $t->id, $discardedTiles), 'discard');
+
+            $this->notify->all('putToCorner', clienttranslate('${player_name} keeps ${keptNumber} tiles and discards ${discardedNumber} tiles'), [
+                'playerId' => $playerId,
+                'player_name' => $this->getPlayerNameById($playerId),
+                'keptTiles' => $keptTiles,
+                'discardedTiles' => $discardedTiles,
+                'keptNumber' => $keptNumber, // for logs
+                'discardedNumber' => $discardedNumber, // for logs
+            ] + $newScoreArgs);
+        }
+
+        $this->setGlobalVariable(UNDO_PLACE, new UndoPlace($hand, $previousScore, count($discardedTiles)));
+
+        if (!$forceNoConfirm && $this->isUndoActivated($playerId) && (count($ids) > 0 || ($this->getRound() >= 6 && count($discardedTiles) > 0))) {
+            return ConfirmPass::class;
+        } else {
+            return $this->applyConfirmPass($playerId);
+        }
+    }
+
+    #[CheckAction(false)]
+    function actSetAutopass(bool $autopass, int $currentPlayerId) {
+        if ($this->canSetAutopass($currentPlayerId)) {
+            $this->DbQuery("UPDATE player SET auto_pass = ".($autopass ? 'TRUE' : 'FALSE')." WHERE player_id = $currentPlayerId" );
+        }
+        
+        // dummy notif so player gets back hand
+        $this->notify->player($currentPlayerId, "setAutopass", '', []);
+    }
+
+    function setGlobalVariable(string $name, /*object|array*/ $obj) {
+        /*if ($obj == null) {
+            throw new \Error('Global Variable null');
+        }*/
+        $jsonObj = json_encode($obj);
+        $this->DbQuery("INSERT INTO `global_variables`(`name`, `value`)  VALUES ('$name', '$jsonObj') ON DUPLICATE KEY UPDATE `value` = '$jsonObj'");
+    }
+
+    function getGlobalVariable(string $name, $asArray = null) {
+        $json_obj = $this->getUniqueValueFromDB("SELECT `value` FROM `global_variables` where `name` = '$name'");
+        if ($json_obj) {
+            $object = json_decode($json_obj, $asArray);
+            return $object;
+        } else {
+            return null;
+        }
+    }
+
+    function isVariant() {
+        return $this->tableOptions->get(100) === 2;
+    }
+
+    function isUndoActivated(int $player) {
+        return $this->userPreferences->get($player, 101) === 1;
+    }
+
+    function isFastScoring() {
+        return $this->tableOptions->get(102) === 1;
+    }
+
+    function getFactoryNumber($playerNumber = null) {
+        if ($playerNumber == null) {
+            $playerNumber = intval($this->getUniqueValueFromDB("SELECT count(*) FROM player "));
+        }
+
+        return $this->factoriesByPlayers[$playerNumber];
+    }
+
+    function getPlayerScore(int $playerId) {
+        return intval($this->getUniqueValueFromDB("SELECT player_score FROM player where `player_id` = $playerId"));
+    }
+
+    function setPlayerScore(int $playerId, int $score) {
+        $this->DbQuery("UPDATE player SET player_score = $score WHERE player_id = $playerId");
+    }
+
+    function incPlayerScore(int $playerId, int $incScore) {
+        $this->DbQuery("UPDATE player SET player_score = player_score + $incScore WHERE player_id = $playerId");
+    }
+
+    function decPlayerScore(int $playerId, int $decScore) {
+        $newScore = max(1, $this->getPlayerScore($playerId) - $decScore);
+        $this->DbQuery("UPDATE player SET player_score = $newScore WHERE player_id = $playerId");
+        return $newScore;
+    }
+
+    function getRound() {
+        return intval($this->getStat('roundsNumber'));
+    }
+
+    function getWildColor() {
+        return intval($this->getStat('roundsNumber'));
+    }
+
+    function getTileFromDb($dbTile) {
+        if (!$dbTile || !array_key_exists('id', $dbTile)) {
+            throw new \Error('tile doesn\'t exists '.json_encode($dbTile));
+        }
+        return new \Tile($dbTile);
+    }
+
+    function getTilesFromDb(array $dbTiles) {
+        return array_map(fn($dbTile) => $this->getTileFromDb($dbTile), array_values($dbTiles));
+    }
+
+    function setupTiles() {
+        $cards = [];
+        $cards[] = [ 'type' => 0, 'type_arg' => null, 'nbr' => 1 ];
+        for ($color=1; $color<=6; $color++) {
+            $cards[] = [ 'type' => $color, 'type_arg' => null, 'nbr' => 22 ];
+        }
+        $this->tiles->createCards($cards, 'deck');
+        $this->tiles->shuffle('deck');
+
+        $this->fillSupply();
+    }
+
+    function putFirstPlayerTile(int $playerId, array $selectedTiles) {
+        $this->setGameStateValue(FIRST_PLAYER_FOR_NEXT_TURN, $playerId);
+
+        $points = count($selectedTiles) - 1;
+        $newScore = $this->decPlayerScore($playerId, $points);
+
+        $this->notify->all('firstPlayerToken', clienttranslate('${player_name} took First Player tile and will start next round, losing ${points} points for taking ${points} tiles'), [
+            'playerId' => $playerId,
+            'player_name' => $this->getPlayerNameById($playerId),
+            'points' => $points, // for logs
+            'decScore' => $points,
+            'newScore' => $newScore,
+        ]);
+
+        return $points;
+    }
+
+    function getColor(int $type) {
+        $colorName = null;
+        switch ($type) {
+            case 0: $colorName = clienttranslate('Multicolor'); break; // for log about complete stars
+            case 1: $colorName = clienttranslate('Fuschia'); break;
+            case 2: $colorName = clienttranslate('Green'); break;
+            case 3: $colorName = clienttranslate('Orange'); break;
+            case 4: $colorName = clienttranslate('Yellow'); break;
+            case 5: $colorName = clienttranslate('Blue'); break;
+            case 6: $colorName = clienttranslate('Red'); break;
+        }
+        return $colorName;
+    }
+
+    function getPlayersIds() {
+        return array_keys($this->loadPlayersBasicInfos());
+    }
+
+    function fillSupply() {
+        $newTiles = [];
+        for ($i=1; $i<=10; $i++) {
+            if (intval($this->tiles->countCardInLocation('supply', $i)) == 0) {
+                $dbTile = $this->tiles->pickCardForLocation('deck', 'supply', $i);
+                if ($dbTile) { // if the bag is empty, we can't refill
+                    $newTiles[] = $this->getTileFromDb($dbTile);
+                }
+            }
+        }
+
+        $this->notify->all("supplyFilled", '', [
+            'newTiles' => $newTiles,
+            'remainingTiles' => intval($this->tiles->countCardInLocation('deck')),
+        ]);
+    }
+
+    function getSpaceNumber(int $star, int $space, bool $variant) {
+        if ($variant) {
+            return $star == 0 ? 3 : [null, 3, 2, 1, 4, 5, 6][$space];
+        } else {
+            return $space;
+        }
+    }
+
+    function getScoredTiles(int $playerId, $placedTile) {
+        $scoredTiles = [$placedTile];
+
+        $wall = $this->getTilesFromDb($this->tiles->getCardsInLocation('wall'.$playerId));
+        $starTiles = array_values(array_filter($wall, fn($tile) => $tile->star == $placedTile->star));
+        if (count($starTiles) >= 5) {
+            $scoredTiles = $starTiles;
+        } else {
+            for ($i = $placedTile->space + 1; $i <= $placedTile->space + 5; $i++) {
+                $iSpace = (($i - 1) % 6) + 1;
+                $iTile = Arrays::find($starTiles, fn($tile) => $tile->space == $iSpace);
+                if ($iTile && !Arrays::find($scoredTiles, fn($tile) => $tile->id == $iTile->id)) {
+                    $scoredTiles[] = $iTile;
+                } else {
+                    break;
+                }
+            }
+            
+            for ($i = $placedTile->space - 1; $i >= $placedTile->space - 5; $i--) {
+                $iSpace = (($i + 11) % 6) + 1;
+                $iTile = Arrays::find($starTiles, fn($tile) => $tile->space == $iSpace);
+                if ($iTile && !Arrays::find($scoredTiles, fn($tile) => $tile->id == $iTile->id)) {
+                    $scoredTiles[] = $iTile;
+                } else {
+                    break;
+                }
+            }
+        }
+
+        return $scoredTiles;
+    }
+
+    function additionalTilesDetail(array $wall, $placedTile) {
+        $additionalTiles = 0;
+        $highlightedTiles = [];
+
+        if ($placedTile->star > 0) {
+            if (in_array($placedTile->space, [1, 2])) { // statue
+                $otherTile = Arrays::find($wall, fn($tile) => $tile->star == $placedTile->star && $tile->space == 3 - $placedTile->space);
+                if ($otherTile) {
+                    $otherStar = ($placedTile->star % 6) + 1;
+                    $space3 = Arrays::find($wall, fn($tile) => $tile->star == $otherStar && $tile->space == 3);
+                    $space4 = Arrays::find($wall, fn($tile) => $tile->star == $otherStar && $tile->space == 4);
+                    if ($space3 && $space4) {
+                        $additionalTiles += 2;
+                        $highlightedTiles = array_merge($highlightedTiles, [$placedTile, $otherTile, $space3, $space4]);
+                    }
+                }
+            }
+            if (in_array($placedTile->space, [3, 4])) { // statue
+                $otherTile = Arrays::find($wall, fn($tile) => $tile->star == $placedTile->star && $tile->space == 7 - $placedTile->space);
+                if ($otherTile) {
+                    $otherStar = (($placedTile->star + 4) % 6) + 1;
+                    $space1 = Arrays::find($wall, fn($tile) => $tile->star == $otherStar && $tile->space == 1);
+                    $space2 = Arrays::find($wall, fn($tile) => $tile->star == $otherStar && $tile->space == 2);
+                    if ($space1 && $space2) {
+                        $additionalTiles += 2;
+                        $highlightedTiles = array_merge($highlightedTiles, [$placedTile, $otherTile, $space1, $space2]);
+                    }
+                }
+            }
+            if (in_array($placedTile->space, [5, 6])) { // window
+                $otherTile = Arrays::find($wall, fn($tile) => $tile->star == $placedTile->star && $tile->space == 11 - $placedTile->space);
+                if ($otherTile) {
+                    $additionalTiles += 3;
+                    $highlightedTiles = array_merge($highlightedTiles, [$placedTile, $otherTile]);
+                }
+            }
+            if (in_array($placedTile->space, [2, 3])) { // pillar
+                $otherTile = Arrays::find($wall, fn($tile) => $tile->star == $placedTile->star && $tile->space == 5 - $placedTile->space);
+                if ($otherTile) {
+                    $space1 = Arrays::find($wall, fn($tile) => $tile->star == 0 && $tile->space == (($placedTile->star + 3) % 6 + 1));
+                    $space2 = Arrays::find($wall, fn($tile) => $tile->star == 0 && $tile->space == (($placedTile->star + 4) % 6 + 1));
+                    if ($space1 && $space2) {
+                        $additionalTiles += 1;
+                        $highlightedTiles = array_merge($highlightedTiles, [$placedTile, $otherTile, $space1, $space2]);
+                    }
+                }
+            }
+        } else { // star 0, pillar
+            $spaceBefore = (($placedTile->space + 4) % 6) + 1;           
+            $tileBefore = Arrays::find($wall, fn($tile) => $tile->star == 0 && $tile->space == $spaceBefore);
+            if ($tileBefore) {
+                $otherStar = (($placedTile->space + 0) % 6) + 1;
+                $space2 = Arrays::find($wall, fn($tile) => $tile->star == $otherStar && $tile->space == 2);
+                $space3 = Arrays::find($wall, fn($tile) => $tile->star == $otherStar && $tile->space == 3);
+                if ($space2 && $space3) {
+                    $additionalTiles += 1;
+                    $highlightedTiles = array_merge($highlightedTiles, [$placedTile, $tileBefore, $space2, $space3]);
+                }
+            }
+            $spaceAfter = ($placedTile->space % 6) + 1;
+            $tileAfter = Arrays::find($wall, fn($tile) => $tile->star == 0 && $tile->space == $spaceAfter);
+            if ($tileAfter) {
+                $otherStar = (($placedTile->space + 1) % 6) + 1;
+                $space2 = Arrays::find($wall, fn($tile) => $tile->star == $otherStar && $tile->space == 2);
+                $space3 = Arrays::find($wall, fn($tile) => $tile->star == $otherStar && $tile->space == 3);
+                if ($space2 && $space3) {
+                    $additionalTiles += 1;
+                    $highlightedTiles = array_merge($highlightedTiles, [$placedTile, $tileAfter, $space2, $space3]);
+                }
+            }
+            //echo json_encode([$spaceBefore, $placedTile->space, $spaceAfter, boolval($tileBefore), boolval($tileAfter)]);
+        }
+
+        return [
+            'count' => $additionalTiles,
+            'highlightedTiles' => $highlightedTiles,
+        ];
+    }
+
+    function canSetAutopass(int $playerId): bool {        
+        if (boolval($this->getUniqueValueFromDB("SELECT passed FROM player WHERE player_id = $playerId"))) {
+            return false;
+        }
+        
+        $hand = $this->getTilesFromDb($this->tiles->getCardsInLocation('hand', $playerId));
+        $tiles = count(array_filter($hand, fn($tile) => $tile->type > 0));
+        if ($tiles == 0) {
+            return true;
+        } else {
+            $lastRound = $this->getRound() >= 6;
+            if ($lastRound) {
+                $possibleSpaces = $this->argChoosePlaceForPlayer($playerId)['possibleSpaces'];
+                return count($possibleSpaces) <= 0;
+            } else {
+                return $tiles <= 4;
+            }
+        }
+    }
+
+    function argAutopass(): array {
+        $result = [];
+        $playersIds = $this->getPlayersIds();
+        foreach ($playersIds as $playerId) {
+            $result[$playerId] = [
+                'autopass' => boolval($this->getUniqueValueFromDB("SELECT auto_pass FROM player WHERE player_id = $playerId")),
+                'canSetAutopass' => $this->canSetAutopass($playerId),
+            ];
+        }
+        
+        return $result;
+    }
         
     ///////////////////////////////////////////////////////////////////////////////////:
     ////////// DB upgrade

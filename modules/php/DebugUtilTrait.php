@@ -2,6 +2,7 @@
 namespace Bga\Games\AzulSummerPavilion;
 
 use Bga\GameFrameworkPrototype\Helpers\Arrays;
+use Bga\Games\AzulSummerPavilion\States\ChoosePlace;
 
 function debug(...$debugData) {
     if (\Bga\GameFramework\Table::getBgaEnvironment() != 'studio') { 
@@ -95,13 +96,13 @@ trait DebugUtilTrait {
         $firstPlayerTokens = array_values(array_filter($factoryTiles, fn($fpTile) => $fpTile->type == 0));
         $hasFirstPlayer = count($firstPlayerTokens) > 0;
         if ($hasFirstPlayer) {
-            $this->tiles->moveCards(array_map('getIdPredicate', $firstPlayerTokens), 'hand', $playerId);
+            $this->tiles->moveCards(array_map(fn($t) => $t->id, $firstPlayerTokens), 'hand', $playerId);
             $this->putFirstPlayerTile($playerId, $firstPlayerTokens);
         }
     }
 
     function debug_place() {
-        $this->gamestate->jumpToState(ST_PLAYER_CHOOSE_PLACE);
+        $this->gamestate->jumpToState(ChoosePlace::class);
     }
 
     function debug_playToEndRound() {

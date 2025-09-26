@@ -28,10 +28,10 @@ class NextPlayerAcquire extends \Bga\GameFramework\States\GameState
 
         if ($factoriesAllEmpty) {
             $this->gamestate->changeActivePlayer($this->game->getGameStateValue(FIRST_PLAYER_FOR_NEXT_TURN));
-            return ST_PLAYER_CHOOSE_PLACE;
+            return ChoosePlace::class;
         } else {
             $this->game->activeNextPlayer();
-            return ST_PLAYER_CHOOSE_TILE;
+            return ChooseTile::class;
         }
     }
 }

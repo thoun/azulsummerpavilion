@@ -42,7 +42,7 @@ class NextPlayerPlay extends \Bga\GameFramework\States\GameState
                 return $this->game->applyPass($playerId, true); // handles the redirection
             } else {
                 $this->game->giveExtraTime($playerId);
-                return ST_PLAYER_CHOOSE_PLACE;
+                return ChoosePlace::class;
             }
         }
     }

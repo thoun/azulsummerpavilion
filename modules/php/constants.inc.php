@@ -3,8 +3,6 @@
 /*
  * State constants
  */
-const ST_BGA_GAME_SETUP = 1;
-
 const ST_FILL_FACTORIES = 10;
 
 const ST_PLAYER_CHOOSE_TILE = 20;
@@ -31,7 +29,6 @@ const ST_END_ROUND = 90;
 const ST_END_SCORE = 95;
 
 const ST_END_GAME = 99;
-const END_SCORE = 100;
 
 /*
  * Options

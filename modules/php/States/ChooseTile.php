@@ -57,7 +57,7 @@ class ChooseTile extends \Bga\GameFramework\States\GameState
         }
 
         if ($possibleTile !== null) { // play automatically this tile
-            $this->actTakeTiles($possibleTile->id, $activePlayerId, true);
+            return $this->actTakeTiles($possibleTile->id, $activePlayerId, true);
         }
     }
 
@@ -127,9 +127,9 @@ class ChooseTile extends \Bga\GameFramework\States\GameState
                     $discardedTiles[] = $factoryTile;
                 }
             }
-            $this->game->tiles->moveCards(array_map('getIdPredicate', $discardedTiles), 'factory', 0);
+            $this->game->tiles->moveCards(array_map(fn($t) => $t->id, $discardedTiles), 'factory', 0);
         }
-        $this->game->tiles->moveCards(array_map('getIdPredicate', $selectedTiles), 'hand', $activePlayerId);
+        $this->game->tiles->moveCards(array_map(fn($t) => $t->id, $selectedTiles), 'hand', $activePlayerId);
 
         
         if ($hasFirstPlayer) {
@@ -165,9 +165,9 @@ class ChooseTile extends \Bga\GameFramework\States\GameState
         ));
 
         if ($this->game->isUndoActivated($activePlayerId) && !$automatic) {
-            return ST_PLAYER_CONFIRM_ACQUIRE;
+            return ConfirmAcquire::class;
         } else {            
-            $this->game->applyConfirmTiles($activePlayerId);
+            return $this->game->applyConfirmTiles($activePlayerId);
         }
     }
 
