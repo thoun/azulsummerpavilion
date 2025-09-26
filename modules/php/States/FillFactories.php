@@ -61,6 +61,6 @@ class FillFactories extends \Bga\GameFramework\States\GameState
             }
         }
 
-        return ST_PLAYER_CHOOSE_TILE;
+        return ChooseTile::class;
     }
 }

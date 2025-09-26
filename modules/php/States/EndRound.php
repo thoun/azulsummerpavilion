@@ -20,6 +20,6 @@ class EndRound extends \Bga\GameFramework\States\GameState
         $this->game->tiles->moveCard($firstPlayerTile->id, 'factory', 0);
 
         $round = $this->game->getRound();
-        return $round < 6 ? ST_FILL_FACTORIES : ST_END_SCORE;
+        return $round < 6 ? FillFactories::class : EndScore::class;
     }
 }

@@ -28,7 +28,7 @@ class NextPlayerPlay extends \Bga\GameFramework\States\GameState
         $this->game->fillSupply();
 
         if ($allPassed) {
-            return ST_END_ROUND;
+            return EndRound::class;
         } else {
             $playerId = intval($this->game->activeNextPlayer());
         
