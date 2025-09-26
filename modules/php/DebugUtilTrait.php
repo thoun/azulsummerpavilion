@@ -103,4 +103,18 @@ trait DebugUtilTrait {
     function debug_place() {
         $this->gamestate->jumpToState(ST_PLAYER_CHOOSE_PLACE);
     }
+
+    function debug_playToEndRound() {
+        $round = $this->getStat('roundsNumber');
+        $count = 0;
+        $stopIfAtState = null;
+        //$stopIfAtState = ST_MULTIPLAYER_PRIVATE_CHOOSE_COLUMNS;
+        while ($this->getStat('roundsNumber') == $round && $count < 100 && ($stopIfAtState === null || $this->gamestate->getCurrentMainStateId() < $stopIfAtState)) {
+            $count++;
+            foreach($this->gamestate->getActivePlayerList() as $playerId) {
+                $playerId = (int)$playerId;
+                $this->gamestate->runStateClassZombie($this->gamestate->getCurrentState($playerId), $playerId);
+            }
+        }
+    }
 }

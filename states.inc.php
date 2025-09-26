@@ -60,22 +60,6 @@ $basicGameStates = [
 
 $playerActionsGameStates = [
 
-    ST_PLAYER_CHOOSE_TILE => [
-        "name" => "chooseTile",
-        "description" => clienttranslate('${actplayer} must choose tiles'),
-        "descriptionmyturn" => clienttranslate('${you} must choose tiles'),
-        "type" => "activeplayer",
-        "args" => "argChooseTile",
-        "action" => "stChooseTile",
-        "possibleactions" => [ 
-            "actTakeTiles",
-        ],
-        "transitions" => [
-            "confirm" => ST_PLAYER_CONFIRM_ACQUIRE,
-            "nextPlayer" => ST_NEXT_PLAYER_ACQUIRE,
-        ]
-    ],
-
     ST_PLAYER_CONFIRM_ACQUIRE => [
         "name" => "confirmAcquire",
         "description" => clienttranslate('${actplayer} must confirm acquired tiles'),

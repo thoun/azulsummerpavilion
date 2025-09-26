@@ -17,6 +17,8 @@
   */
 namespace Bga\Games\AzulSummerPavilion;
 
+require_once('framework-prototype/Helpers/Arrays.php');
+
 require_once('constants.inc.php');
 require_once('tile.php');
 require_once('undo.php');
@@ -240,17 +242,6 @@ class Game extends Table {
             
             if ($state['type'] === "activeplayer") {
                 switch ($statename) {
-                    case 'chooseTile':
-                        $factoryTiles = $this->getTilesFromDb($this->tiles->getCardsInLocation('factory'));
-                        $tiles = array_values(array_filter($factoryTiles, fn($tile) => $tile->type > 0));
-                        $round = $this->getRound();
-                        $normalTiles = array_values(array_filter($factoryTiles, fn($tile) => $tile->type != $round));
-                        if (count($normalTiles) > 0) {
-                            $this->actTakeTiles($normalTiles[bga_rand(1, count($normalTiles)) - 1]->id);
-                        } else {
-                            $this->actTakeTiles($tiles[bga_rand(1, count($tiles)) - 1]->id);
-                        }
-                        break;
                     case 'confirmAcquire':
                         $this->applyConfirmTiles($active_player);
                         break;
