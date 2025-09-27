@@ -28,6 +28,7 @@ use Bga\GameFramework\Actions\CheckAction;
 use Bga\GameFramework\Components\Deck;
 use Bga\GameFramework\Table;
 use Bga\GameFrameworkPrototype\Helpers\Arrays;
+use Bga\Games\AzulSummerPavilion\Boards\Board;
 use Bga\Games\AzulSummerPavilion\States\ChooseKeptTiles;
 use Bga\Games\AzulSummerPavilion\States\ChoosePlace;
 use Bga\Games\AzulSummerPavilion\States\ConfirmPass;
@@ -43,10 +44,9 @@ class Game extends Table {
     use DebugUtilTrait;
 
     public Deck $tiles;
+    public Board $board;
 
     public array $factoriesByPlayers;
-    public array $STANDARD_FACE_STAR_COLORS;
-    public array $FULL_STAR_POINTS_BY_COLOR;
 
 	function __construct() {
         // Your global variables labels:
@@ -61,8 +61,7 @@ class Game extends Table {
             FIRST_PLAYER_FOR_NEXT_TURN => 10,
         ]);
 
-        $this->tiles = self::getNew("module.common.deck");
-        $this->tiles->init("tile");
+        $this->tiles = $this->deckFactory->createDeck("tile");
         $this->tiles->autoreshuffle = true; 
         
         
@@ -70,26 +69,6 @@ class Game extends Table {
             2 => 5,
             3 => 7,
             4 => 9,
-        ];
-
-        $this->STANDARD_FACE_STAR_COLORS = [
-            0 => 0,
-            1 => 1,
-            2 => 3,
-            3 => 6,
-            4 => 5, 
-            5 => 4, 
-            6 => 2,
-        ];
-
-        $this->FULL_STAR_POINTS_BY_COLOR = [
-            0 => 12,
-            1 => 20,
-            2 => 18,
-            3 => 17,
-            4 => 16, 
-            5 => 15, 
-            6 => 14,
         ];
 	}
 
@@ -132,12 +111,18 @@ class Game extends Table {
 
         foreach(['table', 'player'] as $statType) {
             foreach(['turnsNumber', 'normalTilesCollected', 'wildTilesCollected',
-            'bonusTilesCollected', 'bonusTile1', 'bonusTile2', 'bonusTile3',
+            'bonusTilesCollected', 'bonusTile_pillar', 'bonusTile_statue', 'bonusTile_window',
             'pointsWallTile', 'pointsLossDiscardedTiles', 'pointsLossFirstTile',
             'pointsCompleteStars', 'pointsCompleteStars0', 'pointsCompleteStars1', 'pointsCompleteStars2', 'pointsCompleteStars3', 'pointsCompleteStars4', 'pointsCompleteStars5', 'pointsCompleteStars6',
             'pointsCompleteNumbers', 'pointsCompleteNumbers1', 'pointsCompleteNumbers2', 'pointsCompleteNumbers3', 'pointsCompleteNumbers4',
+            'pointsCompleteStructureSets',
             ] as $statName) {
                 $this->initStat($statType, $statName, 0);
+            }
+        }
+        if (in_array($this->getBoardNumber(), [3, 4])) {
+            foreach(['table', 'player'] as $statType) {
+                $this->initStat($statType, 'bonusTile_fountain', 0);
             }
         }
 
@@ -171,6 +156,9 @@ class Game extends Table {
         $result['factoryNumber'] = $this->getFactoryNumber(count($result['players']));
         $result['firstPlayerTokenPlayerId'] = intval(self::getGameStateValue(FIRST_PLAYER_FOR_NEXT_TURN));
         $result['boardNumber'] = $this->getBoardNumber();
+        $result['stars'] = $this->getBoard()->getStars();
+        $result['wildColors'] = $this->getBoard()->getWildColors();
+        
 
         $factories = [];
         $factoryNumber = $result['factoryNumber'];
@@ -227,30 +215,35 @@ class Game extends Table {
         $hand = $this->getTilesFromDb($this->tiles->getCardsInLocation('hand', $playerId));
         $wildColor = $this->getWildColor();
         $possibleSpaces = [];
-        $variant = $this->getBoardNumber() === 2;
+        $board = $this->getBoard();
         $remainingColorTiles = count(array_filter($hand, fn($tile) => $tile->type > 0));
         $skipIsFree = $remainingColorTiles <= ($this->getRound() >= 6 ? 0 : 4);
 
         for ($star = 0; $star <= 6; $star++) {
-            $forcedColor = $this->STANDARD_FACE_STAR_COLORS[$star];
 
             for ($space = 1; $space <= 6; $space++) {
                 if (Arrays::some($placedTiles, fn($placedTile) => $placedTile->star == $star && $placedTile->space == $space)) {
                     continue;
                 }
+                $spaceData = $board->getStars()[$star][$space];
+                $spaceColor = $spaceData['color'];
+                $spaceNumber = $spaceData['number'];
 
-                $colors = [$forcedColor];
-                $number = $this->getSpaceNumber($star, $space, $variant);
-                if ($variant || $forcedColor == 0) {
+                $colors = [$spaceColor];
+                if ($spaceColor == 0) {
                     $starTiles = array_values(array_filter($placedTiles, fn($placedTile) => $placedTile->star == $star));
                     $starColors = array_map(fn($starTile) => $starTile->type, $starTiles);
-                    $colors = $variant && count($starTiles) === 1 ? [1, 2, 3, 4, 5, 6] : array_values(array_diff([1, 2, 3, 4, 5, 6], $starColors));
-                    if ($variant && count($starColors) >= 2 && $starColors[0] == $starColors[1]) {
-                        $colors = [$starColors[0]];
+                    $colors = [1, 2, 3, 4, 5, 6];
+                    if (count($starColors) >= 2) {
+                        if ($starColors[0] == $starColors[1]) {
+                            $colors = [$starColors[0]];
+                        } else {
+                            $colors = Arrays::diff($colors, $starColors);
+                        }
                     }
                 }
 
-                if (Arrays::some($colors, fn($color) => $this->getMaxWildTiles($hand, $number, $color, $wildColor) !== null)) {
+                if (Arrays::some($colors, fn($color) => $this->getMaxWildTiles($hand, $spaceNumber, $color, $wildColor) !== null)) {
                     $possibleSpaces[] = $star * 100 + $space;
                 }
             }
@@ -262,38 +255,34 @@ class Game extends Table {
         ];
     }
 
-    function argChooseColor(int $activePlayerId) {
-        $selectedPlace = $this->getGlobalVariable(SELECTED_PLACE);
-        $star = $selectedPlace[0];
-        $space = $selectedPlace[1];
-        $selectedColor = $this->STANDARD_FACE_STAR_COLORS[$star];
+    function argChooseColor(int $activePlayerId, int $star, int $space) {
+        $board = $this->getBoard();
+        $spaceData = $board->getStars()[$star][$space];
+        $spaceColor = $spaceData['color'];
+        $spaceNumber = $spaceData['number'];
 
         $possibleColors = [];
-        $variant = $this->getBoardNumber() === 2;
-        if ($variant || $selectedColor == 0) {
-            $number = $this->getSpaceNumber($star, $space, $variant);
+        if ($spaceColor == 0) {
             $placedTiles = $this->getTilesFromDb($this->tiles->getCardsInLocation('wall'.$activePlayerId));
             $hand = $this->getTilesFromDb($this->tiles->getCardsInLocation('hand', $activePlayerId));
             $wildColor = $this->getWildColor();
             $starTiles = array_values(array_filter($placedTiles, fn($placedTile) => $placedTile->star == $star));
             $starColors = array_map(fn($starTile) => $starTile->type, $starTiles);
             $colors = array_diff([1, 2, 3, 4, 5, 6], $starColors);
-            if ($variant) {
-                if (count($starColors) <= 1) {
-                    $colors = [1, 2, 3, 4, 5, 6];
-                } else if (count($starColors) >= 2 && $starColors[0] == $starColors[1]) {
-                    $colors = [$starColors[0]];
-                }
+            if (count($starColors) <= 1) {
+                $colors = [1, 2, 3, 4, 5, 6];
+            } else if (count($starColors) >= 2 && $starColors[0] == $starColors[1]) {
+                $colors = [$starColors[0]];
             }
 
             foreach ($colors as $possibleColor) {
-                if ($this->getMaxWildTiles($hand, $number, $possibleColor, $wildColor) !== null) {
+                if ($this->getMaxWildTiles($hand, $spaceNumber, $possibleColor, $wildColor) !== null) {
                     $possibleColors[] = $possibleColor;
                 }
             }
 
         } else {
-            $possibleColors = [$selectedColor];
+            $possibleColors = [$spaceColor];
         }
         return [
             'playerId' => $activePlayerId,
@@ -318,7 +307,6 @@ class Game extends Table {
     }
 
     function argPlayTile(int $activePlayerId) {
-        $variant = $this->getBoardNumber() === 2;
         $hand = $this->getTilesFromDb($this->tiles->getCardsInLocation('hand', $activePlayerId));
 
         $selectedPlace = $this->getGlobalVariable(SELECTED_PLACE);
@@ -326,13 +314,17 @@ class Game extends Table {
         $space = $selectedPlace[1];
         $selectedColor = $this->getGlobalVariable(SELECTED_COLOR);
         $wildColor = $this->getWildColor();
-        $number = $this->getSpaceNumber($star, $space, $variant);
-        $maxWildTiles = $this->getMaxWildTiles($hand, $number, $selectedColor, $wildColor);
+
+        $board = $this->getBoard();
+        $spaceData = $board->getStars()[$star][$space];
+        $spaceNumber = $spaceData['number'];
+
+        $maxWildTiles = $this->getMaxWildTiles($hand, $spaceNumber, $selectedColor, $wildColor);
         $colorTiles = array_values(array_filter($hand, fn($tile) => $tile->type == $selectedColor));
 
         return [
             'selectedPlace' => $selectedPlace,
-            'number' => $number,
+            'number' => $spaceNumber,
             'color' => $selectedColor,
             'wildColor' => $wildColor,
             'maxColor' => count($colorTiles),
@@ -443,8 +435,14 @@ class Game extends Table {
         if ($count > 0) {
             $this->incStat($count, 'bonusTilesCollected');
             $this->incStat($count, 'bonusTilesCollected', $playerId);
-            $this->incStat($count, 'bonusTile'.$count);
-            $this->incStat($count, 'bonusTile'.$count, $playerId);
+
+            $additionalTiles = $this->getGlobalVariable(ADDITIONAL_TILES_DETAIL);
+            if (isset($additionalTiles->from)) {
+                foreach ($additionalTiles->from as $from) {
+                    $this->incStat($count, 'bonusTile_'.$from);
+                    $this->incStat($count, 'bonusTile_'.$from, $playerId);
+                }
+            }
         }
 
         $this->incStat($undo->points, 'pointsWallTile');
@@ -610,6 +608,15 @@ class Game extends Table {
         return $this->tableOptions->get(100);
     }
 
+    function getBoard(): Board {
+        if (!isset($this->board)) {
+            $boardNumber = $this->getBoardNumber();
+            $className = "Bga\Games\AzulSummerPavilion\Boards\Board{$boardNumber}";
+            $this->board = new $className;
+        }
+        return $this->board;
+    }
+
     function isUndoActivated(int $player) {
         return $this->userPreferences->get($player, 101) === 1;
     }
@@ -649,7 +656,7 @@ class Game extends Table {
     }
 
     function getWildColor() {
-        return intval($this->getStat('roundsNumber'));
+        return $this->getBoard()->getWildColors()[$this->getRound()];
     }
 
     function getTileFromDb($dbTile) {
@@ -770,6 +777,8 @@ class Game extends Table {
     function additionalTilesDetail(array $wall, $placedTile) {
         $additionalTiles = 0;
         $highlightedTiles = [];
+        $from = [];
+        $fountains = $this->getBoard()->hasFountains();
 
         if ($placedTile->star > 0) {
             if (in_array($placedTile->space, [1, 2])) { // statue
@@ -781,6 +790,7 @@ class Game extends Table {
                     if ($space3 && $space4) {
                         $additionalTiles += 2;
                         $highlightedTiles = array_merge($highlightedTiles, [$placedTile, $otherTile, $space3, $space4]);
+                        $from[] = 'statue';
                     }
                 }
             }
@@ -793,6 +803,33 @@ class Game extends Table {
                     if ($space1 && $space2) {
                         $additionalTiles += 2;
                         $highlightedTiles = array_merge($highlightedTiles, [$placedTile, $otherTile, $space1, $space2]);
+                        $from[] = 'statue';
+                    }
+                }
+            }
+            if ($fountains && in_array($placedTile->space, [6,1])) { // fountain
+                $otherTile = Arrays::find($wall, fn($tile) => $tile->star == $placedTile->star && $tile->space == 7 - $placedTile->space);
+                if ($otherTile) {
+                    $otherStar = ($placedTile->star % 6) + 1;
+                    $space1 = Arrays::find($wall, fn($tile) => $tile->star == $otherStar && $tile->space == 4);
+                    $space2 = Arrays::find($wall, fn($tile) => $tile->star == $otherStar && $tile->space == 5);
+                    if ($space1 && $space2) {
+                        $additionalTiles += 1;
+                        $highlightedTiles = array_merge($highlightedTiles, [$placedTile, $otherTile, $space1, $space2]);
+                        $from[] = 'fountain';
+                    }
+                }
+            }
+            if ($fountains && in_array($placedTile->space, [4,5])) { // fountain
+                $otherTile = Arrays::find($wall, fn($tile) => $tile->star == $placedTile->star && $tile->space == 9 - $placedTile->space);
+                if ($otherTile) {
+                    $otherStar = (($placedTile->star + 4) % 6) + 1;
+                    $space1 = Arrays::find($wall, fn($tile) => $tile->star == $otherStar && $tile->space == 1);
+                    $space2 = Arrays::find($wall, fn($tile) => $tile->star == $otherStar && $tile->space == 6);
+                    if ($space1 && $space2) {
+                        $additionalTiles += 1;
+                        $highlightedTiles = array_merge($highlightedTiles, [$placedTile, $otherTile, $space1, $space2]);
+                        $from[] = 'fountain';
                     }
                 }
             }
@@ -801,6 +838,7 @@ class Game extends Table {
                 if ($otherTile) {
                     $additionalTiles += 3;
                     $highlightedTiles = array_merge($highlightedTiles, [$placedTile, $otherTile]);
+                        $from[] = 'window';
                 }
             }
             if (in_array($placedTile->space, [2, 3])) { // pillar
@@ -811,6 +849,7 @@ class Game extends Table {
                     if ($space1 && $space2) {
                         $additionalTiles += 1;
                         $highlightedTiles = array_merge($highlightedTiles, [$placedTile, $otherTile, $space1, $space2]);
+                        $from[] = 'pillar';
                     }
                 }
             }
@@ -824,6 +863,7 @@ class Game extends Table {
                 if ($space2 && $space3) {
                     $additionalTiles += 1;
                     $highlightedTiles = array_merge($highlightedTiles, [$placedTile, $tileBefore, $space2, $space3]);
+                    $from[] = 'pillar';
                 }
             }
             $spaceAfter = ($placedTile->space % 6) + 1;
@@ -835,6 +875,7 @@ class Game extends Table {
                 if ($space2 && $space3) {
                     $additionalTiles += 1;
                     $highlightedTiles = array_merge($highlightedTiles, [$placedTile, $tileAfter, $space2, $space3]);
+                    $from[] = 'pillar';
                 }
             }
             //echo json_encode([$spaceBefore, $placedTile->space, $spaceAfter, boolval($tileBefore), boolval($tileAfter)]);
@@ -843,6 +884,7 @@ class Game extends Table {
         return [
             'count' => $additionalTiles,
             'highlightedTiles' => $highlightedTiles,
+            'from' => $from,
         ];
     }
 

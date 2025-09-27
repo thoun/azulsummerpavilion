@@ -49,7 +49,7 @@ class Arrays {
             $result = $array;
             $index = 1;
             while ($index < count($result)) {
-                $duplicateIndex = $this->findKey($result, fn($otherValue) => $compareFn($otherValue, $result[$index]));
+                $duplicateIndex = self::findKey($result, fn($otherValue) => $compareFn($otherValue, $result[$index]));
                 if ($duplicateIndex !== null && $duplicateIndex < $index) {
                     array_splice($result, $index, 1);
                     $result = array_values($result);
@@ -76,7 +76,7 @@ class Arrays {
      * @return array<TValue> the filtered array.
      */
     public static function diff(array $array, array $remove, ?callable $compareFn = null): array {
-        return $this->filter($array, fn($value) => !$this->some($remove, fn($removedValue) => ($compareFn !== null ? $compareFn($value, $removedValue) : $value === $removedValue)));
+        return self::filter($array, fn($value) => !self::some($remove, fn($removedValue) => ($compareFn !== null ? $compareFn($value, $removedValue) : $value === $removedValue)));
     }
 
     /**

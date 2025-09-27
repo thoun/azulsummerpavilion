@@ -29,6 +29,7 @@ trait DebugUtilTrait {
         $this->debugSetWallTile(2343492, 1, 5, 4);
         $this->debugSetWallTile(2343492, 2, 3, 3);
         $this->debugSetWallTile(2343492, 2, 2, 3);
+        $this->debugSetWallTile(2343492, 2, 5, 3);
         $this->debugSetWallTile(2343492, 4, 2, 3);
         $this->debugSetWallTile(2343492, 0, 2, 3);
         $this->debugSetWallTile(2343492, 5, 2, 3);
@@ -125,7 +126,11 @@ trait DebugUtilTrait {
             $count++;
             foreach($this->gamestate->getActivePlayerList() as $playerId) {
                 $playerId = (int)$playerId;
-                $this->gamestate->runStateClassZombie($this->gamestate->getCurrentState($playerId), $playerId);
+                try {
+                    $this->gamestate->runStateClassZombie($this->gamestate->getCurrentState($playerId), $playerId);
+                } catch (\Throwable $e) {
+                    $count = 100;
+                }
             }
         }
     }

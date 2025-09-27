@@ -55,11 +55,7 @@ class AzulSummerPavilion extends GameGui<AzulSummerPavilionGamedatas> implements
 
     public setup(gamedatas: AzulSummerPavilionGamedatas) {
         // ignore loading of some pictures
-        if (this.getBoardNumber() === 2) {
-            this.dontPreloadImage('playerboard.jpg');
-        } else {
-            this.dontPreloadImage('playerboard-variant.jpg');
-        }
+        [1,2,3,4].filter(boardNumber => boardNumber != this.getBoardNumber()).forEach(boardNumber => this.dontPreloadImage(`playerboard${boardNumber}.jpg`));
 
         this.getGameAreaElement().insertAdjacentHTML('beforeend', `
             <div id="table">
@@ -113,11 +109,15 @@ class AzulSummerPavilion extends GameGui<AzulSummerPavilionGamedatas> implements
         document.getElementById(`page-title`).insertAdjacentHTML('beforeend', `
             <div id="summary">
                 <div class="round-zone">${_('Round')} <span id="round">${this.gamedatas.round}</span>/6</div>
-                <div class="wild-zone">${_('Wild color:')} <div class="wild-container"><div id="wildToken" class="tile tile${this.gamedatas.round}"></div></div></div>
+                <div class="wild-zone">${_('Wild color:')} <div class="wild-container"><div id="wildToken" class="tile tile${this.getSpecialTile(this.gamedatas.round)}"></div></div></div>
             </div>    
         `)
 
         log("Ending game setup");
+    }
+
+    private getSpecialTile(roundNumber: number): number {
+        return this.gamedatas.wildColors[roundNumber];
     }
 
     ///////////////////////////////////////////////////
@@ -214,7 +214,7 @@ class AzulSummerPavilion extends GameGui<AzulSummerPavilionGamedatas> implements
 
     private onEnteringTakeBonusTiles(args: EnteringTakeBonusTileArgs) {
         args.highlightedTiles.forEach(tile => document.getElementById(`tile${tile.id}`).classList.add('bonus'));
-        document.getElementById(`bonus-info-${args.count}`).classList.add('active');
+        args.from.forEach(from => document.getElementById(`bonus-info-${from}`).classList.add('active'));
         if (this.isCurrentPlayerActive()) {
             document.getElementById(`supply`).classList.add('selectable');
         }
@@ -466,6 +466,10 @@ class AzulSummerPavilion extends GameGui<AzulSummerPavilionGamedatas> implements
 
     public getBoardNumber(): number {
         return this.gamedatas.boardNumber;
+    }
+
+    public getStars(): { color: number, number: number }[][]{
+        return this.gamedatas.stars;
     }
 
     public getPlayerId(): number {
@@ -774,7 +778,7 @@ class AzulSummerPavilion extends GameGui<AzulSummerPavilionGamedatas> implements
             (this as any).notifqueue.setSynchronous(notif[0], notif[1]);
         });
 
-        ['completeStarLogDetails', 'completeNumberLogDetails'].forEach(notifName => {
+        ['completeStarLogDetails', 'completeNumberLogDetails', 'completeStructureSetLogDetails'].forEach(notifName => {
             dojo.subscribe(notifName, this, e => {
                 if (e.args.playerId && e.args.newScore !== undefined) {
                     this.setScore(e.args.playerId, e.args.newScore);
@@ -794,8 +798,8 @@ class AzulSummerPavilion extends GameGui<AzulSummerPavilionGamedatas> implements
         this.scoringBoard.setRoundNumber(args.roundNumber);
         document.getElementById('round').innerText = `${args.roundNumber}`;
         const wildToken = document.getElementById(`wildToken`);
-        wildToken.classList.remove(`tile${args.roundNumber - 1}`);
-        wildToken.classList.add(`tile${args.roundNumber}`);
+        wildToken.classList.remove(`tile${this.getSpecialTile(args.roundNumber - 1)}`);
+        wildToken.classList.add(`tile${this.getSpecialTile(args.roundNumber)}`);
 
         Object.keys(this.gamedatas.players).forEach(playerId => document.getElementById(`overall_player_board_${playerId}`).classList.remove('passed'));
     }
@@ -892,8 +896,8 @@ class AzulSummerPavilion extends GameGui<AzulSummerPavilionGamedatas> implements
         Object.keys(args.scores).forEach(playerId => {
             const endScore: EndScoreTiles = args.scores[playerId];
 
-            endScore.tiles.forEach(tile => dojo.addClass(`tile${tile.id}`, 'highlight'));
-            setTimeout(() => endScore.tiles.forEach(tile => dojo.removeClass(`tile${tile.id}`, 'highlight')), SCORE_MS - 50);
+            endScore.tiles?.forEach(tile => dojo.addClass(`tile${tile.id}`, 'highlight'));
+            setTimeout(() => endScore.tiles?.forEach(tile => dojo.removeClass(`tile${tile.id}`, 'highlight')), SCORE_MS - 50);
 
             this.displayScoringOnStar(endScore.star, playerId, endScore.points);
         });

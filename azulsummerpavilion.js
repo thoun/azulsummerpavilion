@@ -1081,8 +1081,34 @@ var Factories = /** @class */ (function () {
 }());
 var ScoringBoard = /** @class */ (function () {
     function ScoringBoard(game, roundNumber, supplyTiles) {
+        var _this = this;
         this.game = game;
+        var BONUSES = {
+            'pillar': {
+                name: _("a pillar"),
+                adjacent: 4,
+                number: 1,
+            },
+            'statue': {
+                name: _("a statue"),
+                adjacent: 4,
+                number: 2,
+            },
+            'window': {
+                name: _("a window"),
+                adjacent: 2,
+                number: 3,
+            },
+        };
+        if (this.game.getBoardNumber() >= 3) {
+            BONUSES['fountain'] = {
+                name: _("a fountain"),
+                adjacent: 4,
+                number: 1,
+            };
+        }
         var scoringBoardDiv = document.getElementById('scoring-board');
+        scoringBoardDiv.dataset.board = '' + game.gamedatas.boardNumber;
         var html = "<div id=\"round-counter\">";
         for (var i = 1; i <= 6; i++) {
             html += "<div id=\"round-space-".concat(i, "\" class=\"round-space\">").concat(roundNumber == i ? "<div id=\"round-marker\"></div>" : '', "</div>");
@@ -1092,26 +1118,17 @@ var ScoringBoard = /** @class */ (function () {
             html += "<div id=\"supply-space-".concat(i, "\" class=\"supply-space space").concat(i, "\"></div>");
         }
         html += "</div>";
-        for (var i = 1; i <= 3; i++) {
-            html += "<div id=\"bonus-info-".concat(i, "\" class=\"bonus-info\" data-bonus=\"").concat(i, "\"></div>");
-        }
+        Object.keys(BONUSES).forEach(function (from) {
+            return html += "<div id=\"bonus-info-".concat(from, "\" class=\"bonus-info\" data-from=\"").concat(from, "\"></div>");
+        });
         scoringBoardDiv.insertAdjacentHTML('beforeend', html);
-        var bonusInfos = [
-            _("a pillar"),
-            _("a statue"),
-            _("a window"),
-        ];
-        var bonusAdjacent = [
-            4,
-            4,
-            2,
-        ];
-        for (var i = 1; i <= 3; i++) {
-            this.game.addTooltipHtml("bonus-info-".concat(i), _("When you surround the ${adjacent_number} adjacent spaces of ${a_bonus_shape} with tiles, you must then immediately take any ${number} tile(s) of your choice from the supply.")
-                .replace('${adjacent_number}', "".concat(bonusAdjacent[i - 1]))
-                .replace('${a_bonus_shape}', "<strong>".concat(bonusInfos[i - 1], "</strong>"))
-                .replace('${number}', "<strong>".concat(i, "</strong>")));
-        }
+        Object.entries(BONUSES).forEach(function (_a) {
+            var from = _a[0], detail = _a[1];
+            return _this.game.addTooltipHtml("bonus-info-".concat(from), _("When you surround the ${adjacent_number} adjacent spaces of ${a_bonus_shape} with tiles, you must then immediately take any ${number} tile(s) of your choice from the supply.")
+                .replace('${adjacent_number}', "".concat(detail.adjacent))
+                .replace('${a_bonus_shape}', "<strong>".concat(detail.name, "</strong>"))
+                .replace('${number}', "<strong>".concat(detail.number, "</strong>")));
+        });
         this.placeTiles(supplyTiles, false);
     }
     ScoringBoard.prototype.placeTiles = function (tiles, animation) {
@@ -1134,33 +1151,27 @@ var ScoringBoard = /** @class */ (function () {
     return ScoringBoard;
 }());
 var HAND_CENTER = 327;
-var STAR_TO_PLAIN_COLOR = {
-    1: 1,
-    3: 6,
-    5: 4,
-};
+var COLORS_WITH_COLOR_BLIND_EXTRA_SIGN = [1, 4, 6];
 var PlayerTable = /** @class */ (function () {
     function PlayerTable(game, player) {
         var _this = this;
         this.game = game;
         this.playerId = Number(player.id);
         var nameClass = player.name.indexOf(' ') !== -1 ? 'with-space' : 'without-space';
-        var variant = this.game.getBoardNumber() === 2;
-        var html = "<div id=\"player-table-wrapper-".concat(this.playerId, "\" class=\"player-table-wrapper\">\n        <div id=\"player-hand-").concat(this.playerId, "\" class=\"player-hand\">\n        </div>\n        <div id=\"player-table-").concat(this.playerId, "\" class=\"player-table ").concat(variant ? 'variant' : '', "\" style=\"--player-color: #").concat(player.color, ";\">\n            <div class=\"player-name-box\">\n                <div class=\"player-name-wrapper shift\">\n                    <div id=\"player-name-shift-").concat(this.playerId, "\" class=\"player-name color ").concat(game.isDefaultFont() ? 'standard' : 'azul', " ").concat(nameClass, "\">").concat(player.name, "</div>\n                </div>\n                <div class=\"player-name-wrapper\">\n                    <div id=\"player-name-").concat(this.playerId, "\" class=\"player-name dark ").concat(game.isDefaultFont() ? 'standard' : 'azul', " ").concat(nameClass, "\">").concat(player.name, "</div>\n                </div>\n            </div>\n            ");
+        var stars = this.game.getStars();
+        var html = "<div id=\"player-table-wrapper-".concat(this.playerId, "\" class=\"player-table-wrapper\">\n        <div id=\"player-hand-").concat(this.playerId, "\" class=\"player-hand\">\n        </div>\n        <div id=\"player-table-").concat(this.playerId, "\" class=\"player-table\" data-board=\"").concat(this.game.getBoardNumber(), "\" style=\"--player-color: #").concat(player.color, ";\">\n            <div class=\"player-name-box\">\n                <div class=\"player-name-wrapper shift\">\n                    <div id=\"player-name-shift-").concat(this.playerId, "\" class=\"player-name color ").concat(game.isDefaultFont() ? 'standard' : 'azul', " ").concat(nameClass, "\">").concat(player.name, "</div>\n                </div>\n                <div class=\"player-name-wrapper\">\n                    <div id=\"player-name-").concat(this.playerId, "\" class=\"player-name dark ").concat(game.isDefaultFont() ? 'standard' : 'azul', " ").concat(nameClass, "\">").concat(player.name, "</div>\n                </div>\n            </div>\n            ");
         for (var corner = 0; corner < 4; corner++) {
             html += "<div id=\"player-table-".concat(this.playerId, "-corner-").concat(corner, "\" class=\"corner corner").concat(corner, "\"></div>");
         }
         for (var star = 0; star <= 6; star++) {
-            var cbTileColor = '';
-            if (!variant && STAR_TO_PLAIN_COLOR[star]) {
-                cbTileColor = "cb-tile".concat(STAR_TO_PLAIN_COLOR[star]);
-            }
             html += "<div id=\"player-table-".concat(this.playerId, "-star-").concat(star, "\" class=\"star star").concat(star, "\" style=\" --rotation: ").concat((star == 0 ? 3 : star - 4) * -60, "deg;\">");
             for (var space = 1; space <= 6; space++) {
-                var displayedNumber = space;
-                if (variant) {
-                    displayedNumber = star == 0 ? 3 : [null, 3, 2, 1, 4, 5, 6][space];
+                var spaceColor = stars[star][space].color;
+                var cbTileColor = '';
+                if (COLORS_WITH_COLOR_BLIND_EXTRA_SIGN.includes(spaceColor)) {
+                    cbTileColor = "cb-tile".concat(spaceColor);
                 }
+                var displayedNumber = stars[star][space].number;
                 html += "<div id=\"player-table-".concat(this.playerId, "-star-").concat(star, "-space-").concat(space, "\" class=\"space space").concat(space, " ").concat(cbTileColor, "\" style=\"--number: '").concat(displayedNumber, "'; --rotation: ").concat(240 - space * 60 - (star == 0 ? 3 : star - 4) * 60, "deg;\"></div>");
             }
             html += "</div>";
@@ -1276,12 +1287,7 @@ var AzulSummerPavilion = /** @class */ (function (_super) {
     AzulSummerPavilion.prototype.setup = function (gamedatas) {
         var _this = this;
         // ignore loading of some pictures
-        if (this.getBoardNumber() === 2) {
-            this.dontPreloadImage('playerboard.jpg');
-        }
-        else {
-            this.dontPreloadImage('playerboard-variant.jpg');
-        }
+        [1, 2, 3, 4].filter(function (boardNumber) { return boardNumber != _this.getBoardNumber(); }).forEach(function (boardNumber) { return _this.dontPreloadImage("playerboard".concat(boardNumber, ".jpg")); });
         this.getGameAreaElement().insertAdjacentHTML('beforeend', "\n            <div id=\"table\">\n                <div id=\"centered-table\">\n                    <div id=\"factories-and-scoring-board\">\n                        <div id=\"factories\">\n                            <div id=\"bag\">\n                                <span id=\"bag-counter\"></span>\n                            </div>\n                        </div>\n                        <div id=\"scoring-board\"></div>\n                    </div>\n                </div>\n            </div>\n        ");
         log("Starting game setup");
         this.gamedatas = gamedatas;
@@ -1310,8 +1316,11 @@ var AzulSummerPavilion = /** @class */ (function (_super) {
         if (!['chooseTile', 'confirmAcquire'].includes(this.gamedatas.gamestate.name)) {
             document.getElementById('factories-and-scoring-board').classList.add('play');
         }
-        document.getElementById("page-title").insertAdjacentHTML('beforeend', "\n            <div id=\"summary\">\n                <div class=\"round-zone\">".concat(_('Round'), " <span id=\"round\">").concat(this.gamedatas.round, "</span>/6</div>\n                <div class=\"wild-zone\">").concat(_('Wild color:'), " <div class=\"wild-container\"><div id=\"wildToken\" class=\"tile tile").concat(this.gamedatas.round, "\"></div></div></div>\n            </div>    \n        "));
+        document.getElementById("page-title").insertAdjacentHTML('beforeend', "\n            <div id=\"summary\">\n                <div class=\"round-zone\">".concat(_('Round'), " <span id=\"round\">").concat(this.gamedatas.round, "</span>/6</div>\n                <div class=\"wild-zone\">").concat(_('Wild color:'), " <div class=\"wild-container\"><div id=\"wildToken\" class=\"tile tile").concat(this.getSpecialTile(this.gamedatas.round), "\"></div></div></div>\n            </div>    \n        "));
         log("Ending game setup");
+    };
+    AzulSummerPavilion.prototype.getSpecialTile = function (roundNumber) {
+        return this.gamedatas.wildColors[roundNumber];
     };
     ///////////////////////////////////////////////////
     //// Game & client states
@@ -1396,7 +1405,7 @@ var AzulSummerPavilion = /** @class */ (function (_super) {
     };
     AzulSummerPavilion.prototype.onEnteringTakeBonusTiles = function (args) {
         args.highlightedTiles.forEach(function (tile) { return document.getElementById("tile".concat(tile.id)).classList.add('bonus'); });
-        document.getElementById("bonus-info-".concat(args.count)).classList.add('active');
+        args.from.forEach(function (from) { return document.getElementById("bonus-info-".concat(from)).classList.add('active'); });
         if (this.isCurrentPlayerActive()) {
             document.getElementById("supply").classList.add('selectable');
         }
@@ -1622,6 +1631,9 @@ var AzulSummerPavilion = /** @class */ (function (_super) {
     };
     AzulSummerPavilion.prototype.getBoardNumber = function () {
         return this.gamedatas.boardNumber;
+    };
+    AzulSummerPavilion.prototype.getStars = function () {
+        return this.gamedatas.stars;
     };
     AzulSummerPavilion.prototype.getPlayerId = function () {
         return Number(this.player_id);
@@ -1888,7 +1900,7 @@ var AzulSummerPavilion = /** @class */ (function (_super) {
             });
             _this.notifqueue.setSynchronous(notif[0], notif[1]);
         });
-        ['completeStarLogDetails', 'completeNumberLogDetails'].forEach(function (notifName) {
+        ['completeStarLogDetails', 'completeNumberLogDetails', 'completeStructureSetLogDetails'].forEach(function (notifName) {
             dojo.subscribe(notifName, _this, function (e) {
                 if (e.args.playerId && e.args.newScore !== undefined) {
                     _this.setScore(e.args.playerId, e.args.newScore);
@@ -1903,8 +1915,8 @@ var AzulSummerPavilion = /** @class */ (function (_super) {
         this.scoringBoard.setRoundNumber(args.roundNumber);
         document.getElementById('round').innerText = "".concat(args.roundNumber);
         var wildToken = document.getElementById("wildToken");
-        wildToken.classList.remove("tile".concat(args.roundNumber - 1));
-        wildToken.classList.add("tile".concat(args.roundNumber));
+        wildToken.classList.remove("tile".concat(this.getSpecialTile(args.roundNumber - 1)));
+        wildToken.classList.add("tile".concat(this.getSpecialTile(args.roundNumber)));
         Object.keys(this.gamedatas.players).forEach(function (playerId) { return document.getElementById("overall_player_board_".concat(playerId)).classList.remove('passed'); });
     };
     AzulSummerPavilion.prototype.notif_supplyFilled = function (args) {
@@ -1981,9 +1993,10 @@ var AzulSummerPavilion = /** @class */ (function (_super) {
     AzulSummerPavilion.prototype.notif_endScore = function (args) {
         var _this = this;
         Object.keys(args.scores).forEach(function (playerId) {
+            var _a;
             var endScore = args.scores[playerId];
-            endScore.tiles.forEach(function (tile) { return dojo.addClass("tile".concat(tile.id), 'highlight'); });
-            setTimeout(function () { return endScore.tiles.forEach(function (tile) { return dojo.removeClass("tile".concat(tile.id), 'highlight'); }); }, SCORE_MS - 50);
+            (_a = endScore.tiles) === null || _a === void 0 ? void 0 : _a.forEach(function (tile) { return dojo.addClass("tile".concat(tile.id), 'highlight'); });
+            setTimeout(function () { var _a; return (_a = endScore.tiles) === null || _a === void 0 ? void 0 : _a.forEach(function (tile) { return dojo.removeClass("tile".concat(tile.id), 'highlight'); }); }, SCORE_MS - 50);
             _this.displayScoringOnStar(endScore.star, playerId, endScore.points);
         });
     };

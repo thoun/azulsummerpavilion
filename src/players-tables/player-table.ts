@@ -1,10 +1,6 @@
 const HAND_CENTER = 327;
 
-const STAR_TO_PLAIN_COLOR = {
-    1: 1,
-    3: 6,
-    5: 4,
-};
+const COLORS_WITH_COLOR_BLIND_EXTRA_SIGN = [1, 4, 6];
 
 class PlayerTable {
     public playerId: number;
@@ -16,12 +12,12 @@ class PlayerTable {
         this.playerId = Number(player.id);
 
         const nameClass = player.name.indexOf(' ') !== -1 ? 'with-space' : 'without-space';
-        const variant = this.game.getBoardNumber() === 2;
+        const stars = this.game.getStars();
 
         let html = `<div id="player-table-wrapper-${this.playerId}" class="player-table-wrapper">
         <div id="player-hand-${this.playerId}" class="player-hand">
         </div>
-        <div id="player-table-${this.playerId}" class="player-table ${variant ? 'variant' : ''}" style="--player-color: #${player.color};">
+        <div id="player-table-${this.playerId}" class="player-table" data-board="${this.game.getBoardNumber()}" style="--player-color: #${player.color};">
             <div class="player-name-box">
                 <div class="player-name-wrapper shift">
                     <div id="player-name-shift-${this.playerId}" class="player-name color ${game.isDefaultFont() ? 'standard' : 'azul'} ${nameClass}">${player.name}</div>
@@ -36,16 +32,14 @@ class PlayerTable {
             html += `<div id="player-table-${this.playerId}-corner-${corner}" class="corner corner${corner}"></div>`;
         }
         for (let star=0; star<=6; star++) {
-            let cbTileColor = '';
-            if (!variant && STAR_TO_PLAIN_COLOR[star]) {
-                cbTileColor = `cb-tile${STAR_TO_PLAIN_COLOR[star]}`;
-            }
             html += `<div id="player-table-${this.playerId}-star-${star}" class="star star${star}" style=" --rotation: ${(star == 0 ? 3 : star - 4) * -60}deg;">`;
             for (let space=1; space<=6; space++) {
-                let displayedNumber = space;
-                if (variant) {
-                    displayedNumber = star == 0 ? 3 : [null, 3, 2, 1, 4, 5, 6][space];
+                const spaceColor = stars[star][space].color;
+                let cbTileColor = '';
+                if (COLORS_WITH_COLOR_BLIND_EXTRA_SIGN.includes(spaceColor)) {
+                    cbTileColor = `cb-tile${spaceColor}`;
                 }
+                const displayedNumber = stars[star][space].number;
                 html += `<div id="player-table-${this.playerId}-star-${star}-space-${space}" class="space space${space} ${cbTileColor}" style="--number: '${displayedNumber}'; --rotation: ${240 - space * 60 - (star == 0 ? 3 : star - 4) * 60}deg;"></div>`;
             }
             html += `</div>`;

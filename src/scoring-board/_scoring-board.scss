@@ -5,6 +5,13 @@
     height: 623px;
     float: left;
 
+    &[data-board="3"] {
+        background: url('img/supply3.jpg');
+    }
+    &[data-board="4"] {
+        background: url('img/supply4.jpg');
+    }
+
     #round-counter {
         position: absolute;
         top: 58px;
@@ -62,21 +69,40 @@
         width: 48px;
         border-radius: 5px;
 
-        &[data-bonus="1"] {
+        &[data-from="pillar"] {
             top: 150px;
             height: 83px;
         }
-        &[data-bonus="2"] {
+        &[data-from="statue"] {
             top: 254px;
             height: 111px;
         }
-        &[data-bonus="3"] {
+        &[data-from="window"] {
             top: 387px;
             height: 120px;
         }
 
         &.active {
             outline: 6px solid #c5299b;
+        }
+    }
+
+    &[data-board="3"], &[data-board="4"] {
+        .bonus-info[data-from="pillar"] {
+            top: 41px;
+            height: 83px;
+        }
+        .bonus-info[data-from="statue"] {
+            top: 144px;
+            height: 111px;
+        }
+        .bonus-info[data-from="window"] {
+            top: 277px;
+            height: 120px;
+        }
+        .bonus-info[data-from="fountain"] {
+            top: 418px;
+            height: 86px;
         }
     }
 }

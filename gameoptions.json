@@ -1,16 +1,26 @@
 {
     "100": {
-        "name": "Variant option",
+        "name": "Board",
         "values": {
             "1": {
-                "name": "Disabled",
-                "description": "Colored wall face"
+                "name": "Colored board"
             },
             "2": {
-                "name": "Enabled",
-                "description": "Grayed wall face",
-                "tmdisplay": "Variant option (gray wall)",
+                "name": "Monochrome board",
+                "tmdisplay": "Monochrome board",
                 "nobeginner": true
+            },
+            "3": {
+                "name": "Glazed Pavilion: Colored board (Orange side)",
+                "tmdisplay": "Glazed Pavilion: Colored board (Orange side)",
+                "nobeginner": true,
+                "alpha": true
+            },
+            "4": {
+                "name": "Glazed Pavilion: Monochrome board (Purple side)",
+                "tmdisplay": "Glazed Pavilion: Monochrome board (Purple side)",
+                "nobeginner": true,
+                "alpha": true
             }
         },
         "default": 1

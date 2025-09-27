@@ -45,7 +45,7 @@ class ChoosePlace extends \Bga\GameFramework\States\GameState
         $this->game->setGlobalVariable(UNDO_PLACE, null);
 
         // if only one option (no use of wilds), auto-play it
-        $args = $this->game->argChooseColor($activePlayerId);
+        $args = $this->game->argChooseColor($activePlayerId, $star, $space);
         if (count($args['possibleColors']) > 1) {
             return ChooseColor::class;
         } else {
@@ -66,7 +66,12 @@ class ChoosePlace extends \Bga\GameFramework\States\GameState
         }
         $star = (int)floor($zombieChoice / 100);
         $space = $zombieChoice % 100;
-        return $this->actSelectPlace($star, $space, $playerId, $args);
+        //debug($star, $space, $this->game->argChooseColor($playerId, $star, $space));
+        try {
+            return $this->actSelectPlace($star, $space, $playerId, $args);
+        } catch (\Throwable $e) {
+            return $this->actPass($playerId);
+        }
     }
 
     function applySelectColor(int $color, int $activePlayerId) {

@@ -106,7 +106,6 @@
     }
     
     .player-table {
-        background: url('img/playerboard.jpg');
         width: 740px;
         height: 740px;
         position: relative;
@@ -117,9 +116,12 @@
         z-index: 1;
         border-color: var(--player-color);
         box-shadow: 0 0 5px 2px var(--player-color);
+        
 
-        &.variant {            
-            background: url('img/playerboard-variant.jpg');
+        @for $board from 1 through 4 {
+            &[data-board="#{$board}"] {
+                background: url('img/playerboard#{$board}.jpg');
+            }
         }
 
         .corner {

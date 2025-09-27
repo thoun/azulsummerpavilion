@@ -20,12 +20,6 @@ class PlayTile extends \Bga\GameFramework\States\GameState
     }
 
     function getArgs(int $activePlayerId) {
-        // TEMP FIX for stuck games
-        if ($this->game->getGlobalVariable(SELECTED_PLACE) == null) {
-            $this->gamestate->jumpToState(ChoosePlace::class);
-            return [];
-        }
-
         return $this->game->argPlayTile($activePlayerId);
     }
 

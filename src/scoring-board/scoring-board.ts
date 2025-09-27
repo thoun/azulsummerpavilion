@@ -5,7 +5,34 @@ class ScoringBoard {
         roundNumber: number,
         supplyTiles: Tile[],
     ) {
+        const BONUSES = {
+            'pillar': {
+                name:  _("a pillar"),
+                adjacent: 4,
+                number: 1,
+            },
+            'statue': {
+                name:  _("a statue"),
+                adjacent: 4,
+                number: 2,
+            },
+            'window': {
+                name:  _("a window"),
+                adjacent: 2,
+                number: 3,
+            },
+        };
+        if (this.game.getBoardNumber() >= 3) {
+            BONUSES['fountain'] = {
+                name:  _("a fountain"),
+                adjacent: 4,
+                number: 1,
+            };
+        }
+
         const scoringBoardDiv = document.getElementById('scoring-board');
+
+        scoringBoardDiv.dataset.board = ''+game.gamedatas.boardNumber;
 
         let html = `<div id="round-counter">`;
         for (let i=1; i<=6; i++) {            
@@ -17,34 +44,23 @@ class ScoringBoard {
             html += `<div id="supply-space-${i}" class="supply-space space${i}"></div>`;
         }
         html += `</div>`;
-
         
-        for (let i=1; i<=3; i++) {
-            html += `<div id="bonus-info-${i}" class="bonus-info" data-bonus="${i}"></div>`;
-        }
+        Object.keys(BONUSES).forEach((from) => 
+            html += `<div id="bonus-info-${from}" class="bonus-info" data-from="${from}"></div>`
+        )
 
         scoringBoardDiv.insertAdjacentHTML('beforeend', html);
 
-        const bonusInfos = [
-            _("a pillar"),
-            _("a statue"),
-            _("a window"),
-        ];
-        const bonusAdjacent = [
-            4,
-            4,
-            2,
-        ];
 
-        for (let i=1; i<=3; i++) {
+        Object.entries(BONUSES).forEach(([from, detail]) => 
             (this.game as any).addTooltipHtml(
-                `bonus-info-${i}`, 
+                `bonus-info-${from}`, 
                 _("When you surround the ${adjacent_number} adjacent spaces of ${a_bonus_shape} with tiles, you must then immediately take any ${number} tile(s) of your choice from the supply.")
-                    .replace('${adjacent_number}', `${bonusAdjacent[i - 1]}`)
-                    .replace('${a_bonus_shape}', `<strong>${bonusInfos[i - 1]}</strong>`)
-                    .replace('${number}', `<strong>${i}</strong>`)                
-            );
-        }
+                    .replace('${adjacent_number}', `${detail.adjacent}`)
+                    .replace('${a_bonus_shape}', `<strong>${detail.name}</strong>`)
+                    .replace('${number}', `<strong>${detail.number}</strong>`)                
+            )
+        );
 
         this.placeTiles(supplyTiles, false);
     }

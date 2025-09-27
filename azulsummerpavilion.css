@@ -194,6 +194,12 @@
   height: 623px;
   float: left;
 }
+#scoring-board[data-board="3"] {
+  background: url("img/supply3.jpg");
+}
+#scoring-board[data-board="4"] {
+  background: url("img/supply4.jpg");
+}
 #scoring-board #round-counter {
   position: absolute;
   top: 58px;
@@ -267,20 +273,36 @@
   width: 48px;
   border-radius: 5px;
 }
-#scoring-board .bonus-info[data-bonus="1"] {
+#scoring-board .bonus-info[data-from=pillar] {
   top: 150px;
   height: 83px;
 }
-#scoring-board .bonus-info[data-bonus="2"] {
+#scoring-board .bonus-info[data-from=statue] {
   top: 254px;
   height: 111px;
 }
-#scoring-board .bonus-info[data-bonus="3"] {
+#scoring-board .bonus-info[data-from=window] {
   top: 387px;
   height: 120px;
 }
 #scoring-board .bonus-info.active {
   outline: 6px solid #c5299b;
+}
+#scoring-board[data-board="3"] .bonus-info[data-from=pillar], #scoring-board[data-board="4"] .bonus-info[data-from=pillar] {
+  top: 41px;
+  height: 83px;
+}
+#scoring-board[data-board="3"] .bonus-info[data-from=statue], #scoring-board[data-board="4"] .bonus-info[data-from=statue] {
+  top: 144px;
+  height: 111px;
+}
+#scoring-board[data-board="3"] .bonus-info[data-from=window], #scoring-board[data-board="4"] .bonus-info[data-from=window] {
+  top: 277px;
+  height: 120px;
+}
+#scoring-board[data-board="3"] .bonus-info[data-from=fountain], #scoring-board[data-board="4"] .bonus-info[data-from=fountain] {
+  top: 418px;
+  height: 86px;
 }
 
 #table {
@@ -372,7 +394,6 @@
   color: var(--player-color);
 }
 .player-table-wrapper .player-table {
-  background: url("img/playerboard.jpg");
   width: 740px;
   height: 740px;
   position: relative;
@@ -383,8 +404,17 @@
   border-color: var(--player-color);
   box-shadow: 0 0 5px 2px var(--player-color);
 }
-.player-table-wrapper .player-table.variant {
-  background: url("img/playerboard-variant.jpg");
+.player-table-wrapper .player-table[data-board="1"] {
+  background: url("img/playerboard1.jpg");
+}
+.player-table-wrapper .player-table[data-board="2"] {
+  background: url("img/playerboard2.jpg");
+}
+.player-table-wrapper .player-table[data-board="3"] {
+  background: url("img/playerboard3.jpg");
+}
+.player-table-wrapper .player-table[data-board="4"] {
+  background: url("img/playerboard4.jpg");
 }
 .player-table-wrapper .player-table .corner {
   position: absolute;

@@ -20,12 +20,6 @@ class ConfirmPlay extends \Bga\GameFramework\States\GameState
     }
 
     function getArgs() {
-        // TEMP FIX for stuck games
-        if ($this->game->getGlobalVariable(UNDO_PLACE) == null) {
-            $this->gamestate->jumpToState(ChoosePlace::class);
-            return [];
-        }
-
         return [
             '_private' => $this->game->argAutopass(),
         ];

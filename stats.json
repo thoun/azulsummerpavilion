@@ -20,19 +20,24 @@
             "name": "Bonus tiles collected",
             "type": "int"
         },
-        "bonusTile1": {
+        "bonusTile_pillar": {
             "id": 16,
             "name": "Bonus tiles with pillars",
             "type": "int"
         },
-        "bonusTile2": {
+        "bonusTile_statue": {
             "id": 17,
             "name": "Bonus tiles with statues",
             "type": "int"
         },
-        "bonusTile3": {
+        "bonusTile_window": {
             "id": 18,
             "name": "Bonus tiles with windows",
+            "type": "int"
+        },
+        "bonusTile_fountain": {
+            "id": 19,
+            "name": "Bonus tiles with fountains",
             "type": "int"
         },
         "pointsWallTile": {
@@ -113,6 +118,11 @@
         "pointsCompleteNumbers4": {
             "id": 44,
             "name": "Points gained with complete numbers 4",
+            "type": "int"
+        },
+        "pointsCompleteStructureSets": {
+            "id": 50,
+            "name": "Points gained with complete structure sets",
             "type": "int"
         },
         "roundsNumber": {
@@ -142,19 +152,24 @@
             "name": "Bonus tiles collected",
             "type": "int"
         },
-        "bonusTile1": {
+        "bonusTile_pillar": {
             "id": 16,
             "name": "Bonus tiles with pillars",
             "type": "int"
         },
-        "bonusTile2": {
+        "bonusTile_statue": {
             "id": 17,
             "name": "Bonus tiles with statues",
             "type": "int"
         },
-        "bonusTile3": {
+        "bonusTile_window": {
             "id": 18,
             "name": "Bonus tiles with windows",
+            "type": "int"
+        },
+        "bonusTile_fountain": {
+            "id": 19,
+            "name": "Bonus tiles with fountains",
             "type": "int"
         },
         "pointsWallTile": {
@@ -235,6 +250,11 @@
         "pointsCompleteNumbers4": {
             "id": 44,
             "name": "Points gained with complete numbers 4",
+            "type": "int"
+        },
+        "pointsCompleteStructureSets": {
+            "id": 50,
+            "name": "Points gained with complete structure sets",
             "type": "int"
         },
         "firstPlayer": {

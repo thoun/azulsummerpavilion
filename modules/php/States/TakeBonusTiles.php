@@ -8,8 +8,6 @@ use Bga\GameFramework\States\PossibleAction;
 use Bga\GameFramework\StateType;
 use Bga\Games\AzulSummerPavilion\Game;
 
-use function Bga\Games\AzulSummerPavilion\debug;
-
 class TakeBonusTiles extends \Bga\GameFramework\States\GameState
 {
     public function __construct(protected Game $game) {
@@ -23,20 +21,16 @@ class TakeBonusTiles extends \Bga\GameFramework\States\GameState
     }
 
     function getArgs() {
-        // TEMP FIX for stuck games
-        if ($this->game->getGlobalVariable(UNDO_PLACE) == null) {
-            $this->gamestate->jumpToState(ChoosePlace::class);
-            return [];
-        }
-
         $additionalTiles = $this->game->getGlobalVariable(ADDITIONAL_TILES_DETAIL);
         $number = $additionalTiles->count;
         $highlightedTiles = $additionalTiles->highlightedTiles;
+        $from = $additionalTiles->from;
 
         return [
             'number' => $number, // for title
             'count' => $number,
             'highlightedTiles' => $highlightedTiles,
+            'from' => $from,
             '_private' => $this->game->argAutopass(),
         ];
     }

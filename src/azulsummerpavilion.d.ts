@@ -36,6 +36,8 @@ interface AzulSummerPavilionGamedatas {
     factories: { [factoryId: number]: Tile[] };
     firstPlayerTokenPlayerId: number;
     boardNumber: number;
+    wildColors: { [round: number]: number };
+    stars: { color: number, number: number }[][];
     endRound: boolean;
     fastScoring: boolean;
     remainingTiles: number;
@@ -50,6 +52,7 @@ interface AzulSummerPavilionGame extends GameGui<AzulSummerPavilionGamedatas> {
     isDefaultFont(): boolean;
     getZoom(): number;
     getBoardNumber(): number;
+    getStars(): { color: number, number: number }[][];
     getPlayerColor(playerId: number): string;
     takeTiles(id: number): void;
     playTile(line: number): void;
@@ -66,6 +69,7 @@ interface EnteringChooseTileArgs {
 interface EnteringTakeBonusTileArgs {
     count: number;
     highlightedTiles: Tile[];
+    from: string[];
 }
 
 interface EnteringChoosePlaceArgs {

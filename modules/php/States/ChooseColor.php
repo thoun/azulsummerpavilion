@@ -7,8 +7,6 @@ use Bga\GameFramework\States\PossibleAction;
 use Bga\GameFramework\StateType;
 use Bga\Games\AzulSummerPavilion\Game;
 
-use function Bga\Games\AzulSummerPavilion\debug;
-
 class ChooseColor extends \Bga\GameFramework\States\GameState
 {
     public function __construct(protected Game $game) {
@@ -22,13 +20,10 @@ class ChooseColor extends \Bga\GameFramework\States\GameState
     }
 
     function getArgs(int $activePlayerId) {
-        // TEMP FIX for stuck games
-        if ($this->game->getGlobalVariable(SELECTED_PLACE) == null) {
-            $this->gamestate->jumpToState(ChoosePlace::class);
-            return [];
-        }
-
-        return $this->game->argChooseColor($activePlayerId);
+        $selectedPlace = $this->game->getGlobalVariable(SELECTED_PLACE);
+        $star = $selectedPlace[0];
+        $space = $selectedPlace[1];
+        return $this->game->argChooseColor($activePlayerId, $star, $space);
     }
 
     #[PossibleAction]
