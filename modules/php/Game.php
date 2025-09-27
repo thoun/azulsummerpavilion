@@ -59,9 +59,6 @@ class Game extends Table {
         
         self::initGameStateLabels([
             FIRST_PLAYER_FOR_NEXT_TURN => 10,
-
-            VARIANT_OPTION => 100,
-            FAST_SCORING => 102,
         ]);
 
         $this->tiles = self::getNew("module.common.deck");
@@ -70,29 +67,29 @@ class Game extends Table {
         
         
         $this->factoriesByPlayers = [
-        2 => 5,
-        3 => 7,
-        4 => 9,
+            2 => 5,
+            3 => 7,
+            4 => 9,
         ];
 
         $this->STANDARD_FACE_STAR_COLORS = [
-        0 => 0,
-        1 => 1,
-        2 => 3,
-        3 => 6,
-        4 => 5, 
-        5 => 4, 
-        6 => 2,
+            0 => 0,
+            1 => 1,
+            2 => 3,
+            3 => 6,
+            4 => 5, 
+            5 => 4, 
+            6 => 2,
         ];
 
         $this->FULL_STAR_POINTS_BY_COLOR = [
-        0 => 12,
-        1 => 20,
-        2 => 18,
-        3 => 17,
-        4 => 16, 
-        5 => 15, 
-        6 => 14,
+            0 => 12,
+            1 => 20,
+            2 => 18,
+            3 => 17,
+            4 => 16, 
+            5 => 15, 
+            6 => 14,
         ];
 	}
 
@@ -173,8 +170,7 @@ class Game extends Table {
 
         $result['factoryNumber'] = $this->getFactoryNumber(count($result['players']));
         $result['firstPlayerTokenPlayerId'] = intval(self::getGameStateValue(FIRST_PLAYER_FOR_NEXT_TURN));
-        $isVariant = $this->isVariant();
-        $result['variant'] = $isVariant;
+        $result['boardNumber'] = $this->getBoardNumber();
 
         $factories = [];
         $factoryNumber = $result['factoryNumber'];
@@ -231,7 +227,7 @@ class Game extends Table {
         $hand = $this->getTilesFromDb($this->tiles->getCardsInLocation('hand', $playerId));
         $wildColor = $this->getWildColor();
         $possibleSpaces = [];
-        $variant = $this->isVariant();
+        $variant = $this->getBoardNumber() === 2;
         $remainingColorTiles = count(array_filter($hand, fn($tile) => $tile->type > 0));
         $skipIsFree = $remainingColorTiles <= ($this->getRound() >= 6 ? 0 : 4);
 
@@ -273,7 +269,7 @@ class Game extends Table {
         $selectedColor = $this->STANDARD_FACE_STAR_COLORS[$star];
 
         $possibleColors = [];
-        $variant = $this->isVariant();
+        $variant = $this->getBoardNumber() === 2;
         if ($variant || $selectedColor == 0) {
             $number = $this->getSpaceNumber($star, $space, $variant);
             $placedTiles = $this->getTilesFromDb($this->tiles->getCardsInLocation('wall'.$activePlayerId));
@@ -322,7 +318,7 @@ class Game extends Table {
     }
 
     function argPlayTile(int $activePlayerId) {
-        $variant = $this->isVariant();
+        $variant = $this->getBoardNumber() === 2;
         $hand = $this->getTilesFromDb($this->tiles->getCardsInLocation('hand', $activePlayerId));
 
         $selectedPlace = $this->getGlobalVariable(SELECTED_PLACE);
@@ -375,7 +371,7 @@ class Game extends Table {
 
     function applyPlayTile(int $playerId, int $wilds) {
 
-        $variant = $this->isVariant();
+        $variant = $this->getBoardNumber() === 2;
 
         // for undo
         $previousScore = $this->getPlayerScore($playerId);
@@ -610,8 +606,8 @@ class Game extends Table {
         }
     }
 
-    function isVariant() {
-        return $this->tableOptions->get(100) === 2;
+    function getBoardNumber(): int {
+        return $this->tableOptions->get(100);
     }
 
     function isUndoActivated(int $player) {

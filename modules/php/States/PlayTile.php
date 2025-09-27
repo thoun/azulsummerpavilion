@@ -20,6 +20,12 @@ class PlayTile extends \Bga\GameFramework\States\GameState
     }
 
     function getArgs(int $activePlayerId) {
+        // TEMP FIX for stuck games
+        if ($this->game->getGlobalVariable(SELECTED_PLACE) == null) {
+            $this->gamestate->jumpToState(ChoosePlace::class);
+            return [];
+        }
+
         return $this->game->argPlayTile($activePlayerId);
     }
 
@@ -30,7 +36,7 @@ class PlayTile extends \Bga\GameFramework\States\GameState
 
     #[PossibleAction]
     function actUndoPlayTile(int $activePlayerId) {
-        $this->game->actUndoPlayTile($activePlayerId);
+        return $this->game->actUndoPlayTile($activePlayerId);
     }
 
     function zombie(int $playerId) {

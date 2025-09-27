@@ -8,6 +8,8 @@ use Bga\GameFramework\StateType;
 use Bga\GameFrameworkPrototype\Helpers\Arrays;
 use Bga\Games\AzulSummerPavilion\Game;
 
+use function Bga\Games\AzulSummerPavilion\debug;
+
 class ChooseTile extends \Bga\GameFramework\States\GameState
 {
     public function __construct(protected Game $game) {
@@ -171,13 +173,30 @@ class ChooseTile extends \Bga\GameFramework\States\GameState
         }
     }
 
-    function zombie(int $playerId) {
+    public function zombie(int $playerId) {
         $factoryTiles = $this->game->getTilesFromDb($this->game->tiles->getCardsInLocation('factory'));
         $tiles = Arrays::filter($factoryTiles, fn($tile) => $tile->type > 0);
-        $round = $this->game->getRound();
-        $normalTiles = Arrays::filter($tiles, fn($tile) => $tile->type != $round);
-        $possibleChoices = count($normalTiles) > 0 ? $normalTiles : $tiles;
-        $zombieChoice = $this->getRandomZombieChoice(Arrays::map($possibleChoices, fn($t) => $t->id));
-        return $this->actTakeTiles($zombieChoice, $playerId, true);
+        $wildColor = $this->game->getWildColor();
+
+        $possibleAnswerPoints = [];
+        foreach ($tiles as $tile) {
+            $isWild = $tile->type == $wildColor;
+            $factoryTiles = Arrays::filter($tiles, fn($t) => $tile->space == $t->space);
+            if ($isWild && Arrays::some($factoryTiles, fn($t) => $t->type != $wildColor)) {
+                continue; // can't pick a wild if there are pther colors in the factory
+            }
+
+            $nonWildTiles = [];
+            $wildTiles = Arrays::filter($factoryTiles, fn($t) => $t->type == $wildColor);
+            if (!$isWild) {
+                $nonWildTiles = Arrays::filter($factoryTiles, fn($t) => $tile->type == $t->type);
+                $wildTiles = array_slice($wildTiles, 0, 1);
+            }
+
+            $possibleAnswerPoints[$tile->id] = count($nonWildTiles) + 1.5 * count($wildTiles);
+        }
+
+        $zombieChoice = $this->getBestZombieChoice($possibleAnswerPoints);
+        return $this->actTakeTiles($zombieChoice, $playerId);
     }
 }

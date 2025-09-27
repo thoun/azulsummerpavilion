@@ -7,6 +7,8 @@ use Bga\GameFramework\States\PossibleAction;
 use Bga\GameFramework\StateType;
 use Bga\Games\AzulSummerPavilion\Game;
 
+use function Bga\Games\AzulSummerPavilion\debug;
+
 class ChooseColor extends \Bga\GameFramework\States\GameState
 {
     public function __construct(protected Game $game) {
@@ -20,6 +22,12 @@ class ChooseColor extends \Bga\GameFramework\States\GameState
     }
 
     function getArgs(int $activePlayerId) {
+        // TEMP FIX for stuck games
+        if ($this->game->getGlobalVariable(SELECTED_PLACE) == null) {
+            $this->gamestate->jumpToState(ChoosePlace::class);
+            return [];
+        }
+
         return $this->game->argChooseColor($activePlayerId);
     }
 
@@ -40,7 +48,7 @@ class ChooseColor extends \Bga\GameFramework\States\GameState
 
     #[PossibleAction]
     function actUndoPlayTile(int $activePlayerId) {
-        $this->game->actUndoPlayTile($activePlayerId);
+        return $this->game->actUndoPlayTile($activePlayerId);
     }
 
     #[PossibleAction]
@@ -48,7 +56,9 @@ class ChooseColor extends \Bga\GameFramework\States\GameState
         return $this->game->applyPass($activePlayerId);
     }
 
-    function zombie(int $playerId) {
-        return $this->actSelectColor(0, $playerId);
+    public function zombie(int $playerId, array $args) {
+        $possibleColors = $args['possibleColors'];
+        $zombieChoice = $this->getRandomZombieChoice($possibleColors);
+        return $this->actSelectColor($zombieChoice, $playerId);
     }
 }

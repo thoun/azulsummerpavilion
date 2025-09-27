@@ -16,8 +16,8 @@ trait DebugUtilTrait {
 //////////// Utility functions
 ////////////
 
-/*
-    function debugSetup() {
+
+    function debug_Setup() {
         if ($this->getBgaEnvironment() != 'studio') { 
             return;
         }
@@ -36,7 +36,7 @@ trait DebugUtilTrait {
         $this->debugSetWallTile(2343492, 3, 2, 3);
 
         //$this->setStat(5, 'roundsNumber');
-    }*/
+    }
 
     function debugSetWallTile(int $playerId, int $star, int $space, int $color) {
         $tile = $this->getTilesFromDb($this->tiles->getCardsOfTypeInLocation($color, null, 'deck'))[0];
@@ -105,11 +105,22 @@ trait DebugUtilTrait {
         $this->gamestate->jumpToState(ChoosePlace::class);
     }
 
+    function debug_playToEmptyFactories() {
+        $count = 0;
+        while ($count < 100 && $this->gamestate->getCurrentMainStateId() < ST_PLAYER_CHOOSE_PLACE) {
+            $count++;
+            foreach($this->gamestate->getActivePlayerList() as $playerId) {
+                $playerId = (int)$playerId;
+                $this->gamestate->runStateClassZombie($this->gamestate->getCurrentState($playerId), $playerId);
+            }
+        }
+    }
+
     function debug_playToEndRound() {
         $round = $this->getStat('roundsNumber');
         $count = 0;
         $stopIfAtState = null;
-        //$stopIfAtState = ST_MULTIPLAYER_PRIVATE_CHOOSE_COLUMNS;
+        //$stopIfAtState = ST_PLAYER_CHOOSE_PLACE;
         while ($this->getStat('roundsNumber') == $round && $count < 100 && ($stopIfAtState === null || $this->gamestate->getCurrentMainStateId() < $stopIfAtState)) {
             $count++;
             foreach($this->gamestate->getActivePlayerList() as $playerId) {

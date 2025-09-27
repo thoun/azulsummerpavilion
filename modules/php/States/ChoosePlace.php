@@ -8,6 +8,8 @@ use Bga\GameFramework\StateType;
 use Bga\GameFrameworkPrototype\Helpers\Arrays;
 use Bga\Games\AzulSummerPavilion\Game;
 
+use function Bga\Games\AzulSummerPavilion\debug;
+
 class ChoosePlace extends \Bga\GameFramework\States\GameState
 {
     public function __construct(protected Game $game) {
@@ -56,8 +58,15 @@ class ChoosePlace extends \Bga\GameFramework\States\GameState
         return $this->game->applyPass($activePlayerId);
     }
 
-    function zombie(int $playerId) {
-        return $this->game->applyPass($playerId, true);
+    public function zombie(int $playerId, array $args) {
+        $possibleSpaces = $args['possibleSpaces'];
+        $zombieChoice = $this->getRandomZombieChoice($possibleSpaces);
+        if ($zombieChoice == null) {
+            return $this->actPass($playerId);
+        }
+        $star = (int)floor($zombieChoice / 100);
+        $space = $zombieChoice % 100;
+        return $this->actSelectPlace($star, $space, $playerId, $args);
     }
 
     function applySelectColor(int $color, int $activePlayerId) {

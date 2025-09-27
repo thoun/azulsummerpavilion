@@ -16,7 +16,7 @@ class EndScore extends \Bga\GameFramework\States\GameState
     }
 
     function onEnteringState() {
-        $variant = $this->game->isVariant();
+        $variant = $this->game->getBoardNumber() === 2;
         $playersIds = $this->game->getPlayersIds();
 
         $walls = [];

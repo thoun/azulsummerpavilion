@@ -55,7 +55,7 @@ class AzulSummerPavilion extends GameGui<AzulSummerPavilionGamedatas> implements
 
     public setup(gamedatas: AzulSummerPavilionGamedatas) {
         // ignore loading of some pictures
-        if (this.isVariant()) {
+        if (this.getBoardNumber() === 2) {
             this.dontPreloadImage('playerboard.jpg');
         } else {
             this.dontPreloadImage('playerboard-variant.jpg');
@@ -464,8 +464,8 @@ class AzulSummerPavilion extends GameGui<AzulSummerPavilionGamedatas> implements
             `${factoriesWidth + (Math.floor(tablesMaxWidth / playerTableWidth) * playerTableWidth)}px` : `unset`;
     }
 
-    public isVariant(): boolean {
-        return this.gamedatas.variant;
+    public getBoardNumber(): number {
+        return this.gamedatas.boardNumber;
     }
 
     public getPlayerId(): number {

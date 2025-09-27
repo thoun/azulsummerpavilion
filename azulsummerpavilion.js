@@ -1145,7 +1145,7 @@ var PlayerTable = /** @class */ (function () {
         this.game = game;
         this.playerId = Number(player.id);
         var nameClass = player.name.indexOf(' ') !== -1 ? 'with-space' : 'without-space';
-        var variant = this.game.isVariant();
+        var variant = this.game.getBoardNumber() === 2;
         var html = "<div id=\"player-table-wrapper-".concat(this.playerId, "\" class=\"player-table-wrapper\">\n        <div id=\"player-hand-").concat(this.playerId, "\" class=\"player-hand\">\n        </div>\n        <div id=\"player-table-").concat(this.playerId, "\" class=\"player-table ").concat(variant ? 'variant' : '', "\" style=\"--player-color: #").concat(player.color, ";\">\n            <div class=\"player-name-box\">\n                <div class=\"player-name-wrapper shift\">\n                    <div id=\"player-name-shift-").concat(this.playerId, "\" class=\"player-name color ").concat(game.isDefaultFont() ? 'standard' : 'azul', " ").concat(nameClass, "\">").concat(player.name, "</div>\n                </div>\n                <div class=\"player-name-wrapper\">\n                    <div id=\"player-name-").concat(this.playerId, "\" class=\"player-name dark ").concat(game.isDefaultFont() ? 'standard' : 'azul', " ").concat(nameClass, "\">").concat(player.name, "</div>\n                </div>\n            </div>\n            ");
         for (var corner = 0; corner < 4; corner++) {
             html += "<div id=\"player-table-".concat(this.playerId, "-corner-").concat(corner, "\" class=\"corner corner").concat(corner, "\"></div>");
@@ -1167,7 +1167,7 @@ var PlayerTable = /** @class */ (function () {
         }
         html += "</div>";
         html += "\n        </div>";
-        dojo.place(html, 'centered-table');
+        document.getElementById('centered-table').insertAdjacentHTML('beforeend', html);
         this.placeTilesOnHand(player.hand);
         this.placeTilesOnCorner(player.corner);
         var _loop_4 = function (star) {
@@ -1224,10 +1224,12 @@ var PlayerTable = /** @class */ (function () {
     };
     PlayerTable.prototype.setFont = function (prefValue) {
         var defaultFont = prefValue === 1;
-        dojo.toggleClass("player-name-shift-".concat(this.playerId), 'standard', defaultFont);
-        dojo.toggleClass("player-name-shift-".concat(this.playerId), 'azul', !defaultFont);
-        dojo.toggleClass("player-name-".concat(this.playerId), 'standard', defaultFont);
-        dojo.toggleClass("player-name-".concat(this.playerId), 'azul', !defaultFont);
+        var playerName = document.getElementById("player-name-".concat(this.playerId));
+        var playerNameShift = document.getElementById("player-name-shift-".concat(this.playerId));
+        playerNameShift.classList.toggle('standard', defaultFont);
+        playerNameShift.classList.toggle('azul', !defaultFont);
+        playerName.classList.toggle('standard', defaultFont);
+        playerName.classList.toggle('azul', !defaultFont);
     };
     return PlayerTable;
 }());
@@ -1274,7 +1276,7 @@ var AzulSummerPavilion = /** @class */ (function (_super) {
     AzulSummerPavilion.prototype.setup = function (gamedatas) {
         var _this = this;
         // ignore loading of some pictures
-        if (this.isVariant()) {
+        if (this.getBoardNumber() === 2) {
             this.dontPreloadImage('playerboard.jpg');
         }
         else {
@@ -1618,8 +1620,8 @@ var AzulSummerPavilion = /** @class */ (function (_super) {
         document.getElementById('centered-table').style.width = tablesMaxWidth < playerTableWidth * this.gamedatas.playerorder.length ?
             "".concat(factoriesWidth + (Math.floor(tablesMaxWidth / playerTableWidth) * playerTableWidth), "px") : "unset";
     };
-    AzulSummerPavilion.prototype.isVariant = function () {
-        return this.gamedatas.variant;
+    AzulSummerPavilion.prototype.getBoardNumber = function () {
+        return this.gamedatas.boardNumber;
     };
     AzulSummerPavilion.prototype.getPlayerId = function () {
         return Number(this.player_id);

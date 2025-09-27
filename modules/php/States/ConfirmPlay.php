@@ -20,6 +20,12 @@ class ConfirmPlay extends \Bga\GameFramework\States\GameState
     }
 
     function getArgs() {
+        // TEMP FIX for stuck games
+        if ($this->game->getGlobalVariable(UNDO_PLACE) == null) {
+            $this->gamestate->jumpToState(ChoosePlace::class);
+            return [];
+        }
+
         return [
             '_private' => $this->game->argAutopass(),
         ];
@@ -32,7 +38,7 @@ class ConfirmPlay extends \Bga\GameFramework\States\GameState
 
     #[PossibleAction]
     function actUndoPlayTile(int $activePlayerId) {
-        $this->game->actUndoPlayTile($activePlayerId);
+        return $this->game->actUndoPlayTile($activePlayerId);
     }
 
     function zombie(int $playerId) {

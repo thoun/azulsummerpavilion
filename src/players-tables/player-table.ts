@@ -16,7 +16,7 @@ class PlayerTable {
         this.playerId = Number(player.id);
 
         const nameClass = player.name.indexOf(' ') !== -1 ? 'with-space' : 'without-space';
-        const variant = this.game.isVariant();
+        const variant = this.game.getBoardNumber() === 2;
 
         let html = `<div id="player-table-wrapper-${this.playerId}" class="player-table-wrapper">
         <div id="player-hand-${this.playerId}" class="player-hand">
@@ -55,7 +55,7 @@ class PlayerTable {
         html += `
         </div>`;
 
-        dojo.place(html, 'centered-table');
+        document.getElementById('centered-table').insertAdjacentHTML('beforeend', html);
 
         this.placeTilesOnHand(player.hand);
         this.placeTilesOnCorner(player.corner);
@@ -113,9 +113,11 @@ class PlayerTable {
     
     public setFont(prefValue: number): void {
         const defaultFont = prefValue === 1;
-        dojo.toggleClass(`player-name-shift-${this.playerId}`, 'standard', defaultFont);
-        dojo.toggleClass(`player-name-shift-${this.playerId}`, 'azul', !defaultFont);
-        dojo.toggleClass(`player-name-${this.playerId}`, 'standard', defaultFont);
-        dojo.toggleClass(`player-name-${this.playerId}`, 'azul', !defaultFont);
+        const playerName = document.getElementById(`player-name-${this.playerId}`);
+        const playerNameShift = document.getElementById(`player-name-shift-${this.playerId}`);
+        playerNameShift.classList.toggle('standard', defaultFont);
+        playerNameShift.classList.toggle('azul', !defaultFont);
+        playerName.classList.toggle('standard', defaultFont);
+        playerName.classList.toggle('azul', !defaultFont);
     }
 }

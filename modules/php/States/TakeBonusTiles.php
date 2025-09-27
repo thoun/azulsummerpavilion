@@ -8,6 +8,8 @@ use Bga\GameFramework\States\PossibleAction;
 use Bga\GameFramework\StateType;
 use Bga\Games\AzulSummerPavilion\Game;
 
+use function Bga\Games\AzulSummerPavilion\debug;
+
 class TakeBonusTiles extends \Bga\GameFramework\States\GameState
 {
     public function __construct(protected Game $game) {
@@ -21,6 +23,12 @@ class TakeBonusTiles extends \Bga\GameFramework\States\GameState
     }
 
     function getArgs() {
+        // TEMP FIX for stuck games
+        if ($this->game->getGlobalVariable(UNDO_PLACE) == null) {
+            $this->gamestate->jumpToState(ChoosePlace::class);
+            return [];
+        }
+
         $additionalTiles = $this->game->getGlobalVariable(ADDITIONAL_TILES_DETAIL);
         $number = $additionalTiles->count;
         $highlightedTiles = $additionalTiles->highlightedTiles;
@@ -74,11 +82,15 @@ class TakeBonusTiles extends \Bga\GameFramework\States\GameState
 
     #[PossibleAction]
     function actUndoPlayTile(int $activePlayerId) {
-        $this->game->actUndoPlayTile($activePlayerId);
+        return $this->game->actUndoPlayTile($activePlayerId);
     }
 
     function zombie(int $playerId, array $args) {
+        $wildColor = $this->game->getWildColor();
         $supply = $this->game->getTilesFromDb($this->game->tiles->getCardsInLocation('supply'));
+        shuffle($supply);
+        usort($supply, fn($a, $b) => ($a->type == $wildColor ? 0 : 1) <=> ($b->type == $wildColor ? 0 : 1)); // take wilds in priority
+
         $ids = array_slice(array_map(fn($t) => $t->id, $supply), 0, $args['count']);
         return $this->actTakeBonusTiles($ids, $playerId, $args);
     }

@@ -31,13 +31,6 @@ const ST_END_SCORE = 95;
 const ST_END_GAME = 99;
 
 /*
- * Options
- */
-
-define('VARIANT_OPTION', 'VariantOption');
-define('FAST_SCORING', 'FastScoring');
-
-/*
  * Variables
  */
 
