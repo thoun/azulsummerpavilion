@@ -1266,6 +1266,7 @@ var AzulSummerPavilion = /** @class */ (function (_super) {
         var _this = _super.call(this) || this;
         _this.playersTables = [];
         _this.zoom = 0.75;
+        Object.assign(_this, _this.bga);
         var zoomStr = localStorage.getItem(LOCAL_STORAGE_ZOOM_KEY);
         if (zoomStr) {
             _this.zoom = Number(zoomStr);
@@ -1288,7 +1289,7 @@ var AzulSummerPavilion = /** @class */ (function (_super) {
         var _this = this;
         // ignore loading of some pictures
         [1, 2, 3, 4].filter(function (boardNumber) { return boardNumber != _this.getBoardNumber(); }).forEach(function (boardNumber) { return _this.dontPreloadImage("playerboard".concat(boardNumber, ".jpg")); });
-        this.getGameAreaElement().insertAdjacentHTML('beforeend', "\n            <div id=\"table\">\n                <div id=\"centered-table\">\n                    <div id=\"factories-and-scoring-board\">\n                        <div id=\"factories\">\n                            <div id=\"bag\">\n                                <span id=\"bag-counter\"></span>\n                            </div>\n                        </div>\n                        <div id=\"scoring-board\"></div>\n                    </div>\n                </div>\n            </div>\n        ");
+        this.gameArea.getElement().insertAdjacentHTML('beforeend', "\n            <div id=\"table\">\n                <div id=\"centered-table\">\n                    <div id=\"factories-and-scoring-board\">\n                        <div id=\"factories\">\n                            <div id=\"bag\">\n                                <span id=\"bag-counter\"></span>\n                            </div>\n                        </div>\n                        <div id=\"scoring-board\"></div>\n                    </div>\n                </div>\n            </div>\n        ");
         log("Starting game setup");
         this.gamedatas = gamedatas;
         log('gamedatas', gamedatas);
@@ -1357,7 +1358,7 @@ var AzulSummerPavilion = /** @class */ (function (_super) {
                 break;
         }
         var autopassParams = (_a = args.args) === null || _a === void 0 ? void 0 : _a._private;
-        if ((autopassParams === null || autopassParams === void 0 ? void 0 : autopassParams.canSetAutopass) && !this.isCurrentPlayerActive()) {
+        if ((autopassParams === null || autopassParams === void 0 ? void 0 : autopassParams.canSetAutopass) && !this.players.isCurrentPlayerActive()) {
             this.addAutopassToggle(autopassParams.autopass);
         }
         else {
@@ -1365,14 +1366,14 @@ var AzulSummerPavilion = /** @class */ (function (_super) {
         }
     };
     AzulSummerPavilion.prototype.onEnteringChooseTile = function (args) {
-        if (this.isCurrentPlayerActive()) {
+        if (this.players.isCurrentPlayerActive()) {
             this.factories.wildColor = args.wildColor;
             dojo.addClass('factories', 'selectable');
         }
     };
     AzulSummerPavilion.prototype.onEnteringChoosePlace = function (args) {
         document.getElementById('factories-and-scoring-board').classList.add('play');
-        if (this.isCurrentPlayerActive()) {
+        if (this.players.isCurrentPlayerActive()) {
             var playerId = this.getPlayerId();
             for (var star = 0; star <= 6; star++) {
                 for (var space = 1; space <= 6; space++) {
@@ -1382,7 +1383,7 @@ var AzulSummerPavilion = /** @class */ (function (_super) {
         }
     };
     AzulSummerPavilion.prototype.onEnteringChooseColor = function (args) {
-        if (this.isCurrentPlayerActive()) {
+        if (this.players.isCurrentPlayerActive()) {
             document.getElementById("player-table-".concat(args.playerId, "-star-").concat(args.star, "-space-").concat(args.space)).classList.add('selected');
         }
     };
@@ -1390,7 +1391,7 @@ var AzulSummerPavilion = /** @class */ (function (_super) {
         document.querySelector('.tile.ghost')?.remove();
     }*/
     AzulSummerPavilion.prototype.onEnteringPlayTile = function (args) {
-        if (this.isCurrentPlayerActive()) {
+        if (this.players.isCurrentPlayerActive()) {
             /*this.removeGhostTile();
 
             const spotId = `player-table-${this.getPlayerId()}-star-${args.selectedPlace[0]}-space-${args.selectedPlace[1]}`;
@@ -1399,14 +1400,14 @@ var AzulSummerPavilion = /** @class */ (function (_super) {
         }
     };
     AzulSummerPavilion.prototype.onEnteringChooseKeptTiles = function (args) {
-        if (this.isCurrentPlayerActive()) {
+        if (this.players.isCurrentPlayerActive()) {
             document.getElementById("player-hand-".concat(this.getPlayerId())).classList.add('selectable');
         }
     };
     AzulSummerPavilion.prototype.onEnteringTakeBonusTiles = function (args) {
         args.highlightedTiles.forEach(function (tile) { return document.getElementById("tile".concat(tile.id)).classList.add('bonus'); });
         args.from.forEach(function (from) { return document.getElementById("bonus-info-".concat(from)).classList.add('active'); });
-        if (this.isCurrentPlayerActive()) {
+        if (this.players.isCurrentPlayerActive()) {
             document.getElementById("supply").classList.add('selectable');
         }
     };
@@ -1473,8 +1474,8 @@ var AzulSummerPavilion = /** @class */ (function (_super) {
         var selectedTileDivsIds = selectedTileDivs.map(function (div) { return Number(div.dataset.id); });
         var discardedTileDivs = handTileDivs.filter(function (div) { return !selectedTileDivsIds.includes(Number(div.dataset.id)); });
         var warning = selectedTileDivs.length < handTileDivs.length && selectedTileDivs.length < 4;
-        var labelKeep = selectedTileDivs.map(function (div) { return _this.format_string_recursive('${number} ${color}', { number: 1, type: Number(div.dataset.type) }); }).join('');
-        var labelDiscard = discardedTileDivs.map(function (div) { return _this.format_string_recursive('${number} ${color}', { number: 1, type: Number(div.dataset.type) }); }).join('');
+        var labelKeep = selectedTileDivs.map(function (div) { return _this.gameui.format_string_recursive('${number} ${color}', { number: 1, type: Number(div.dataset.type) }); }).join('');
+        var labelDiscard = discardedTileDivs.map(function (div) { return _this.gameui.format_string_recursive('${number} ${color}', { number: 1, type: Number(div.dataset.type) }); }).join('');
         var label = '';
         if (labelKeep != '' && labelDiscard != '') {
             label = _("Keep ${keep} and discard ${discard}");
@@ -1498,7 +1499,7 @@ var AzulSummerPavilion = /** @class */ (function (_super) {
         var selectedTileDivs = Array.from(supplyDiv.querySelectorAll('.tile.selected'));
         var label = '-';
         if (selectedTileDivs.length > 0) {
-            label = selectedTileDivs.map(function (div) { return _this.format_string_recursive('${number} ${color}', { number: 1, type: Number(div.dataset.type) }); }).join('');
+            label = selectedTileDivs.map(function (div) { return _this.gameui.format_string_recursive('${number} ${color}', { number: 1, type: Number(div.dataset.type) }); }).join('');
         }
         button.innerHTML = _("Take ${tiles}").replace('${tiles}', label);
         button.classList.toggle('disabled', selectedTileDivs.length != this.gamedatas.gamestate.args.count);
@@ -1509,10 +1510,10 @@ var AzulSummerPavilion = /** @class */ (function (_super) {
     AzulSummerPavilion.prototype.onUpdateActionButtons = function (stateName, args) {
         var _this = this;
         log('onUpdateActionButtons', stateName, args);
-        if (this.isCurrentPlayerActive()) {
+        if (this.players.isCurrentPlayerActive()) {
             switch (stateName) {
                 case 'confirmAcquire':
-                    this.statusBar.addActionButton(_("Confirm"), function () { return _this.confirmAcquire(); }, { autoclick: this.getGameUserPreference(204) != 2 });
+                    this.statusBar.addActionButton(_("Confirm"), function () { return _this.confirmAcquire(); }, { autoclick: this.userPreferences.get(204) != 2 });
                     this.statusBar.addActionButton(_("Undo tile selection"), function () { return _this.undoTakeTiles(); }, { color: 'secondary' });
                     break;
                 case 'choosePlace':
@@ -1522,7 +1523,7 @@ var AzulSummerPavilion = /** @class */ (function (_super) {
                 case 'chooseColor':
                     var chooseColorArgs = args;
                     chooseColorArgs.possibleColors.forEach(function (color) {
-                        var label = _this.format_string_recursive('${number} ${color}', { number: 1, type: color });
+                        var label = _this.gameui.format_string_recursive('${number} ${color}', { number: 1, type: color });
                         _this.statusBar.addActionButton(label, function () { return _this.selectColor(color); });
                     });
                     this.statusBar.addActionButton(_("Undo played tile"), function () { return _this.undoPlayTile(); }, { color: 'secondary' });
@@ -1532,8 +1533,8 @@ var AzulSummerPavilion = /** @class */ (function (_super) {
                     var _loop_6 = function (i) {
                         var colorNumber = playTileArgs.number - i;
                         if (colorNumber <= args.maxColor) {
-                            var label = this_4.format_string_recursive('${number} ${color}', { number: colorNumber, type: playTileArgs.color });
-                            label += this_4.format_string_recursive('${number} ${color}', { number: i, type: playTileArgs.wildColor });
+                            var label = (colorNumber === 0 ? '' : this_4.gameui.format_string_recursive('${number} ${color}', { number: colorNumber, type: playTileArgs.color })) +
+                                (i === 0 ? '' : this_4.gameui.format_string_recursive('${number} ${color}', { number: i, type: playTileArgs.wildColor }));
                             this_4.statusBar.addActionButton(label, function () { return _this.playTile(i); });
                         }
                     };
@@ -1544,7 +1545,7 @@ var AzulSummerPavilion = /** @class */ (function (_super) {
                     this.statusBar.addActionButton(_("Undo played tile"), function () { return _this.undoPlayTile(); }, { color: 'secondary' });
                     break;
                 case 'confirmPlay':
-                    this.statusBar.addActionButton(_("Confirm"), function () { return _this.confirmPlay(); }, { autoclick: this.getGameUserPreference(204) != 2 });
+                    this.statusBar.addActionButton(_("Confirm"), function () { return _this.confirmPlay(); }, { autoclick: this.userPreferences.get(204) != 2 });
                     this.statusBar.addActionButton(_("Undo played tile"), function () { return _this.undoPlayTile(); }, { color: 'secondary' });
                     break;
                 case 'chooseKeptTiles':
@@ -1553,7 +1554,7 @@ var AzulSummerPavilion = /** @class */ (function (_super) {
                     this.updateSelectKeptTilesButton();
                     break;
                 case 'confirmPass':
-                    this.statusBar.addActionButton(_("Confirm"), function () { return _this.confirmPass(); }, { autoclick: this.getGameUserPreference(204) != 2 });
+                    this.statusBar.addActionButton(_("Confirm"), function () { return _this.confirmPass(); }, { autoclick: this.userPreferences.get(204) != 2 });
                     this.statusBar.addActionButton(_("Cancel"), function () { return _this.undoPass(); }, { color: 'secondary' });
                     break;
                 case 'takeBonusTiles':
@@ -1574,7 +1575,7 @@ var AzulSummerPavilion = /** @class */ (function (_super) {
             document.getElementById('preference_fontrol_299').closest(".preference_choice").style.display = 'none';
         }
         catch (e) { }
-        [201, 203, 205, 206, 207, 299].forEach(function (prefId) { return _this.onGameUserPreferenceChanged(prefId, _this.getGameUserPreference(prefId)); });
+        [201, 203, 205, 206, 207, 299].forEach(function (prefId) { return _this.onGameUserPreferenceChanged(prefId, _this.userPreferences.get(prefId)); });
     };
     // @ts-ignore
     AzulSummerPavilion.prototype.onGameUserPreferenceChanged = function (prefId, prefValue) {
@@ -1606,7 +1607,7 @@ var AzulSummerPavilion = /** @class */ (function (_super) {
             if (!elem) {
                 dojo.place("\n                <div id=\"zoom-notice\">\n                    ".concat(_("Use zoom controls to adapt players board size !"), "\n                    <div style=\"text-align: center; margin-top: 10px;\"><a id=\"hide-zoom-notice\">").concat(_("Dismiss"), "</a></div>\n                    <div class=\"arrow-right\"></div>\n                </div>\n                "), 'bga-zoom-controls');
                 document.getElementById('hide-zoom-notice').addEventListener('click', function () {
-                    return _this.setGameUserPreference(299, 2);
+                    return _this.userPreferences.set(299, 2);
                 });
             }
         }
@@ -1615,7 +1616,7 @@ var AzulSummerPavilion = /** @class */ (function (_super) {
         }
     };
     AzulSummerPavilion.prototype.isDefaultFont = function () {
-        return this.getGameUserPreference(206) == 1;
+        return this.userPreferences.get(206) == 1;
     };
     AzulSummerPavilion.prototype.getZoom = function () {
         return this.zoom;
@@ -1740,7 +1741,7 @@ var AzulSummerPavilion = /** @class */ (function (_super) {
         var _this = this;
         if (!document.getElementById('autopass-wrapper')) {
             document.getElementById("game_play_area").insertAdjacentHTML('beforeend', "<div id=\"autopass-wrapper\">\n                <label class=\"switch\">\n                    <input id=\"autopass-checkbox\" type=\"checkbox\" ".concat(active ? 'checked' : '', ">\n                    <span class=\"slider round\"></span>\n                </label>\n                <label for=\"autopass-checkbox\" class=\"text-label\">").concat(_("Auto-pass"), "</label>\n            </div>"));
-            document.getElementById('autopass-checkbox').addEventListener('change', function (e) { return _this.bgaPerformAction('actSetAutopass', { autopass: e.target.checked }, { checkAction: false, }); });
+            document.getElementById('autopass-checkbox').addEventListener('change', function (e) { return _this.actions.performAction('actSetAutopass', { autopass: e.target.checked }, { checkAction: false, }); });
         }
     };
     AzulSummerPavilion.prototype.removeAutopassToggle = function () {
@@ -1767,43 +1768,43 @@ var AzulSummerPavilion = /** @class */ (function (_super) {
         }
     };
     AzulSummerPavilion.prototype.takeTiles = function (id) {
-        this.bgaPerformAction('actTakeTiles', {
+        this.actions.performAction('actTakeTiles', {
             id: id
         });
     };
     AzulSummerPavilion.prototype.undoTakeTiles = function () {
-        this.bgaPerformAction('actUndoTakeTiles');
+        this.actions.performAction('actUndoTakeTiles');
     };
     AzulSummerPavilion.prototype.confirmAcquire = function () {
-        this.bgaPerformAction('actConfirmAcquire');
+        this.actions.performAction('actConfirmAcquire');
     };
     AzulSummerPavilion.prototype.pass = function () {
-        this.bgaPerformAction('actPass');
+        this.actions.performAction('actPass');
     };
     AzulSummerPavilion.prototype.selectColor = function (color) {
-        this.bgaPerformAction('actSelectColor', {
+        this.actions.performAction('actSelectColor', {
             color: color
         });
     };
     AzulSummerPavilion.prototype.playTile = function (wilds) {
-        this.bgaPerformAction('actPlayTile', {
+        this.actions.performAction('actPlayTile', {
             wilds: wilds
         });
     };
     AzulSummerPavilion.prototype.confirmPlay = function () {
-        this.bgaPerformAction('actConfirmPlay');
+        this.actions.performAction('actConfirmPlay');
     };
     AzulSummerPavilion.prototype.confirmPass = function () {
-        this.bgaPerformAction('actConfirmPass');
+        this.actions.performAction('actConfirmPass');
     };
     AzulSummerPavilion.prototype.undoPlayTile = function () {
-        this.bgaPerformAction('actUndoPlayTile');
+        this.actions.performAction('actUndoPlayTile');
     };
     AzulSummerPavilion.prototype.undoPass = function () {
-        this.bgaPerformAction('actUndoPass');
+        this.actions.performAction('actUndoPass');
     };
     AzulSummerPavilion.prototype.selectPlace = function (star, space) {
-        this.bgaPerformAction('actSelectPlace', {
+        this.actions.performAction('actSelectPlace', {
             star: star,
             space: space
         });
@@ -1816,24 +1817,28 @@ var AzulSummerPavilion = /** @class */ (function (_super) {
         var handTileDivs = handDiv.querySelectorAll('.tile');
         var selectedTileDivs = handDiv.querySelectorAll('.tile.selected');
         if (askConfirmation && selectedTileDivs.length < handTileDivs.length && selectedTileDivs.length < 4) {
-            this.confirmationDialog(_('You will keep ${keep} tiles and discard ${discard} tiles, when you could keep ${possible} tiles!')
+            this.dialogs.confirmation(_('You will keep ${keep} tiles and discard ${discard} tiles, when you could keep ${possible} tiles!')
                 .replace('${keep}', "<strong>".concat(selectedTileDivs.length, "</strong>"))
                 .replace('${discard}', "<strong>".concat(handTileDivs.length - selectedTileDivs.length, "</strong>"))
-                .replace('${possible}', "<strong>".concat(Math.min(4, handTileDivs.length), "</strong>")), function () { return _this.selectKeptTiles(false); });
+                .replace('${possible}', "<strong>".concat(Math.min(4, handTileDivs.length), "</strong>"))).then(function (result) {
+                if (result) {
+                    _this.selectKeptTiles(false);
+                }
+            });
         }
         else {
-            this.bgaPerformAction('actSelectKeptTiles', {
+            this.actions.performAction('actSelectKeptTiles', {
                 ids: Array.from(selectedTileDivs).map(function (tile) { return Number(tile.dataset.id); }).sort().join(','),
             });
         }
     };
     AzulSummerPavilion.prototype.cancel = function () {
-        this.bgaPerformAction('actCancel');
+        this.actions.performAction('actCancel');
     };
     AzulSummerPavilion.prototype.takeBonusTiles = function () {
         var supplyDiv = document.getElementById("supply");
         var selectedTileDivs = supplyDiv.querySelectorAll('.tile.selected');
-        this.bgaPerformAction('actTakeBonusTiles', {
+        this.actions.performAction('actTakeBonusTiles', {
             ids: Array.from(selectedTileDivs).map(function (tile) { return Number(tile.dataset.id); }).sort().join(','),
         });
     };
@@ -2012,8 +2017,7 @@ var AzulSummerPavilion = /** @class */ (function (_super) {
         // TODO useful ? dojo.place(`<div id="last-round">${_("This is the last round of the game!")}</div>`, 'page-title');
     };
     /* This enable to inject translatable styled things to logs or action bar */
-    /* @Override */
-    AzulSummerPavilion.prototype.format_string_recursive = function (log, args) {
+    AzulSummerPavilion.prototype.bgaFormatText = function (log, args) {
         try {
             if (log && args && !args.processed) {
                 if (typeof args.lineNumber === 'number') {
@@ -2043,7 +2047,7 @@ var AzulSummerPavilion = /** @class */ (function (_super) {
         catch (e) {
             console.error(log, args, "Exception thrown", e.stack);
         }
-        return this.inherited(arguments);
+        return { log: log, args: args };
     };
     return AzulSummerPavilion;
 }(GameGui));

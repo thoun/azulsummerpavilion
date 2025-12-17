@@ -32,8 +32,22 @@ class AzulSummerPavilion extends GameGui<AzulSummerPavilionGamedatas> implements
 
     public zoom: number = 0.75;
 
+    public gameui: GameGui<AzulSummerPavilionGamedatas>;
+    public statusBar: StatusBar;
+    public images: Images;
+    public sounds: Sounds;
+    public userPreferences: UserPreferences;
+    public players: Players;
+    public actions: Actions;
+    public notifications: Notifications;
+    public gameArea: GameArea;
+    public playerPanels: PlayerPanels;
+    public dialogs: Dialogs;
+
     constructor() {    
         super();
+        Object.assign(this, this.bga);
+
         const zoomStr = localStorage.getItem(LOCAL_STORAGE_ZOOM_KEY);
         if (zoomStr) {
             this.zoom = Number(zoomStr);
@@ -57,7 +71,7 @@ class AzulSummerPavilion extends GameGui<AzulSummerPavilionGamedatas> implements
         // ignore loading of some pictures
         [1,2,3,4].filter(boardNumber => boardNumber != this.getBoardNumber()).forEach(boardNumber => this.dontPreloadImage(`playerboard${boardNumber}.jpg`));
 
-        this.getGameAreaElement().insertAdjacentHTML('beforeend', `
+        this.gameArea.getElement().insertAdjacentHTML('beforeend', `
             <div id="table">
                 <div id="centered-table">
                     <div id="factories-and-scoring-board">
@@ -157,7 +171,7 @@ class AzulSummerPavilion extends GameGui<AzulSummerPavilionGamedatas> implements
         }
 
         const autopassParams = args.args?._private;
-        if (autopassParams?.canSetAutopass && !this.isCurrentPlayerActive()) {
+        if (autopassParams?.canSetAutopass && !this.players.isCurrentPlayerActive()) {
             this.addAutopassToggle(autopassParams.autopass);
         } else {
             this.removeAutopassToggle();
@@ -165,7 +179,7 @@ class AzulSummerPavilion extends GameGui<AzulSummerPavilionGamedatas> implements
     }
 
     private onEnteringChooseTile(args: EnteringChooseTileArgs) {
-        if (this.isCurrentPlayerActive()) {
+        if (this.players.isCurrentPlayerActive()) {
             this.factories.wildColor = args.wildColor;
             dojo.addClass('factories', 'selectable');
         }
@@ -174,7 +188,7 @@ class AzulSummerPavilion extends GameGui<AzulSummerPavilionGamedatas> implements
     private onEnteringChoosePlace(args: EnteringChoosePlaceArgs) {
         document.getElementById('factories-and-scoring-board').classList.add('play');
 
-        if (this.isCurrentPlayerActive()) {
+        if (this.players.isCurrentPlayerActive()) {
             const playerId = this.getPlayerId();
             for (let star = 0; star <= 6; star++) {
                 for (let space = 1; space <= 6; space++) {
@@ -187,7 +201,7 @@ class AzulSummerPavilion extends GameGui<AzulSummerPavilionGamedatas> implements
     }
 
     private onEnteringChooseColor(args: EnteringChooseColorArgs) {
-        if (this.isCurrentPlayerActive()) {
+        if (this.players.isCurrentPlayerActive()) {
             document.getElementById(`player-table-${args.playerId}-star-${args.star}-space-${args.space}`).classList.add('selected');
         }
     }
@@ -197,7 +211,7 @@ class AzulSummerPavilion extends GameGui<AzulSummerPavilionGamedatas> implements
     }*/
 
     private onEnteringPlayTile(args: EnteringPlayTileArgs) {
-        if (this.isCurrentPlayerActive()) {
+        if (this.players.isCurrentPlayerActive()) {
             /*this.removeGhostTile();
 
             const spotId = `player-table-${this.getPlayerId()}-star-${args.selectedPlace[0]}-space-${args.selectedPlace[1]}`;
@@ -207,7 +221,7 @@ class AzulSummerPavilion extends GameGui<AzulSummerPavilionGamedatas> implements
     }
 
     private onEnteringChooseKeptTiles(args: EnteringChooseTileArgs) {
-        if (this.isCurrentPlayerActive()) {
+        if (this.players.isCurrentPlayerActive()) {
             document.getElementById(`player-hand-${this.getPlayerId()}`).classList.add('selectable');
         }
     }
@@ -215,7 +229,7 @@ class AzulSummerPavilion extends GameGui<AzulSummerPavilionGamedatas> implements
     private onEnteringTakeBonusTiles(args: EnteringTakeBonusTileArgs) {
         args.highlightedTiles.forEach(tile => document.getElementById(`tile${tile.id}`).classList.add('bonus'));
         args.from.forEach(from => document.getElementById(`bonus-info-${from}`).classList.add('active'));
-        if (this.isCurrentPlayerActive()) {
+        if (this.players.isCurrentPlayerActive()) {
             document.getElementById(`supply`).classList.add('selectable');
         }
     }
@@ -290,8 +304,8 @@ class AzulSummerPavilion extends GameGui<AzulSummerPavilionGamedatas> implements
         const discardedTileDivs = handTileDivs.filter((div: HTMLElement) => !selectedTileDivsIds.includes(Number(div.dataset.id)));
         const warning = selectedTileDivs.length < handTileDivs.length && selectedTileDivs.length < 4;
 
-        const labelKeep = selectedTileDivs.map((div: HTMLElement) => this.format_string_recursive('${number} ${color}', { number: 1, type: Number(div.dataset.type) })).join('');
-        const labelDiscard = discardedTileDivs.map((div: HTMLElement) => this.format_string_recursive('${number} ${color}', { number: 1, type: Number(div.dataset.type) })).join('');
+        const labelKeep = selectedTileDivs.map((div: HTMLElement) => this.gameui.format_string_recursive('${number} ${color}', { number: 1, type: Number(div.dataset.type) })).join('');
+        const labelDiscard = discardedTileDivs.map((div: HTMLElement) => this.gameui.format_string_recursive('${number} ${color}', { number: 1, type: Number(div.dataset.type) })).join('');
         let label = '';
         if (labelKeep != '' && labelDiscard != '') {
             label = _("Keep ${keep} and discard ${discard}");
@@ -316,7 +330,7 @@ class AzulSummerPavilion extends GameGui<AzulSummerPavilionGamedatas> implements
 
         let label = '-';
         if (selectedTileDivs.length > 0) {
-            label = selectedTileDivs.map((div: HTMLElement) => this.format_string_recursive('${number} ${color}', { number: 1, type: Number(div.dataset.type) })).join('');
+            label = selectedTileDivs.map((div: HTMLElement) => this.gameui.format_string_recursive('${number} ${color}', { number: 1, type: Number(div.dataset.type) })).join('');
         }
 
         button.innerHTML = _("Take ${tiles}").replace('${tiles}', label);
@@ -329,10 +343,10 @@ class AzulSummerPavilion extends GameGui<AzulSummerPavilionGamedatas> implements
     public onUpdateActionButtons(stateName: string, args: any) {
         log('onUpdateActionButtons', stateName, args);
         
-        if(this.isCurrentPlayerActive()) {
+        if(this.players.isCurrentPlayerActive()) {
             switch (stateName) { 
                 case 'confirmAcquire':
-                    this.statusBar.addActionButton(_("Confirm"), () => this.confirmAcquire(), { autoclick: this.getGameUserPreference(204) != 2 });
+                    this.statusBar.addActionButton(_("Confirm"), () => this.confirmAcquire(), { autoclick: this.userPreferences.get(204) != 2 });
                     this.statusBar.addActionButton(_("Undo tile selection"), () => this.undoTakeTiles(), { color: 'secondary'});
                     break;
                 case 'choosePlace':
@@ -342,7 +356,7 @@ class AzulSummerPavilion extends GameGui<AzulSummerPavilionGamedatas> implements
                 case 'chooseColor':
                     const chooseColorArgs = args as EnteringChooseColorArgs;
                     chooseColorArgs.possibleColors.forEach(color => {
-                        const label = this.format_string_recursive('${number} ${color}', { number: 1, type: color });
+                        const label = this.gameui.format_string_recursive('${number} ${color}', { number: 1, type: color });
                         this.statusBar.addActionButton(label, () => this.selectColor(color));
                     });
                     this.statusBar.addActionButton(_("Undo played tile"), () => this.undoPlayTile(), { color: 'secondary'});
@@ -352,15 +366,16 @@ class AzulSummerPavilion extends GameGui<AzulSummerPavilionGamedatas> implements
                     for (let i = 0; i <= playTileArgs.maxWildTiles; i++) {
                         const colorNumber = playTileArgs.number - i;
                         if (colorNumber <= args.maxColor) {
-                            let label = this.format_string_recursive('${number} ${color}', { number: colorNumber, type: playTileArgs.color });
-                            label += this.format_string_recursive('${number} ${color}', { number: i, type: playTileArgs.wildColor });
+                            let label = 
+                                (colorNumber === 0 ? '' : this.gameui.format_string_recursive('${number} ${color}', { number: colorNumber, type: playTileArgs.color })) +
+                                (i === 0 ? '' : this.gameui.format_string_recursive('${number} ${color}', { number: i, type: playTileArgs.wildColor }));
                             this.statusBar.addActionButton(label, () => this.playTile(i));
                         }
                     }
                     this.statusBar.addActionButton(_("Undo played tile"), () => this.undoPlayTile(), { color: 'secondary'});
                     break;
                 case 'confirmPlay':
-                    this.statusBar.addActionButton(_("Confirm"), () => this.confirmPlay(), { autoclick: this.getGameUserPreference(204) != 2 });
+                    this.statusBar.addActionButton(_("Confirm"), () => this.confirmPlay(), { autoclick: this.userPreferences.get(204) != 2 });
                     this.statusBar.addActionButton(_("Undo played tile"), () => this.undoPlayTile(), { color: 'secondary'});
                     break;
                 case 'chooseKeptTiles':
@@ -369,7 +384,7 @@ class AzulSummerPavilion extends GameGui<AzulSummerPavilionGamedatas> implements
                     this.updateSelectKeptTilesButton();
                     break;
                 case 'confirmPass':
-                    this.statusBar.addActionButton(_("Confirm"), () => this.confirmPass(), { autoclick: this.getGameUserPreference(204) != 2 });
+                    this.statusBar.addActionButton(_("Confirm"), () => this.confirmPass(), { autoclick: this.userPreferences.get(204) != 2 });
                     this.statusBar.addActionButton(_("Cancel"), () => this.undoPass(), { color: 'secondary'});
                     break;
                 case 'takeBonusTiles':
@@ -395,7 +410,7 @@ class AzulSummerPavilion extends GameGui<AzulSummerPavilionGamedatas> implements
         } catch (e) {}
 
         [201, 203, 205, 206, 207, 299].forEach(
-            prefId => this.onGameUserPreferenceChanged(prefId, this.getGameUserPreference(prefId))
+            prefId => this.onGameUserPreferenceChanged(prefId, this.userPreferences.get(prefId))
         );
     }
       
@@ -436,7 +451,7 @@ class AzulSummerPavilion extends GameGui<AzulSummerPavilionGamedatas> implements
                 `, 'bga-zoom-controls');
 
                 document.getElementById('hide-zoom-notice').addEventListener('click', () => 
-                    this.setGameUserPreference(299, 2)
+                    this.userPreferences.set(299, 2)
                 );
             }
         } else if (elem) {
@@ -445,7 +460,7 @@ class AzulSummerPavilion extends GameGui<AzulSummerPavilionGamedatas> implements
     }
 
     public isDefaultFont(): boolean {
-        return this.getGameUserPreference(206) == 1;
+        return this.userPreferences.get(206) == 1;
     }
 
     public getZoom() {
@@ -592,7 +607,7 @@ class AzulSummerPavilion extends GameGui<AzulSummerPavilionGamedatas> implements
                 <label for="autopass-checkbox" class="text-label">${_("Auto-pass")}</label>
             </div>`);
 
-            document.getElementById('autopass-checkbox').addEventListener('change', (e: any) => this.bgaPerformAction('actSetAutopass', { autopass: e.target.checked }, { checkAction: false, }));
+            document.getElementById('autopass-checkbox').addEventListener('change', (e: any) => this.actions.performAction('actSetAutopass', { autopass: e.target.checked }, { checkAction: false, }));
         }
     }
 
@@ -619,53 +634,53 @@ class AzulSummerPavilion extends GameGui<AzulSummerPavilionGamedatas> implements
     }
 
     public takeTiles(id: number) {
-        this.bgaPerformAction('actTakeTiles', {
+        this.actions.performAction('actTakeTiles', {
             id
         });
     }
 
     public undoTakeTiles() {
-        this.bgaPerformAction('actUndoTakeTiles');
+        this.actions.performAction('actUndoTakeTiles');
     }
 
     public confirmAcquire() {
-        this.bgaPerformAction('actConfirmAcquire');
+        this.actions.performAction('actConfirmAcquire');
     }
 
     public pass() {
-        this.bgaPerformAction('actPass');
+        this.actions.performAction('actPass');
     }
 
     public selectColor(color: number) {
-        this.bgaPerformAction('actSelectColor', {
+        this.actions.performAction('actSelectColor', {
             color
         });
     }
 
     public playTile(wilds: number) {
-        this.bgaPerformAction('actPlayTile', {
+        this.actions.performAction('actPlayTile', {
             wilds
         });
     }
 
     public confirmPlay() {
-        this.bgaPerformAction('actConfirmPlay');
+        this.actions.performAction('actConfirmPlay');
     }
 
     public confirmPass() {
-        this.bgaPerformAction('actConfirmPass');
+        this.actions.performAction('actConfirmPass');
     }
 
     public undoPlayTile() {
-        this.bgaPerformAction('actUndoPlayTile');
+        this.actions.performAction('actUndoPlayTile');
     }
 
     public undoPass() {
-        this.bgaPerformAction('actUndoPass');
+        this.actions.performAction('actUndoPass');
     }
 
     public selectPlace(star: number, space: number) {
-        this.bgaPerformAction('actSelectPlace', {
+        this.actions.performAction('actSelectPlace', {
             star,
             space
         });
@@ -679,29 +694,32 @@ class AzulSummerPavilion extends GameGui<AzulSummerPavilionGamedatas> implements
         const selectedTileDivs = handDiv.querySelectorAll('.tile.selected');
 
         if (askConfirmation && selectedTileDivs.length < handTileDivs.length && selectedTileDivs.length < 4) {
-            this.confirmationDialog(
+            this.dialogs.confirmation(
                 _('You will keep ${keep} tiles and discard ${discard} tiles, when you could keep ${possible} tiles!')
                     .replace('${keep}', `<strong>${selectedTileDivs.length}</strong>`)
                     .replace('${discard}', `<strong>${handTileDivs.length - selectedTileDivs.length}</strong>`)
-                    .replace('${possible}', `<strong>${Math.min(4, handTileDivs.length)}</strong>`), 
-                () => this.selectKeptTiles(false)
-            );
+                    .replace('${possible}', `<strong>${Math.min(4, handTileDivs.length)}</strong>`)
+            ).then(result => {
+                if (result) {
+                    this.selectKeptTiles(false)
+                }
+            });
         } else {
-            this.bgaPerformAction('actSelectKeptTiles', {
+            this.actions.performAction('actSelectKeptTiles', {
                 ids: Array.from(selectedTileDivs).map((tile: HTMLElement) => Number(tile.dataset.id)).sort().join(','),
             });
         }
     }
 
     public cancel() {
-        this.bgaPerformAction('actCancel');
+        this.actions.performAction('actCancel');
     }
 
     public takeBonusTiles() {
         const supplyDiv = document.getElementById(`supply`);
         const selectedTileDivs = supplyDiv.querySelectorAll('.tile.selected');
 
-        this.bgaPerformAction('actTakeBonusTiles', {
+        this.actions.performAction('actTakeBonusTiles', {
             ids: Array.from(selectedTileDivs).map((tile: HTMLElement) => Number(tile.dataset.id)).sort().join(','),
         });
     }
@@ -919,8 +937,7 @@ class AzulSummerPavilion extends GameGui<AzulSummerPavilionGamedatas> implements
     }
 
     /* This enable to inject translatable styled things to logs or action bar */
-    /* @Override */
-    public format_string_recursive(log: string, args: any) {
+    public bgaFormatText(log: string, args: any) {
         try {
             if (log && args && !args.processed) {
                 if (typeof args.lineNumber === 'number') {
@@ -953,6 +970,6 @@ class AzulSummerPavilion extends GameGui<AzulSummerPavilionGamedatas> implements
         } catch (e) {
             console.error(log,args,"Exception thrown", e.stack);
         }
-        return (this as any).inherited(arguments);
+        return { log, args };
     }
 }
