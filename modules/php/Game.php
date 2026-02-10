@@ -230,15 +230,20 @@ class Game extends Table {
                 $spaceNumber = $spaceData['number'];
 
                 $colors = [$spaceColor];
-                if ($spaceColor == 0) {
+                if ($spaceColor <= 0) {
                     $starTiles = array_values(array_filter($placedTiles, fn($placedTile) => $placedTile->star == $star));
                     $starColors = array_map(fn($starTile) => $starTile->type, $starTiles);
                     $colors = [1, 2, 3, 4, 5, 6];
-                    if (count($starColors) >= 2) {
-                        if ($starColors[0] == $starColors[1]) {
-                            $colors = [$starColors[0]];
-                        } else {
-                            $colors = Arrays::diff($colors, $starColors);
+                    if ($spaceColor == -1) {
+                        // non forced color, but must all be different
+                        $colors = array_diff([1, 2, 3, 4, 5, 6], $starColors);
+                    } else {
+                        if (count($starColors) >= 2) {
+                            if ($starColors[0] == $starColors[1]) {
+                                $colors = [$starColors[0]];
+                            } else {
+                                $colors = Arrays::diff($colors, $starColors);
+                            }
                         }
                     }
                 }
@@ -262,17 +267,21 @@ class Game extends Table {
         $spaceNumber = $spaceData['number'];
 
         $possibleColors = [];
-        if ($spaceColor == 0) {
+        if ($spaceColor <= 0) {
             $placedTiles = $this->getTilesFromDb($this->tiles->getCardsInLocation('wall'.$activePlayerId));
             $hand = $this->getTilesFromDb($this->tiles->getCardsInLocation('hand', $activePlayerId));
             $wildColor = $this->getWildColor();
             $starTiles = array_values(array_filter($placedTiles, fn($placedTile) => $placedTile->star == $star));
             $starColors = array_map(fn($starTile) => $starTile->type, $starTiles);
             $colors = array_diff([1, 2, 3, 4, 5, 6], $starColors);
-            if (count($starColors) <= 1) {
-                $colors = [1, 2, 3, 4, 5, 6];
-            } else if (count($starColors) >= 2 && $starColors[0] == $starColors[1]) {
-                $colors = [$starColors[0]];
+            if ($spaceColor == -1) {
+                // non forced color, but must all be different
+            } else {
+                if (count($starColors) <= 1) {
+                    $colors = [1, 2, 3, 4, 5, 6];
+                } else if (count($starColors) >= 2 && $starColors[0] == $starColors[1]) {
+                    $colors = [$starColors[0]];
+                }
             }
 
             foreach ($colors as $possibleColor) {

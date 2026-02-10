@@ -404,18 +404,11 @@ class AzulSummerPavilion extends GameGui<AzulSummerPavilionGamedatas> implements
     ///////////////////////////////////////////////////
 
     private setupPreferences() {
-        try {
-            (document.getElementById('preference_control_299').closest(".preference_choice") as HTMLDivElement).style.display = 'none';
-            (document.getElementById('preference_fontrol_299').closest(".preference_choice") as HTMLDivElement).style.display = 'none';
-        } catch (e) {}
-
-        [201, 203, 205, 206, 207, 299].forEach(
-            prefId => this.onGameUserPreferenceChanged(prefId, this.userPreferences.get(prefId))
-        );
+        this.bga.userPreferences.toggleVisibility(299, false);
+        this.bga.userPreferences.onChange = (prefId: number, prefValue: number) => this.onUserPreferenceChanged(prefId, prefValue);
     }
       
-    // @ts-ignore
-    public onGameUserPreferenceChanged(prefId: number, prefValue: number) {
+    public onUserPreferenceChanged(prefId: number, prefValue: number) {
         switch (prefId) {
             case 201: 
                 dojo.toggleClass('table', 'disabled-shimmer', prefValue == 2);
@@ -500,7 +493,7 @@ class AzulSummerPavilion extends GameGui<AzulSummerPavilionGamedatas> implements
     }
 
     private setScore(playerId: number, score: number) {
-         this.scoreCtrl[playerId]?.toValue(score);
+        this.bga.playerPanels.getScoreCounter(playerId).toValue(score);
     }
 
     public placeTile(tile: Tile, destinationId: string, left?: number, top?: number, rotation?: number, placeInParent?: (elem, parent) => void): Promise<boolean> {

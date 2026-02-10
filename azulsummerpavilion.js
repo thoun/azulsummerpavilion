@@ -1570,15 +1570,10 @@ var AzulSummerPavilion = /** @class */ (function (_super) {
     ///////////////////////////////////////////////////
     AzulSummerPavilion.prototype.setupPreferences = function () {
         var _this = this;
-        try {
-            document.getElementById('preference_control_299').closest(".preference_choice").style.display = 'none';
-            document.getElementById('preference_fontrol_299').closest(".preference_choice").style.display = 'none';
-        }
-        catch (e) { }
-        [201, 203, 205, 206, 207, 299].forEach(function (prefId) { return _this.onGameUserPreferenceChanged(prefId, _this.userPreferences.get(prefId)); });
+        this.bga.userPreferences.toggleVisibility(299, false);
+        this.bga.userPreferences.onChange = function (prefId, prefValue) { return _this.onUserPreferenceChanged(prefId, prefValue); };
     };
-    // @ts-ignore
-    AzulSummerPavilion.prototype.onGameUserPreferenceChanged = function (prefId, prefValue) {
+    AzulSummerPavilion.prototype.onUserPreferenceChanged = function (prefId, prefValue) {
         switch (prefId) {
             case 201:
                 dojo.toggleClass('table', 'disabled-shimmer', prefValue == 2);
@@ -1646,8 +1641,7 @@ var AzulSummerPavilion = /** @class */ (function (_super) {
         return this.playersTables.find(function (playerTable) { return playerTable.playerId === playerId; });
     };
     AzulSummerPavilion.prototype.setScore = function (playerId, score) {
-        var _a;
-        (_a = this.scoreCtrl[playerId]) === null || _a === void 0 ? void 0 : _a.toValue(score);
+        this.bga.playerPanels.getScoreCounter(playerId).toValue(score);
     };
     AzulSummerPavilion.prototype.placeTile = function (tile, destinationId, left, top, rotation, placeInParent) {
         var _this = this;
