@@ -13,14 +13,12 @@
             "3": {
                 "name": "Glazed Pavilion: Colored board (Orange side)",
                 "tmdisplay": "Glazed Pavilion: Colored board (Orange side)",
-                "nobeginner": true,
-                "alpha": true
+                "nobeginner": true
             },
             "4": {
                 "name": "Glazed Pavilion: Monochrome board (Purple side)",
                 "tmdisplay": "Glazed Pavilion: Monochrome board (Purple side)",
-                "nobeginner": true,
-                "alpha": true
+                "nobeginner": true
             }
         },
         "default": 1
