@@ -13,9 +13,13 @@ $tile6-color: #ef3340;
 @import 'playerboards';
 @import 'tile';
 
-html, .mode_3d #game_play_area_background {
+html {
     background: url('img/background.jpg') #fbefe2;
     background-repeat: repeat;
+}
+
+html[data-theme="dark"] {
+  background-blend-mode: soft-light;
 }
 
 @font-face {
@@ -35,7 +39,7 @@ html, .mode_3d #game_play_area_background {
       box-shadow: 1px 1px 1px 1px #00000099;
   }
 
-  $titleBarColor: #f0f0f0;
+  --title-bar-color: #f0f0f0;
   $summaryHeight: 32px;
 
   #summary {
@@ -44,7 +48,7 @@ html, .mode_3d #game_play_area_background {
     width: 300px;
     bottom: -$summaryHeight;
     height: $summaryHeight;
-    background: $titleBarColor;
+    background: var(--title-bar-color);
     display: flex;
     justify-content: space-evenly;
     align-items: center;
@@ -57,7 +61,7 @@ html, .mode_3d #game_play_area_background {
       height: 0;
       width: 0;
       left: -$summaryHeight*2;
-      border-top: $summaryHeight solid $titleBarColor;
+      border-top: $summaryHeight solid var(--title-bar-color);
       border-left: $summaryHeight*2 solid transparent;
     }
 
@@ -68,7 +72,7 @@ html, .mode_3d #game_play_area_background {
       height: 0;
       width: 0;
       right: -$summaryHeight*2;
-      border-top: $summaryHeight solid $titleBarColor;
+      border-top: $summaryHeight solid var(--title-bar-color);
       border-right: $summaryHeight*2 solid transparent;
     }
 
@@ -88,6 +92,14 @@ html, .mode_3d #game_play_area_background {
       }
     }
 
+  }
+}
+
+html[data-theme="dark"] {
+  #page-title {
+    #summary {
+      --title-bar-color: var(--game-palette-bga-gray-244);
+    }
   }
 }
 
