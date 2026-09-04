@@ -1,8 +1,11 @@
-declare const board: HTMLDivElement;
+import { ANIMATION_MS, SCORE_MS, SLOW_SCORE_MS } from './constants';
+import { Factories } from './factories';
+import { BgaAnimations, BgaZoom } from './libs';
+import { PlayerTable } from './player-table';
+import { ScoringBoard } from './scoring-board';
+import { slideToObjectAndAttach } from './slide-utils';
 
-const ANIMATION_MS = 500;
-const SCORE_MS = 1500;
-const SLOW_SCORE_MS = 2000;
+declare const board: HTMLDivElement;
 
 const REFILL_DELAY = [];
 REFILL_DELAY[5] = 1600;
@@ -15,38 +18,21 @@ const LOCAL_STORAGE_ZOOM_KEY = 'AzulSummerPavilion-zoom';
 const isDebug = window.location.host == 'studio.boardgamearena.com';
 const log = isDebug ? console.log.bind(window.console) : function () { };
 
-// @ts-ignore
-GameGui = (function () { // this hack required so we fake extend GameGui
-  function GameGui() {}
-  return GameGui;
-})();
-
-class AzulSummerPavilion extends GameGui<AzulSummerPavilionGamedatas> implements AzulSummerPavilionGame {
-    public animationManager: AnimationManager;
+export class Game implements AzulSummerPavilionGame {
+    public animationManager: any;
 
     public gamedatas: AzulSummerPavilionGamedatas;
-    private zoomManager: ZoomManager;
+    private zoomManager: any;
     private factories: Factories;
     private scoringBoard: ScoringBoard;
     private playersTables: PlayerTable[] = [];
 
     public zoom: number = 0.75;
 
-    public gameui: GameGui<AzulSummerPavilionGamedatas>;
-    public statusBar: StatusBar;
-    public images: Images;
-    public sounds: Sounds;
-    public userPreferences: UserPreferences;
-    public players: Players;
-    public actions: Actions;
-    public notifications: Notifications;
-    public gameArea: GameArea;
-    public playerPanels: PlayerPanels;
-    public dialogs: Dialogs;
+    public bga: Bga<AzulSummerPavilionPlayer, AzulSummerPavilionGamedatas>;
 
-    constructor() {    
-        super();
-        Object.assign(this, this.bga);
+    constructor(bga: Bga<AzulSummerPavilionPlayer, AzulSummerPavilionGamedatas>) {
+        this.bga = bga;
 
         const zoomStr = localStorage.getItem(LOCAL_STORAGE_ZOOM_KEY);
         if (zoomStr) {
@@ -68,10 +54,7 @@ class AzulSummerPavilion extends GameGui<AzulSummerPavilionGamedatas> implements
     */
 
     public setup(gamedatas: AzulSummerPavilionGamedatas) {
-        // ignore loading of some pictures
-        [1,2,3,4].filter(boardNumber => boardNumber != this.getBoardNumber()).forEach(boardNumber => this.dontPreloadImage(`playerboard${boardNumber}.jpg`));
-
-        this.gameArea.getElement().insertAdjacentHTML('beforeend', `
+        this.bga.gameArea.getElement().insertAdjacentHTML('beforeend', `
             <div id="table">
                 <div id="centered-table">
                     <div id="factories-and-scoring-board">
@@ -92,7 +75,12 @@ class AzulSummerPavilion extends GameGui<AzulSummerPavilionGamedatas> implements
 
         log('gamedatas', gamedatas);
 
-        this.animationManager = new AnimationManager(this);
+        // ignore loading of some pictures
+        [1,2,3,4].filter(boardNumber => boardNumber != this.getBoardNumber()).forEach(boardNumber => this.bga.images.dontPreloadImage(`playerboard${boardNumber}.jpg`));
+
+        this.animationManager = new BgaAnimations.Manager({
+            animationsActive: () => this.bga.gameui.bgaAnimationsActive(),
+        });
 
         this.createPlayerPanels(gamedatas);
         this.factories = new Factories(this, gamedatas.factoryNumber, gamedatas.factories, gamedatas.remainingTiles);
@@ -100,7 +88,7 @@ class AzulSummerPavilion extends GameGui<AzulSummerPavilionGamedatas> implements
         this.createPlayerTables(gamedatas);
 
         // before set
-        this.zoomManager = new ZoomManager({
+        this.zoomManager = new BgaZoom.Manager({
             element: document.getElementById('table'),
             smooth: false,
             localStorageZoomKey: LOCAL_STORAGE_ZOOM_KEY,
@@ -171,7 +159,7 @@ class AzulSummerPavilion extends GameGui<AzulSummerPavilionGamedatas> implements
         }
 
         const autopassParams = args.args?._private;
-        if (autopassParams?.canSetAutopass && !this.players.isCurrentPlayerActive()) {
+        if (autopassParams?.canSetAutopass && !this.bga.players.isCurrentPlayerActive()) {
             this.addAutopassToggle(autopassParams.autopass);
         } else {
             this.removeAutopassToggle();
@@ -179,16 +167,16 @@ class AzulSummerPavilion extends GameGui<AzulSummerPavilionGamedatas> implements
     }
 
     private onEnteringChooseTile(args: EnteringChooseTileArgs) {
-        if (this.players.isCurrentPlayerActive()) {
+        if (this.bga.players.isCurrentPlayerActive()) {
             this.factories.wildColor = args.wildColor;
-            dojo.addClass('factories', 'selectable');
+            document.getElementById('factories').classList.add('selectable');
         }
     }
 
     private onEnteringChoosePlace(args: EnteringChoosePlaceArgs) {
         document.getElementById('factories-and-scoring-board').classList.add('play');
 
-        if (this.players.isCurrentPlayerActive()) {
+        if (this.bga.players.isCurrentPlayerActive()) {
             const playerId = this.getPlayerId();
             for (let star = 0; star <= 6; star++) {
                 for (let space = 1; space <= 6; space++) {
@@ -201,7 +189,7 @@ class AzulSummerPavilion extends GameGui<AzulSummerPavilionGamedatas> implements
     }
 
     private onEnteringChooseColor(args: EnteringChooseColorArgs) {
-        if (this.players.isCurrentPlayerActive()) {
+        if (this.bga.players.isCurrentPlayerActive()) {
             document.getElementById(`player-table-${args.playerId}-star-${args.star}-space-${args.space}`).classList.add('selected');
         }
     }
@@ -211,17 +199,17 @@ class AzulSummerPavilion extends GameGui<AzulSummerPavilionGamedatas> implements
     }*/
 
     private onEnteringPlayTile(args: EnteringPlayTileArgs) {
-        if (this.players.isCurrentPlayerActive()) {
+        if (this.bga.players.isCurrentPlayerActive()) {
             /*this.removeGhostTile();
 
             const spotId = `player-table-${this.getPlayerId()}-star-${args.selectedPlace[0]}-space-${args.selectedPlace[1]}`;
             const ghostTileId = `${spotId}-ghost-tile`;
-            dojo.place(`<div id="${ghostTileId}" class="tile tile${args.color} ghost"></div>`, spotId);*/
+            document.getElementById(spotId).insertAdjacentHTML('beforeend', `<div id="${ghostTileId}" class="tile tile${args.color} ghost"></div>`);*/
         }
     }
 
     private onEnteringChooseKeptTiles(args: EnteringChooseTileArgs) {
-        if (this.players.isCurrentPlayerActive()) {
+        if (this.bga.players.isCurrentPlayerActive()) {
             document.getElementById(`player-hand-${this.getPlayerId()}`).classList.add('selectable');
         }
     }
@@ -229,7 +217,7 @@ class AzulSummerPavilion extends GameGui<AzulSummerPavilionGamedatas> implements
     private onEnteringTakeBonusTiles(args: EnteringTakeBonusTileArgs) {
         args.highlightedTiles.forEach(tile => document.getElementById(`tile${tile.id}`).classList.add('bonus'));
         args.from.forEach(from => document.getElementById(`bonus-info-${from}`).classList.add('active'));
-        if (this.players.isCurrentPlayerActive()) {
+        if (this.bga.players.isCurrentPlayerActive()) {
             document.getElementById(`supply`).classList.add('selectable');
         }
     }
@@ -263,7 +251,7 @@ class AzulSummerPavilion extends GameGui<AzulSummerPavilionGamedatas> implements
     }
 
     private onLeavingChooseTile() {
-        dojo.removeClass('factories', 'selectable');
+        document.getElementById('factories').classList.remove('selectable');
     }
 
     private onLeavingChoosePlace() {
@@ -304,8 +292,8 @@ class AzulSummerPavilion extends GameGui<AzulSummerPavilionGamedatas> implements
         const discardedTileDivs = handTileDivs.filter((div: HTMLElement) => !selectedTileDivsIds.includes(Number(div.dataset.id)));
         const warning = selectedTileDivs.length < handTileDivs.length && selectedTileDivs.length < 4;
 
-        const labelKeep = selectedTileDivs.map((div: HTMLElement) => this.gameui.format_string_recursive('${number} ${color}', { number: 1, type: Number(div.dataset.type) })).join('');
-        const labelDiscard = discardedTileDivs.map((div: HTMLElement) => this.gameui.format_string_recursive('${number} ${color}', { number: 1, type: Number(div.dataset.type) })).join('');
+        const labelKeep = selectedTileDivs.map((div: HTMLElement) => this.bga.gameui.format_string_recursive('${number} ${color}', { number: 1, type: Number(div.dataset.type) })).join('');
+        const labelDiscard = discardedTileDivs.map((div: HTMLElement) => this.bga.gameui.format_string_recursive('${number} ${color}', { number: 1, type: Number(div.dataset.type) })).join('');
         let label = '';
         if (labelKeep != '' && labelDiscard != '') {
             label = _("Keep ${keep} and discard ${discard}");
@@ -330,7 +318,7 @@ class AzulSummerPavilion extends GameGui<AzulSummerPavilionGamedatas> implements
 
         let label = '-';
         if (selectedTileDivs.length > 0) {
-            label = selectedTileDivs.map((div: HTMLElement) => this.gameui.format_string_recursive('${number} ${color}', { number: 1, type: Number(div.dataset.type) })).join('');
+            label = selectedTileDivs.map((div: HTMLElement) => this.bga.gameui.format_string_recursive('${number} ${color}', { number: 1, type: Number(div.dataset.type) })).join('');
         }
 
         button.innerHTML = _("Take ${tiles}").replace('${tiles}', label);
@@ -343,23 +331,23 @@ class AzulSummerPavilion extends GameGui<AzulSummerPavilionGamedatas> implements
     public onUpdateActionButtons(stateName: string, args: any) {
         log('onUpdateActionButtons', stateName, args);
         
-        if(this.players.isCurrentPlayerActive()) {
+        if(this.bga.players.isCurrentPlayerActive()) {
             switch (stateName) { 
                 case 'confirmAcquire':
-                    this.statusBar.addActionButton(_("Confirm"), () => this.confirmAcquire(), { autoclick: this.userPreferences.get(204) != 2 });
-                    this.statusBar.addActionButton(_("Undo tile selection"), () => this.undoTakeTiles(), { color: 'secondary'});
+                    this.bga.statusBar.addActionButton(_("Confirm"), () => this.confirmAcquire(), { autoclick: this.bga.userPreferences.get(204) != 2 });
+                    this.bga.statusBar.addActionButton(_("Undo tile selection"), () => this.undoTakeTiles(), { color: 'secondary'});
                     break;
                 case 'choosePlace':
                     const choosePlaceArgs = args as EnteringChoosePlaceArgs;
-                    this.statusBar.addActionButton(_("Pass (end round)"), () => this.pass(), { color: choosePlaceArgs?.skipIsFree ? undefined : 'alert' });
+                    this.bga.statusBar.addActionButton(_("Pass (end round)"), () => this.pass(), { color: choosePlaceArgs?.skipIsFree ? undefined : 'alert' });
                     break;
                 case 'chooseColor':
                     const chooseColorArgs = args as EnteringChooseColorArgs;
                     chooseColorArgs.possibleColors.forEach(color => {
-                        const label = this.gameui.format_string_recursive('${number} ${color}', { number: 1, type: color });
-                        this.statusBar.addActionButton(label, () => this.selectColor(color));
+                        const label = this.bga.gameui.format_string_recursive('${number} ${color}', { number: 1, type: color });
+                        this.bga.statusBar.addActionButton(label, () => this.selectColor(color));
                     });
-                    this.statusBar.addActionButton(_("Undo played tile"), () => this.undoPlayTile(), { color: 'secondary'});
+                    this.bga.statusBar.addActionButton(_("Undo played tile"), () => this.undoPlayTile(), { color: 'secondary'});
                     break;
                 case 'playTile':
                     const playTileArgs = args as EnteringPlayTileArgs;
@@ -367,29 +355,29 @@ class AzulSummerPavilion extends GameGui<AzulSummerPavilionGamedatas> implements
                         const colorNumber = playTileArgs.number - i;
                         if (colorNumber <= args.maxColor) {
                             let label = 
-                                (colorNumber === 0 ? '' : this.gameui.format_string_recursive('${number} ${color}', { number: colorNumber, type: playTileArgs.color })) +
-                                (i === 0 ? '' : this.gameui.format_string_recursive('${number} ${color}', { number: i, type: playTileArgs.wildColor }));
-                            this.statusBar.addActionButton(label, () => this.playTile(i));
+                                (colorNumber === 0 ? '' : this.bga.gameui.format_string_recursive('${number} ${color}', { number: colorNumber, type: playTileArgs.color })) +
+                                (i === 0 ? '' : this.bga.gameui.format_string_recursive('${number} ${color}', { number: i, type: playTileArgs.wildColor }));
+                            this.bga.statusBar.addActionButton(label, () => this.playTile(i));
                         }
                     }
-                    this.statusBar.addActionButton(_("Undo played tile"), () => this.undoPlayTile(), { color: 'secondary'});
+                    this.bga.statusBar.addActionButton(_("Undo played tile"), () => this.undoPlayTile(), { color: 'secondary'});
                     break;
                 case 'confirmPlay':
-                    this.statusBar.addActionButton(_("Confirm"), () => this.confirmPlay(), { autoclick: this.userPreferences.get(204) != 2 });
-                    this.statusBar.addActionButton(_("Undo played tile"), () => this.undoPlayTile(), { color: 'secondary'});
+                    this.bga.statusBar.addActionButton(_("Confirm"), () => this.confirmPlay(), { autoclick: this.bga.userPreferences.get(204) != 2 });
+                    this.bga.statusBar.addActionButton(_("Undo played tile"), () => this.undoPlayTile(), { color: 'secondary'});
                     break;
                 case 'chooseKeptTiles':
-                    this.statusBar.addActionButton('', () => this.selectKeptTiles(), { id: 'selectKeptTiles_button' });
-                    this.statusBar.addActionButton(_("Cancel"), () => this.undoPass(), { color: 'secondary'});
+                    this.bga.statusBar.addActionButton('', () => this.selectKeptTiles(), { id: 'selectKeptTiles_button' });
+                    this.bga.statusBar.addActionButton(_("Cancel"), () => this.undoPass(), { color: 'secondary'});
                     this.updateSelectKeptTilesButton();
                     break;
                 case 'confirmPass':
-                    this.statusBar.addActionButton(_("Confirm"), () => this.confirmPass(), { autoclick: this.userPreferences.get(204) != 2 });
-                    this.statusBar.addActionButton(_("Cancel"), () => this.undoPass(), { color: 'secondary'});
+                    this.bga.statusBar.addActionButton(_("Confirm"), () => this.confirmPass(), { autoclick: this.bga.userPreferences.get(204) != 2 });
+                    this.bga.statusBar.addActionButton(_("Cancel"), () => this.undoPass(), { color: 'secondary'});
                     break;
                 case 'takeBonusTiles':
-                    this.statusBar.addActionButton('', () => this.takeBonusTiles(), { id: 'takeBonusTiles_button' });
-                    this.statusBar.addActionButton(_("Undo played tile"), () => this.undoPlayTile(), { color: 'secondary'});
+                    this.bga.statusBar.addActionButton('', () => this.takeBonusTiles(), { id: 'takeBonusTiles_button' });
+                    this.bga.statusBar.addActionButton(_("Undo played tile"), () => this.undoPlayTile(), { color: 'secondary'});
                     this.updateTakeBonusTilesButton();
                     break;
             }
@@ -411,19 +399,19 @@ class AzulSummerPavilion extends GameGui<AzulSummerPavilionGamedatas> implements
     public onUserPreferenceChanged(prefId: number, prefValue: number) {
         switch (prefId) {
             case 201: 
-                dojo.toggleClass('table', 'disabled-shimmer', prefValue == 2);
+                document.getElementById('table').classList.toggle('disabled-shimmer', prefValue == 2);
                 break;
             case 203:
-                dojo.toggleClass(document.getElementsByTagName('html')[0] as any, 'cb', prefValue == 1);
+                document.documentElement.classList.toggle('cb', prefValue == 1);
                 break;
             case 205:
-                dojo.toggleClass(document.getElementsByTagName('html')[0] as any, 'hide-tile-count', prefValue == 2);
+                document.documentElement.classList.toggle('hide-tile-count', prefValue == 2);
                 break;
             case 206: 
                 this.playersTables.forEach(playerTable => playerTable.setFont(prefValue));
                 break;
             case 207: 
-            dojo.toggleClass(document.getElementsByTagName('html')[0] as any, 'show-numbers', prefValue == 1);
+                document.documentElement.classList.toggle('show-numbers', prefValue == 1);
                 break;
             case 299: 
                 this.toggleZoomNotice(prefValue == 1);
@@ -435,16 +423,16 @@ class AzulSummerPavilion extends GameGui<AzulSummerPavilionGamedatas> implements
         const elem = document.getElementById('zoom-notice');
         if (visible) {
             if (!elem) {
-                dojo.place(`
+                document.getElementById('bga-zoom_controls').insertAdjacentHTML('beforeend', `
                 <div id="zoom-notice">
                     ${_("Use zoom controls to adapt players board size !")}
                     <div style="text-align: center; margin-top: 10px;"><a id="hide-zoom-notice">${_("Dismiss")}</a></div>
                     <div class="arrow-right"></div>
                 </div>
-                `, 'bga-zoom-controls');
+                `);
 
                 document.getElementById('hide-zoom-notice').addEventListener('click', () => 
-                    this.userPreferences.set(299, 2)
+                    this.bga.userPreferences.set(299, 2)
                 );
             }
         } else if (elem) {
@@ -453,7 +441,7 @@ class AzulSummerPavilion extends GameGui<AzulSummerPavilionGamedatas> implements
     }
 
     public isDefaultFont(): boolean {
-        return this.userPreferences.get(206) == 1;
+        return this.bga.userPreferences.get(206) == 1;
     }
 
     public getZoom() {
@@ -481,7 +469,7 @@ class AzulSummerPavilion extends GameGui<AzulSummerPavilionGamedatas> implements
     }
 
     public getPlayerId(): number {
-        return Number(this.player_id);
+        return this.bga.players.getCurrentPlayerId();
     }
 
     public getPlayerColor(playerId: number): string {
@@ -498,7 +486,7 @@ class AzulSummerPavilion extends GameGui<AzulSummerPavilionGamedatas> implements
 
     public placeTile(tile: Tile, destinationId: string, left?: number, top?: number, rotation?: number, placeInParent?: (elem, parent) => void): Promise<boolean> {
         //this.removeTile(tile);
-        //dojo.place(`<div id="tile${tile.id}" class="tile tile${tile.type}" style="left: ${left}px; top: ${top}px;"></div>`, destinationId);
+        //document.getElementById(destinationId).insertAdjacentHTML('beforeend', `<div id="tile${tile.id}" class="tile tile${tile.type}" style="left: ${left}px; top: ${top}px;"></div>`);
         const tileDiv = document.getElementById(`tile${tile.id}`);
         if (tileDiv) {
             return slideToObjectAndAttach(this, tileDiv, destinationId, left, top, rotation, placeInParent);
@@ -543,7 +531,7 @@ class AzulSummerPavilion extends GameGui<AzulSummerPavilionGamedatas> implements
             const playerId = Number(player.id);     
 
             // first player token
-            dojo.place(`<div id="player_board_${player.id}_firstPlayerWrapper" class="firstPlayerWrapper disabled-shimmer"></div>`, `player_board_${player.id}`);
+            document.getElementById(`player_board_${player.id}`).insertAdjacentHTML('beforeend', `<div id="player_board_${player.id}_firstPlayerWrapper" class="firstPlayerWrapper disabled-shimmer"></div>`);
 
             if (gamedatas.firstPlayerTokenPlayerId === playerId) {
                 this.placeFirstPlayerToken(gamedatas.firstPlayerTokenPlayerId);
@@ -555,7 +543,7 @@ class AzulSummerPavilion extends GameGui<AzulSummerPavilionGamedatas> implements
 
     private createPlayerTables(gamedatas: AzulSummerPavilionGamedatas) {
         const players = Object.values(gamedatas.players).sort((a, b) => a.playerNo - b.playerNo);
-        const playerIndex = players.findIndex(player => Number(player.id) === Number(this.player_id));
+        const playerIndex = players.findIndex(player => Number(player.id) === this.bga.players.getCurrentPlayerId());
         const orderedPlayers = playerIndex > 0 ? [...players.slice(playerIndex), ...players.slice(0, playerIndex)] : players;
 
         orderedPlayers.forEach(player => 
@@ -576,9 +564,7 @@ class AzulSummerPavilion extends GameGui<AzulSummerPavilionGamedatas> implements
             const divElement = document.getElementById(`tile${tile.id}`);
             if (divElement) {
                 if (fadeOut) {
-                    const destroyedId = `${divElement.id}-to-be-destroyed`;
-                    divElement.id = destroyedId;
-                    this.fadeOutAndDestroy(destroyedId);
+                    this.animationManager.fadeOutAndDestroy(divElement);
                 } else {
                     divElement.parentElement.removeChild(divElement);
                 }
@@ -600,7 +586,7 @@ class AzulSummerPavilion extends GameGui<AzulSummerPavilionGamedatas> implements
                 <label for="autopass-checkbox" class="text-label">${_("Auto-pass")}</label>
             </div>`);
 
-            document.getElementById('autopass-checkbox').addEventListener('change', (e: any) => this.actions.performAction('actSetAutopass', { autopass: e.target.checked }, { checkAction: false, }));
+            document.getElementById('autopass-checkbox').addEventListener('change', (e: any) => this.bga.actions.performAction('actSetAutopass', { autopass: e.target.checked }, { checkAction: false, }));
         }
     }
 
@@ -627,53 +613,53 @@ class AzulSummerPavilion extends GameGui<AzulSummerPavilionGamedatas> implements
     }
 
     public takeTiles(id: number) {
-        this.actions.performAction('actTakeTiles', {
+        this.bga.actions.performAction('actTakeTiles', {
             id
         });
     }
 
     public undoTakeTiles() {
-        this.actions.performAction('actUndoTakeTiles');
+        this.bga.actions.performAction('actUndoTakeTiles');
     }
 
     public confirmAcquire() {
-        this.actions.performAction('actConfirmAcquire');
+        this.bga.actions.performAction('actConfirmAcquire');
     }
 
     public pass() {
-        this.actions.performAction('actPass');
+        this.bga.actions.performAction('actPass');
     }
 
     public selectColor(color: number) {
-        this.actions.performAction('actSelectColor', {
+        this.bga.actions.performAction('actSelectColor', {
             color
         });
     }
 
     public playTile(wilds: number) {
-        this.actions.performAction('actPlayTile', {
+        this.bga.actions.performAction('actPlayTile', {
             wilds
         });
     }
 
     public confirmPlay() {
-        this.actions.performAction('actConfirmPlay');
+        this.bga.actions.performAction('actConfirmPlay');
     }
 
     public confirmPass() {
-        this.actions.performAction('actConfirmPass');
+        this.bga.actions.performAction('actConfirmPass');
     }
 
     public undoPlayTile() {
-        this.actions.performAction('actUndoPlayTile');
+        this.bga.actions.performAction('actUndoPlayTile');
     }
 
     public undoPass() {
-        this.actions.performAction('actUndoPass');
+        this.bga.actions.performAction('actUndoPass');
     }
 
     public selectPlace(star: number, space: number) {
-        this.actions.performAction('actSelectPlace', {
+        this.bga.actions.performAction('actSelectPlace', {
             star,
             space
         });
@@ -687,7 +673,7 @@ class AzulSummerPavilion extends GameGui<AzulSummerPavilionGamedatas> implements
         const selectedTileDivs = handDiv.querySelectorAll('.tile.selected');
 
         if (askConfirmation && selectedTileDivs.length < handTileDivs.length && selectedTileDivs.length < 4) {
-            this.dialogs.confirmation(
+            this.bga.dialogs.confirmation(
                 _('You will keep ${keep} tiles and discard ${discard} tiles, when you could keep ${possible} tiles!')
                     .replace('${keep}', `<strong>${selectedTileDivs.length}</strong>`)
                     .replace('${discard}', `<strong>${handTileDivs.length - selectedTileDivs.length}</strong>`)
@@ -698,21 +684,21 @@ class AzulSummerPavilion extends GameGui<AzulSummerPavilionGamedatas> implements
                 }
             });
         } else {
-            this.actions.performAction('actSelectKeptTiles', {
+            this.bga.actions.performAction('actSelectKeptTiles', {
                 ids: Array.from(selectedTileDivs).map((tile: HTMLElement) => Number(tile.dataset.id)).sort().join(','),
             });
         }
     }
 
     public cancel() {
-        this.actions.performAction('actCancel');
+        this.bga.actions.performAction('actCancel');
     }
 
     public takeBonusTiles() {
         const supplyDiv = document.getElementById(`supply`);
         const selectedTileDivs = supplyDiv.querySelectorAll('.tile.selected');
 
-        this.actions.performAction('actTakeBonusTiles', {
+        this.bga.actions.performAction('actTakeBonusTiles', {
             ids: Array.from(selectedTileDivs).map((tile: HTMLElement) => Number(tile.dataset.id)).sort().join(','),
         });
     }
@@ -720,31 +706,28 @@ class AzulSummerPavilion extends GameGui<AzulSummerPavilionGamedatas> implements
     placeFirstPlayerToken(playerId: number) {
         const firstPlayerToken = document.getElementById('firstPlayerToken');
         if (firstPlayerToken) {
-            this.animationManager.attachWithAnimation(
-                new BgaSlideAnimation({
-                    element: firstPlayerToken,
-                    scale: 1, // ignore game zoom
-                }), 
+            this.animationManager.slideAndAttach(
+                firstPlayerToken,
                 document.getElementById(`player_board_${playerId}_firstPlayerWrapper`),
             );
         } else {
-            dojo.place('<div id="firstPlayerToken" class="tile tile0"></div>', `player_board_${playerId}_firstPlayerWrapper`);
+            document.getElementById(`player_board_${playerId}_firstPlayerWrapper`).insertAdjacentHTML('beforeend', '<div id="firstPlayerToken" class="tile tile0"></div>');
 
-            this.addTooltipHtml('firstPlayerToken', _("First Player token. Player with this token will start the next turn"));
+            this.bga.gameui.addTooltipHtml('firstPlayerToken', _("First Player token. Player with this token will start the next turn"));
         }
     }
 
     private displayScoringOnTile(tile: Tile, playerId: string | number, points: number) {
         // create a div over tile, same position and width, but no overflow hidden (that must be kept on tile for glowing effect)
-        dojo.place(`<div id="tile${tile.id}-scoring" class="scoring-tile"></div>`, `player-table-${playerId}-star-${tile.star}-space-${tile.space}`);
-        this.displayScoring(`tile${tile.id}-scoring`, this.getPlayerColor(Number(playerId)), points, SCORE_MS);
+        document.getElementById(`player-table-${playerId}-star-${tile.star}-space-${tile.space}`).insertAdjacentHTML('beforeend', `<div id="tile${tile.id}-scoring" class="scoring-tile"></div>`);
+        this.animationManager.displayScoring(document.getElementById(`tile${tile.id}-scoring`), points, this.getPlayerColor(Number(playerId)), { duration: SCORE_MS });
     }
 
     private displayScoringOnStar(star: number, playerId: string | number, points: number) {
         if (!document.getElementById(`player-table-${playerId}-star-${star}-scoring`)) {
-            dojo.place(`<div id="player-table-${playerId}-star-${star}-scoring" class="scoring-star"></div>`, `player-table-${playerId}-star-${star}`);
+            document.getElementById(`player-table-${playerId}-star-${star}`).insertAdjacentHTML('beforeend', `<div id="player-table-${playerId}-star-${star}-scoring" class="scoring-star"></div>`);
         }
-        this.displayScoring(`player-table-${playerId}-star-${star}-scoring`, this.getPlayerColor(Number(playerId)), points, SCORE_MS);
+        this.animationManager.displayScoring(document.getElementById(`player-table-${playerId}-star-${star}-scoring`), points, this.getPlayerColor(Number(playerId)), { duration: SCORE_MS });
     }
 
     ///////////////////////////////////////////////////
@@ -786,7 +769,7 @@ class AzulSummerPavilion extends GameGui<AzulSummerPavilionGamedatas> implements
                     this.setScore(e.args.playerId, e.args.newScore);
                 }
             });
-            (this as any).notifqueue.setSynchronous(notif[0], notif[1]);
+            (this.bga.gameui as any).notifqueue.setSynchronous(notif[0], notif[1]);
         });
 
         ['completeStarLogDetails', 'completeNumberLogDetails', 'completeStructureSetLogDetails'].forEach(notifName => {
@@ -877,8 +860,8 @@ class AzulSummerPavilion extends GameGui<AzulSummerPavilionGamedatas> implements
         playerTable.placeTilesOnWall([placedTile]);
         this.removeTiles(discardedTiles, true);
 
-        scoredTiles.forEach(tile => dojo.addClass(`tile${tile.id}`, 'highlight'));
-        setTimeout(() => scoredTiles.forEach(tile => dojo.removeClass(`tile${tile.id}`, 'highlight')), SCORE_MS - 50);
+        scoredTiles.forEach(tile => document.getElementById(`tile${tile.id}`).classList.add('highlight'));
+        setTimeout(() => scoredTiles.forEach(tile => document.getElementById(`tile${tile.id}`).classList.remove('highlight')), SCORE_MS - 50);
 
         this.displayScoringOnTile(placedTile, playerId, scoredTiles.length);
     }
@@ -889,7 +872,7 @@ class AzulSummerPavilion extends GameGui<AzulSummerPavilionGamedatas> implements
         this.removeTiles(discardedTiles, true);
 
         if (discardedTiles.length > 0) {
-            this.displayScoring(`player-hand-${playerId}`, this.getPlayerColor(Number(playerId)), -discardedTiles.length, SCORE_MS);
+            this.animationManager.displayScoring(document.getElementById(`player-hand-${playerId}`), -discardedTiles.length, this.getPlayerColor(Number(playerId)), { duration: SCORE_MS });
         }
     }
 
@@ -907,8 +890,8 @@ class AzulSummerPavilion extends GameGui<AzulSummerPavilionGamedatas> implements
         Object.keys(args.scores).forEach(playerId => {
             const endScore: EndScoreTiles = args.scores[playerId];
 
-            endScore.tiles?.forEach(tile => dojo.addClass(`tile${tile.id}`, 'highlight'));
-            setTimeout(() => endScore.tiles?.forEach(tile => dojo.removeClass(`tile${tile.id}`, 'highlight')), SCORE_MS - 50);
+            endScore.tiles?.forEach(tile => document.getElementById(`tile${tile.id}`).classList.add('highlight'));
+            setTimeout(() => endScore.tiles?.forEach(tile => document.getElementById(`tile${tile.id}`).classList.remove('highlight')), SCORE_MS - 50);
 
             this.displayScoringOnStar(endScore.star, playerId, endScore.points);
         });
@@ -926,7 +909,7 @@ class AzulSummerPavilion extends GameGui<AzulSummerPavilionGamedatas> implements
             return;
         }
         
-        // TODO useful ? dojo.place(`<div id="last-round">${_("This is the last round of the game!")}</div>`, 'page-title');
+        // TODO useful ? document.getElementById('page-title').insertAdjacentHTML('beforeend', `<div id="last-round">${_("This is the last round of the game!")}</div>`);
     }
 
     /* This enable to inject translatable styled things to logs or action bar */

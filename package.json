@@ -2,10 +2,14 @@
   "name": "azulsummerpavilion",
   "version": "1.0.0",
   "description": "",
-  "main": "azulsummerpavilion.js",
+  "main": "modules/js/Game.js",
   "scripts": {
-    "build:ts": "tsc",
-    "build:scss": "sass --no-source-map src/azulsummerpavilion.scss azulsummerpavilion.css"
+    "build:ts": "rollup -c",
+    "build:scss": "sass --no-source-map src/scss/Game.scss azulsummerpavilion.css",
+    "watch:ts": "rollup -c -w",
+    "watch:scss": "sass --watch src/scss/Game.scss azulsummerpavilion.css",
+    "watch": "npm run watch:ts && npm run watch:scss",
+    "build": "npm run build:ts && npm run build:scss"
   },
   "author": "",
   "license": "ISC",
@@ -14,7 +18,10 @@
     "bga-zoom": "thoun/bga-zoom#1.0.4"
   },
   "devDependencies": {
+    "@rollup/plugin-typescript": "^12.3.0",
+    "rollup": "^4.53.3",
     "sass": "^1.62.1",
+    "tslib": "^2.8.1",
     "typescript": "^5.0.4"
   }
 }

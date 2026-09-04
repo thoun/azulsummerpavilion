@@ -1,4 +1,4 @@
-function slideToObjectAndAttach(game: AzulSummerPavilionGame, object: HTMLElement, destinationId: string, posX?: number, posY?: number, rotation: number = 0, placeInParent?: (elem, parent) => void): Promise<boolean> {
+export function slideToObjectAndAttach(game: AzulSummerPavilionGame, object: HTMLElement, destinationId: string, posX?: number, posY?: number, rotation: number = 0, placeInParent?: (elem, parent) => void): Promise<boolean> {
     const destination = document.getElementById(destinationId);
     if (destination.contains(object)) {
         return Promise.resolve(true);
@@ -29,7 +29,7 @@ function slideToObjectAndAttach(game: AzulSummerPavilionGame, object: HTMLElemen
             }
         }
 
-        if (document.visibilityState === 'hidden' || (game as any).instantaneousMode) {
+        if (document.visibilityState === 'hidden' || !game.bga.gameui.bgaAnimationsActive()) {
             // if tab is not visible, we skip animation (else they could be delayed or cancelled by browser)
             attachToNewParent();
         } else {

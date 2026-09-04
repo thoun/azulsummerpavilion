@@ -809,7 +809,7 @@ html[data-theme=dark] #page-title #summary {
   --title-bar-color: var(--game-palette-bga-gray-244);
 }
 
-#bga-zoom-wrapper {
+#bga-zoom_wrapper {
   margin-top: 36px;
 }
 

@@ -19,7 +19,7 @@ interface AzulSummerPavilionPlayer extends Player {
  * Your game interfaces
  */
 
-interface AzulSummerPavilionGamedatas {
+interface AzulSummerPavilionGamedatas extends Gamedatas<AzulSummerPavilionPlayer> {
     current_player_id: string;
     decision: {decision_type: string};
     game_result_neutralized: string;
@@ -45,8 +45,10 @@ interface AzulSummerPavilionGamedatas {
     supply: Tile[];
 }
 
-interface AzulSummerPavilionGame extends GameGui<AzulSummerPavilionGamedatas> {
-    animationManager: AnimationManager;
+interface AzulSummerPavilionGame {
+    bga: Bga<AzulSummerPavilionPlayer, AzulSummerPavilionGamedatas>;
+    animationManager: any;
+    gamedatas: AzulSummerPavilionGamedatas;
     
     getPlayerId(): number;
     isDefaultFont(): boolean;

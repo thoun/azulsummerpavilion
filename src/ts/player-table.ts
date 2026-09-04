@@ -2,7 +2,7 @@ const HAND_CENTER = 327;
 
 const COLORS_WITH_COLOR_BLIND_EXTRA_SIGN = [1, 4, 6];
 
-class PlayerTable {
+export class PlayerTable {
     public playerId: number;
 
     constructor(

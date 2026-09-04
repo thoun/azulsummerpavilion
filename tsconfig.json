@@ -1,27 +1,16 @@
 {
-    "rootDir": ".", 
-    "compilerOptions": {
-      "target": "es5",
-      "module": "none",
-      "lib": ["dom", "esnext"],  
-      "sourceMap": false,
-      "outFile": "azulsummerpavilion.js",
-    },
-    "files": [
-        "bga-framework.d.ts",
-        "node_modules/bga-animations/src/animations.ts",
-        "node_modules/bga-animations/src/animations/attach-with-animation.ts",
-        "node_modules/bga-animations/src/animations/slide-animation.ts",
-        "node_modules/bga-animations/src/animations/cumulated-animations.ts",
-        "node_modules/bga-animations/src/animations-utils.ts",
-        "node_modules/bga-animations/src/animation-manager.ts",
-        "node_modules/bga-zoom/src/zoom-manager.ts",
-        "src/azulsummerpavilion.d.ts",
-        "src/slide-utils.ts",
-        "src/factories/factories.ts",
-        "src/scoring-board/scoring-board.ts",
-        "src/players-tables/player-table.ts",
-        "src/azulsummerpavilion.ts",
-        "src/define.ts"
-    ]
+  "compilerOptions": {
+    "target": "ES2020",
+    "module": "ES2022",
+    "moduleResolution": "bundler",
+    "strict": false,
+    "lib": ["dom", "esnext"],
+    "sourceMap": false,
+    "rootDir": "."
+  },
+  "include": [
+    "*.d.ts",
+    "src/**/*.d.ts",
+    "src/**/*.ts"
+  ]
 }

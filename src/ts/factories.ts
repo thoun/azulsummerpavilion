@@ -1,8 +1,11 @@
+import { ANIMATION_MS, SCORE_MS } from './constants';
+import { slideToObjectAndAttach } from './slide-utils';
+
 const FACTORY_RADIUS = 125;
 const HALF_TILE_SIZE = 29;
 const CENTER_FACTORY_TILE_SHIFT = 12;
 
-class Factories {
+export class Factories {
     public wildColor: number;
     private tilesPositionsInCenter: PlacedTile[][] = [[], [], [], [], [], [], []]; // color, tiles
     private tilesInFactories: Tile[][][] = []; // factory, color, tiles
@@ -25,7 +28,7 @@ class Factories {
         const bagDiv = document.getElementById('bag');
         this.bagCounter = new ebg.counter();
         this.bagCounter.create('bag-counter');
-        bagDiv.addEventListener('click', () => dojo.toggleClass('bag-counter', 'visible'));
+        bagDiv.addEventListener('click', () => document.getElementById('bag-counter').classList.toggle('visible'));
 
         let html = `<div>`;
         html += `<div id="factory0" class="factory-center"></div>`;
@@ -38,7 +41,7 @@ class Factories {
         }
         html += `</div>`;
 
-        dojo.place(html, 'factories');
+        factoriesDiv.insertAdjacentHTML('beforeend', html);
 
         this.fillFactories(factories, false);
         this.setRemainingTiles(remainingTiles);
@@ -161,11 +164,10 @@ class Factories {
                 } else {
                     const rotation = Math.round(Math.random()*90 - 45);
                     this.game.placeTile(tile, `factory${args.factory}`, left, top, rotation);
-                    this.game.animationManager.play(new BgaSlideAnimation({
-                        element: document.getElementById(`tile${tile.id}`),
-                        fromElement: document.getElementById(`bag`),
-                        finalTransform: `rotate(${rotation}deg)`,
-                    }));
+                    this.game.animationManager.slideIn(
+                        document.getElementById(`tile${tile.id}`),
+                        document.getElementById('bag'),
+                    );
                 }
             });
             this.updateTilesInFactories(factoryTiles, args.factory);
@@ -278,9 +280,9 @@ class Factories {
             const x = this.tilesPositionsInCenter[type].reduce((sum, place) => sum + place.x, 0) / number + 14;
             const y = this.tilesPositionsInCenter[type].reduce((sum, place) => sum + place.y, 0) / number + 14;
             
-            dojo.place(`
+            document.getElementById('factories').insertAdjacentHTML('beforeend', `
             <div id="tileCount${type}" class="tile-count tile${type}" style="left: ${x}px; top: ${y}px;">${number}</div>
-            `, 'factories');
+            `);
 
             const newNumberDiv = document.getElementById(`tileCount${type}`);
             const firstTileId = this.tilesInFactories[0][type][0].id;
@@ -389,6 +391,11 @@ class Factories {
     }
     
     public displayScoringCenter(playerId: number, points: number) {
-        (this.game as any).displayScoring(`factory0`, this.game.getPlayerColor(playerId), points, SCORE_MS);
+        this.game.animationManager.displayScoring(
+            document.getElementById('factory0'),
+            points,
+            this.game.getPlayerColor(playerId),
+            { duration: SCORE_MS },
+        );
     }
 }

@@ -1,4 +1,6 @@
-class ScoringBoard {
+import { slideToObjectAndAttach } from './slide-utils';
+
+export class ScoringBoard {
 
     constructor(
         private game: AzulSummerPavilionGame, 
@@ -53,7 +55,7 @@ class ScoringBoard {
 
 
         Object.entries(BONUSES).forEach(([from, detail]) => 
-            (this.game as any).addTooltipHtml(
+            this.game.bga.gameui.addTooltipHtml(
                 `bonus-info-${from}`, 
                 _("When you surround the ${adjacent_number} adjacent spaces of ${a_bonus_shape} with tiles, you must then immediately take any ${number} tile(s) of your choice from the supply.")
                     .replace('${adjacent_number}', `${detail.adjacent}`)
@@ -77,11 +79,9 @@ class ScoringBoard {
     }
     
     public setRoundNumber(roundNumber: number) {
-        this.game.animationManager.attachWithAnimation(
-            new BgaSlideAnimation({
-                element: document.getElementById(`round-marker`)
-            }),
+        this.game.animationManager.slideAndAttach(
+            document.getElementById('round-marker'),
             document.getElementById(`round-space-${roundNumber}`),
-        )
+        );
     }
 }

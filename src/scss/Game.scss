@@ -6,10 +6,10 @@ $tile4-color: #f8e08e;
 $tile5-color: #009cde;
 $tile6-color: #ef3340;
 
-@import '../node_modules/bga-zoom/bga-zoom';
-@import 'factories/factories';
-@import 'scoring-board/scoring-board';
-@import 'players-tables/players-tables';
+@import '../../node_modules/bga-zoom/bga-zoom';
+@import 'factories';
+@import 'scoring-board';
+@import 'players-tables';
 @import 'playerboards';
 @import 'tile';
 
@@ -103,7 +103,7 @@ html[data-theme="dark"] {
   }
 }
 
-#bga-zoom-wrapper {
+#bga-zoom_wrapper {
   margin-top: 36px;
 }
 
