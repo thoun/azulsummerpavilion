@@ -88,16 +88,17 @@ class Game extends Table {
  
         // Create players
         // Note: if you added some extra field on "player" table in the database (dbmodel.sql), you can initialize it there.
-        $sql = "INSERT INTO player (player_id, player_color, player_canal, player_name, player_avatar, player_score) VALUES ";
+        $sql = "INSERT INTO player (player_id, player_color, player_name) VALUES ";
         $values = [];
         foreach ($players as $player_id => $player) {
             $color = array_shift( $default_colors );
-            $values[] = "('".$player_id."','$color','".$player['player_canal']."','".addslashes( $player['player_name'] )."','".addslashes( $player['player_avatar'] )."', 5)";
+            $values[] = "($player_id,'$color','".addslashes( $player['player_name'] )."')";
         }
         $sql .= implode(',', $values);
         self::DbQuery( $sql );
         self::reattributeColorsBasedOnPreferences($players, $gameinfos['player_colors']);
         self::reloadPlayersBasicInfos();
+        $this->bga->playerScore->setAll(5, null);
         
         /************ Start the game initialization *****/
 
@@ -642,22 +643,21 @@ class Game extends Table {
         return $this->factoriesByPlayers[$playerNumber];
     }
 
-    function getPlayerScore(int $playerId) {
-        return intval($this->getUniqueValueFromDB("SELECT player_score FROM player where `player_id` = $playerId"));
+    function getPlayerScore(int $playerId): int {
+        return $this->bga->playerScore->get($playerId);
     }
 
     function setPlayerScore(int $playerId, int $score) {
-        $this->DbQuery("UPDATE player SET player_score = $score WHERE player_id = $playerId");
+        $this->bga->playerScore->set($playerId, $score, null);
     }
 
     function incPlayerScore(int $playerId, int $incScore) {
-        $this->DbQuery("UPDATE player SET player_score = player_score + $incScore WHERE player_id = $playerId");
+        $this->bga->playerScore->inc($playerId, $incScore, null);
     }
 
     function decPlayerScore(int $playerId, int $decScore) {
-        $newScore = max(1, $this->getPlayerScore($playerId) - $decScore);
-        $this->DbQuery("UPDATE player SET player_score = $newScore WHERE player_id = $playerId");
-        return $newScore;
+        $newScore = max(1, $this->bga->playerScore->get($playerId) - $decScore);
+        return $this->bga->playerScore->set($playerId, $newScore, null);
     }
 
     function getRound() {

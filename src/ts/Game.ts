@@ -531,7 +531,7 @@ export class Game implements AzulSummerPavilionGame {
             const playerId = Number(player.id);     
 
             // first player token
-            document.getElementById(`player_board_${player.id}`).insertAdjacentHTML('beforeend', `<div id="player_board_${player.id}_firstPlayerWrapper" class="firstPlayerWrapper disabled-shimmer"></div>`);
+            this.bga.playerPanels.getElement(playerId).insertAdjacentHTML('beforeend', `<div id="player-board-${player.id}-firstPlayerWrapper" class="firstPlayerWrapper disabled-shimmer"></div>`);
 
             if (gamedatas.firstPlayerTokenPlayerId === playerId) {
                 this.placeFirstPlayerToken(gamedatas.firstPlayerTokenPlayerId);
@@ -708,10 +708,10 @@ export class Game implements AzulSummerPavilionGame {
         if (firstPlayerToken) {
             this.animationManager.slideAndAttach(
                 firstPlayerToken,
-                document.getElementById(`player_board_${playerId}_firstPlayerWrapper`),
+                document.getElementById(`player-board-${playerId}-firstPlayerWrapper`),
             );
         } else {
-            document.getElementById(`player_board_${playerId}_firstPlayerWrapper`).insertAdjacentHTML('beforeend', '<div id="firstPlayerToken" class="tile tile0"></div>');
+            document.getElementById(`player-board-${playerId}-firstPlayerWrapper`).insertAdjacentHTML('beforeend', '<div id="firstPlayerToken" class="tile tile0"></div>');
 
             this.bga.gameui.addTooltipHtml('firstPlayerToken', _("First Player token. Player with this token will start the next turn"));
         }
